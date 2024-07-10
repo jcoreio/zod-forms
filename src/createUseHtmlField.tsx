@@ -2,6 +2,7 @@ import z from 'zod'
 import { BasePath, FieldPath, SchemaAt } from './FieldPath'
 import { createUseField, UseFieldProps } from './createUseField'
 import React, { HTMLInputTypeAttribute } from 'react'
+import { invert } from 'zod-invertible'
 
 type HtmlFieldInputProps = {
   name: string
@@ -92,13 +93,18 @@ export const createUseHtmlField = <T extends z.ZodTypeAny>({
     const onBlur = React.useCallback(
       (e: React.FocusEvent) => {
         if (e.currentTarget instanceof HTMLInputElement) {
-          const newValue =
+          let newValue =
             type === 'checkbox'
               ? e.currentTarget.checked
               : e.currentTarget.value
-          if (normalizeOnBlur)
-            setValue(field.schema.parse(newValue), { normalize: true })
-          else setRawValue(newValue)
+          if (normalizeOnBlur) {
+            const parsed = field.schema.safeParse(newValue)
+            const formatted = parsed.success
+              ? invert(field.schema).safeParse(parsed.data)
+              : undefined
+            if (formatted?.success) newValue = formatted.data
+          }
+          setRawValue(newValue)
         }
         setMeta({ visited: true, touched: true })
       },

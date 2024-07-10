@@ -22,7 +22,6 @@ export function createFormReducer<T extends z.ZodTypeAny>({
         return { ...state, mounted: action.mounted }
       case 'setValue': {
         const newValues = set(state.values, action.field.path, action.value)
-        if (!action.normalize && newValues === state.values) return state
         try {
           const newRawValues = inverseSchema.parse(newValues)
           schema.parse(newRawValues)

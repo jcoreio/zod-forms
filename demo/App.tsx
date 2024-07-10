@@ -38,7 +38,7 @@ const NumberSchema = invertible(
 )
 
 const schema = z
-  .strictObject({
+  .object({
     min: NumberSchema,
     max: NumberSchema,
     requireMinLteMax: z.boolean().optional(),
@@ -117,13 +117,9 @@ function FormTextField({
 }) {
   const { useHtmlField } = useFormContext()
   const { input, meta } = useHtmlField({ field, type, normalizeOnBlur })
+  const error = meta.touched ? meta.error : undefined
   return (
-    <TextField
-      {...input}
-      error={meta.error != null}
-      helperText={meta.error}
-      {...props}
-    />
+    <TextField {...input} error={error != null} helperText={error} {...props} />
   )
 }
 
@@ -137,15 +133,16 @@ function FormSwitchField({
 }) {
   const { useHtmlField } = useFormContext()
   const { input, meta } = useHtmlField({ field, type: 'checkbox' })
+  const error = meta.touched ? meta.error : undefined
   return (
-    <FormControl error={meta.error != null}>
+    <FormControl error={error != null}>
       <FormGroup>
         <FormControlLabel
           label={label}
           control={<Switch {...input} {...props} />}
         />
       </FormGroup>
-      {meta.error ? <FormHelperText>{meta.error}</FormHelperText> : null}
+      {error ? <FormHelperText>{error}</FormHelperText> : null}
     </FormControl>
   )
 }
