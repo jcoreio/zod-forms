@@ -96,7 +96,8 @@ export const createUseHtmlField = <T extends z.ZodTypeAny>({
             type === 'checkbox'
               ? e.currentTarget.checked
               : e.currentTarget.value
-          if (normalizeOnBlur) setValue(field.schema.parse(newValue))
+          if (normalizeOnBlur)
+            setValue(field.schema.parse(newValue), { normalize: true })
           else setRawValue(newValue)
         }
         setMeta({ visited: true, touched: true })

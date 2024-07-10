@@ -13,7 +13,7 @@ export type FormState<T extends z.ZodTypeAny> = {
   values?: z.output<T>
   rawInitialValues?: z.input<T>
   initialValues?: z.input<T>
-  validationError?: z.ZodError
+  validationError?: any
   submitting: boolean
   submitSucceeded: boolean
   submitFailed: boolean

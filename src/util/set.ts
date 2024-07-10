@@ -13,7 +13,7 @@ export function set(
     result.set(path[index], newValue)
     return result
   }
-  if (from instanceof Object && path[index] in from) {
+  if (from instanceof Object) {
     const oldValue = (from as any)[path[index]]
     const newValue = set(oldValue, path, value, index + 1)
     if (Object.is(oldValue, newValue)) return from
@@ -21,5 +21,5 @@ export function set(
     result[path[index]] = newValue
     return result
   }
-  return set(typeof value === 'number' ? [] : {}, path, value, index + 1)
+  return set(typeof path[index] === 'number' ? [] : {}, path, value, index)
 }

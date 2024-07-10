@@ -1,7 +1,6 @@
 import React from 'react'
 import z from 'zod'
 import { invert } from 'zod-invertible'
-import { FormContextProps } from './FormContextProps'
 import { FieldPath } from './FieldPath'
 import {
   createDispatchHook,
@@ -14,6 +13,7 @@ import { createFormProvider } from './createFormProvider'
 import { createUseValidationErrorMap } from './createUseValidationErrorMap'
 import { createUseField } from './createUseField'
 import { createUseHtmlField } from './createUseHtmlField'
+import { useFormContext } from './useFormContext'
 
 export type ZodForm<T extends z.ZodTypeAny> = ReturnType<
   typeof createZodForm<T>
@@ -26,7 +26,6 @@ export function createZodForm<T extends z.ZodTypeAny>({
 }) {
   const inverseSchema = invert(schema)
 
-  const FormContext = React.createContext<FormContextProps<T> | null>(null)
   const FormReactReduxContext = React.createContext<ReactReduxContextValue<
     FormState<T>,
     FormAction<T>
@@ -36,21 +35,6 @@ export function createZodForm<T extends z.ZodTypeAny>({
   const useFormDispatch = createDispatchHook(FormReactReduxContext)
 
   const useValidationErrorMap = createUseValidationErrorMap({ useFormSelector })
-
-  function useFormContext(): FormContextProps<T> {
-    const props = React.useContext(FormContext)
-    if (!props) {
-      throw new Error(`must be used inside a <FormProvider>`)
-    }
-    return props
-  }
-
-  const FormProvider = createFormProvider({
-    schema,
-    inverseSchema,
-    FormContext,
-    FormReactReduxContext,
-  })
 
   const root = FieldPath.root(schema)
 
@@ -62,11 +46,19 @@ export function createZodForm<T extends z.ZodTypeAny>({
   })
   const useHtmlField = createUseHtmlField({ root, useField })
 
+  const FormProvider = createFormProvider({
+    schema,
+    inverseSchema,
+    FormReactReduxContext,
+    useField,
+    useHtmlField,
+  })
+
   const get: (typeof root)['get'] = (key: any) => root.get(key)
 
   return {
     FormProvider,
-    useFormContext,
+    useFormContext: useFormContext<T>,
     root,
     get,
     useField,

@@ -12,7 +12,7 @@ export function createUseValidationErrorMap<T extends z.ZodTypeAny>({
     (
       validationError: FormState<T>['validationError']
     ): { [K in string]?: string } => {
-      if (!validationError) return {}
+      if (!isZodError(validationError)) return {}
       return Object.fromEntries(
         validationError.issues.map(({ path, message }) => [
           pathstring(path),
@@ -27,4 +27,8 @@ export function createUseValidationErrorMap<T extends z.ZodTypeAny>({
       selectValidationErrorMap(state.validationError)
     )
   }
+}
+
+function isZodError(error: any): error is z.ZodError {
+  return error && error.name === 'ZodError'
 }

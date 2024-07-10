@@ -8,6 +8,7 @@ export type SetValueAction<Field extends FieldPath> = ReturnType<
 export function setValue<Field extends FieldPath>(props: {
   field: Field
   value: z.output<Field['schema']>
+  normalize?: boolean
 }) {
   return {
     type: 'setValue',

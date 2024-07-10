@@ -4,6 +4,7 @@ import { FormAction } from './FormAction'
 import { FormState } from './FormState'
 import { initFormState } from './initFormState'
 import { set } from './util/set'
+import { invert } from 'zod-invertible'
 
 export function createFormReducer<T extends z.ZodTypeAny>({
   schema,
@@ -21,9 +22,10 @@ export function createFormReducer<T extends z.ZodTypeAny>({
         return { ...state, mounted: action.mounted }
       case 'setValue': {
         const newValues = set(state.values, action.field.path, action.value)
-        if (newValues === state.values) return state
+        if (!action.normalize && newValues === state.values) return state
         try {
           const newRawValues = inverseSchema.parse(newValues)
+          schema.parse(newRawValues)
           return {
             ...state,
             validationError: undefined,
@@ -31,12 +33,24 @@ export function createFormReducer<T extends z.ZodTypeAny>({
             values: newValues,
           }
         } catch (error) {
-          return {
+          const newRawParsed = invert(action.field.schema).safeParse(
+            action.value
+          )
+          const rawValues = newRawParsed.success
+            ? set(state.rawValues, action.field.path, newRawParsed.data)
+            : state.rawValues
+          const newParsed = schema.safeParse(rawValues)
+          const result = {
             ...state,
-            validationError: error instanceof z.ZodError ? error : undefined,
-            rawValues: undefined,
-            values: newValues,
+            validationError: !newRawParsed.success
+              ? newRawParsed.error
+              : newParsed.success
+              ? undefined
+              : newParsed.error,
+            rawValues,
+            values: newParsed.success ? newParsed.data : state.values,
           }
+          return result
         }
       }
       case 'setRawValue': {
@@ -57,7 +71,7 @@ export function createFormReducer<T extends z.ZodTypeAny>({
         } catch (error) {
           return {
             ...state,
-            validationError: error instanceof z.ZodError ? error : undefined,
+            validationError: error,
             rawValues: newRawValues,
             values: undefined,
           }
@@ -107,7 +121,7 @@ export function createFormReducer<T extends z.ZodTypeAny>({
         } catch (error) {
           return {
             ...state,
-            validationError: error instanceof z.ZodError ? error : undefined,
+            validationError: error,
             initialized: true,
             submitting: false,
             submitFailed: false,

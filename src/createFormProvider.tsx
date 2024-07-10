@@ -10,16 +10,18 @@ import { Provider, ReactReduxContextValue } from 'react-redux'
 import { initialize } from './actions/initialize'
 import { setRawValue } from './actions/setRawValue'
 import { setValue } from './actions/setValue'
+import { FormContext } from './FormContext'
 
 export const createFormProvider = <T extends z.ZodTypeAny>({
   schema,
   inverseSchema,
-  FormContext,
+  useField,
+  useHtmlField,
   FormReactReduxContext,
-}: {
-  schema: T
-  inverseSchema: z.ZodType<z.input<T>, any, z.output<T>>
-  FormContext: React.Context<FormContextProps<T> | null>
+}: Pick<
+  FormContextProps<T>,
+  'schema' | 'inverseSchema' | 'useField' | 'useHtmlField'
+> & {
   FormReactReduxContext: React.Context<ReactReduxContextValue<
     FormState<T>,
     FormAction<T>
@@ -44,6 +46,8 @@ export const createFormProvider = <T extends z.ZodTypeAny>({
       (): FormContextProps<T> => ({
         schema,
         inverseSchema,
+        useField,
+        useHtmlField,
         ...bindActionCreators(
           {
             initialize: initialize<T>,
@@ -57,7 +61,7 @@ export const createFormProvider = <T extends z.ZodTypeAny>({
     )
 
     return (
-      <FormContext.Provider value={formContext}>
+      <FormContext.Provider value={formContext as any}>
         <Provider store={store} context={FormReactReduxContext}>
           {children}
         </Provider>

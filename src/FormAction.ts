@@ -4,10 +4,11 @@ import { InitializeAction } from './actions/initialize'
 import { SetValueAction } from './actions/setValue'
 import { SetRawValueAction } from './actions/setRawValue'
 import { SetMetaAction } from './actions/setMeta'
+import { FieldPath } from './FieldPath'
 
 export type FormAction<T extends z.ZodTypeAny> =
   | SetMountedAction
   | InitializeAction<T>
-  | SetValueAction<T, any>
-  | SetRawValueAction<T, any>
-  | SetMetaAction<T, any>
+  | SetValueAction<FieldPath>
+  | SetRawValueAction<FieldPath>
+  | SetMetaAction<FieldPath>

@@ -27,15 +27,15 @@ export class FieldPath<T extends z.ZodTypeAny = z.ZodTypeAny> {
     if (Array.isArray(key)) {
       return key.reduce((field, key) => field.get(key), this)
     }
-    const cached = this.subfields?.get(key)
-    if (cached) return cached
+    // const cached = this.subfields?.get(key)
+    // if (cached) return cached
     const schema = subschema(this.schema, key)
     if (!schema) throw new Error(`invalid subschema key: ${key}`)
     const subfield = new FieldPath({
       path: [...this.path, key] as any,
       schema: schema as any,
     })
-    this.subfields?.set(key, subfield)
+    // this.subfields?.set(key, subfield)
     return subfield
   }
 }
@@ -46,6 +46,10 @@ export type SchemaAt<
   T extends z.ZodTypeAny,
   Path extends BasePath
 > = 0 extends 1 & Path
+  ? z.ZodTypeAny
+  : 0 extends 1 & T
+  ? z.ZodTypeAny
+  : 0 extends 1 & z.output<T>
   ? z.ZodTypeAny
   : Path extends [infer Head, ...infer Tail extends BasePath]
   ? T extends z.ZodLazy<infer U>
@@ -64,6 +68,12 @@ export type SchemaAt<
     ? SchemaAt<Options[number], Path>
     : T extends z.ZodDiscriminatedUnion<any, infer Options>
     ? SchemaAt<Options[number], Path>
+    : T extends z.ZodPipeline<any, infer Out>
+    ? SchemaAt<Out, Path>
+    : T extends z.ZodEffects<infer U>
+    ? SchemaAt<U, Path>
+    : T extends z.ZodReadonly<infer U>
+    ? SchemaAt<U, Path>
     : T extends z.ZodRecord<infer Key, infer Value>
     ? Head extends z.output<Key>
       ? SchemaAt<Value, Tail>
@@ -97,12 +107,6 @@ export type SchemaAt<
     ? Head extends number
       ? SchemaAt<Element, Tail>
       : never
-    : T extends z.ZodPipeline<any, infer Out>
-    ? SchemaAt<Out, Tail>
-    : T extends z.ZodEffects<infer U, any>
-    ? SchemaAt<U, Tail>
-    : T extends z.ZodReadonly<infer U>
-    ? SchemaAt<U, Tail>
     : never
   : T
 
@@ -136,6 +140,8 @@ export type SubpathKey<T extends z.ZodTypeAny> = T extends z.ZodObject<
   : T extends z.ZodDefault<infer U>
   ? SubpathKey<U>
   : T extends z.ZodCatch<infer U>
+  ? SubpathKey<U>
+  : T extends z.ZodEffects<infer U, any>
   ? SubpathKey<U>
   : T extends z.ZodBranded<infer U, any>
   ? SubpathKey<U>
@@ -227,8 +233,16 @@ function subschema(
     }
     case 'ZodLazy':
       return subschema((schema as z.ZodLazy<z.ZodTypeAny>).schema, key)
-    case 'ZodEffects':
+    case 'ZodEffects': {
+      const {
+        _def: {
+          effect: { type },
+          schema: innerSchema,
+        },
+      } = schema as z.ZodEffects<z.ZodTypeAny, any>
+      if (type === 'refinement') return subschema(innerSchema, key)
       break
+    }
     case 'ZodOptional':
       return subschema((schema as z.ZodOptional<z.ZodTypeAny>).unwrap(), key)
     case 'ZodNullable':

@@ -17,7 +17,10 @@ export type UseFieldProps<Field extends FieldPath> = FieldMeta & {
   rawValue: z.input<Field['schema']> | undefined
   initialValue: z.output<Field['schema']> | undefined
   rawInitialValue: z.input<Field['schema']> | undefined
-  setValue: (value: z.output<Field['schema']>) => SetValueAction<Field>
+  setValue: (
+    value: z.output<Field['schema']>,
+    options?: Omit<SetValueAction<Field>, 'type' | 'field' | 'value'>
+  ) => SetValueAction<Field>
   setRawValue: (value: z.input<Field['schema']>) => SetRawValueAction<Field>
   setMeta: (meta: Partial<FieldMeta>) => SetMetaAction<Field>
   error?: string
@@ -73,7 +76,10 @@ export const createUseField = <T extends z.ZodTypeAny>({
     const meta = useFormSelector((state) => state.fieldMeta[field.pathstring])
 
     const setValue = React.useCallback(
-      (value: z.output<Schema>) => dispatch(_setValue<Field>({ field, value })),
+      (
+        value: z.output<Schema>,
+        options?: Omit<SetValueAction<Field>, 'type' | 'field' | 'value'>
+      ) => dispatch(_setValue<Field>({ field, value, ...options })),
       [field.pathstring]
     )
     const setRawValue = React.useCallback(
