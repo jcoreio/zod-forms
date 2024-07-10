@@ -11,22 +11,21 @@ import { initialize } from './actions/initialize'
 import { setRawValue } from './actions/setRawValue'
 import { setValue } from './actions/setValue'
 
-export const createFormProvider =
-  <T extends z.ZodTypeAny>({
-    schema,
-    inverseSchema,
-    FormContext,
-    FormReactReduxContext,
-  }: {
-    schema: T
-    inverseSchema: z.ZodType<z.input<T>, any, z.output<T>>
-    FormContext: React.Context<FormContextProps<T> | null>
-    FormReactReduxContext: React.Context<ReactReduxContextValue<
-      FormState<T>,
-      FormAction<T>
-    > | null>
-  }) =>
-  ({ children }: { children: React.ReactElement }) => {
+export const createFormProvider = <T extends z.ZodTypeAny>({
+  schema,
+  inverseSchema,
+  FormContext,
+  FormReactReduxContext,
+}: {
+  schema: T
+  inverseSchema: z.ZodType<z.input<T>, any, z.output<T>>
+  FormContext: React.Context<FormContextProps<T> | null>
+  FormReactReduxContext: React.Context<ReactReduxContextValue<
+    FormState<T>,
+    FormAction<T>
+  > | null>
+}) =>
+  function FormProvider({ children }: { children: React.ReactElement }) {
     const storeRef = React.useRef<Store<FormState<T>, FormAction<T>>>()
     if (!storeRef.current)
       storeRef.current = createStore(
@@ -43,7 +42,6 @@ export const createFormProvider =
     )
     const formContext = React.useMemo(
       () => ({
-        store,
         schema,
         inverseSchema,
         ...bindActionCreators(
