@@ -15,6 +15,10 @@ import { createUseValidationErrorMap } from './createUseValidationErrorMap'
 import { createUseField } from './createUseField'
 import { createUseHtmlField } from './createUseHtmlField'
 
+export type ZodForm<T extends z.ZodTypeAny> = ReturnType<
+  typeof createZodForm<T>
+>
+
 export function createZodForm<T extends z.ZodTypeAny>({
   schema,
 }: {
@@ -57,10 +61,13 @@ export function createZodForm<T extends z.ZodTypeAny>({
   })
   const useHtmlField = createUseHtmlField({ useField })
 
+  const get: (typeof root)['get'] = (key: any) => root.get(key)
+
   return {
     FormProvider,
     useFormContext,
     root,
+    get,
     useField,
     useHtmlField,
   }

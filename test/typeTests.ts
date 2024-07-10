@@ -25,5 +25,5 @@ const testSchema = z.object({
 
 const form = createZodForm({ schema: testSchema })
 
-form.useField(form.root.get('foo').get(0).get('bar')).setValue(2)
-form.useField(form.root.get('foo').get(0).get('bar')).setRawValue('5')
+form.useField(form.get('foo').get(0).get('bar')).setValue(2)
+form.useField(form.get('foo').get(0).get('bar')).setRawValue('5')

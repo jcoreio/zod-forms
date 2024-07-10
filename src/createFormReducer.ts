@@ -13,7 +13,7 @@ export function createFormReducer<T extends z.ZodTypeAny>({
   inverseSchema: z.ZodType<z.input<T>, any, z.output<T>>
 }): Reducer<FormState<T>, FormAction<T>> {
   return (
-    state: FormState<T> = initFormState({ schema, inverseSchema }),
+    state: FormState<T> = initFormState(),
     action: FormAction<T>
   ): FormState<T> => {
     switch (action.type) {
