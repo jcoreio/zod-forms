@@ -2,7 +2,15 @@ import z from 'zod'
 import React, { HTMLInputTypeAttribute } from 'react'
 import { invertible } from 'zod-invertible'
 import { createZodForm } from '../src/createZodForm'
-import { Paper, TextField } from '@mui/material'
+import {
+  Paper,
+  TextField,
+  Switch,
+  FormControl,
+  FormGroup,
+  FormControlLabel,
+  FormHelperText,
+} from '@mui/material'
 import { FieldPath } from '../src/FieldPath'
 import { useFormContext } from '../src/useFormContext'
 
@@ -33,10 +41,15 @@ const schema = z
   .strictObject({
     min: NumberSchema,
     max: NumberSchema,
-    bool: z.boolean().optional(),
+    requireMinLteMax: z.boolean().optional(),
   })
   .superRefine((obj, ctx) => {
-    if (obj.min != null && obj.max != null && obj.min > obj.max) {
+    if (
+      obj.requireMinLteMax &&
+      obj.min != null &&
+      obj.max != null &&
+      obj.min > obj.max
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: [...ctx.path, 'min'],
@@ -66,7 +79,7 @@ export default function App() {
 function App2() {
   const { initialize } = form.useFormContext()
   React.useEffect(() => {
-    initialize({ values: { min: 5, max: 10 } })
+    initialize({ values: { min: 5, max: 10, requireMinLteMax: true } })
   }, [])
   return (
     <Paper sx={{ width: 600, p: 2 }}>
@@ -82,6 +95,12 @@ function App2() {
         label="Max"
         normalizeOnBlur
       />
+      <div>
+        <FormSwitchField
+          label="Require min <= max"
+          field={form.get('requireMinLteMax')}
+        />
+      </div>
     </Paper>
   )
 }
@@ -97,13 +116,36 @@ function FormTextField({
   field: FieldPath<z.ZodType<any, any, string | null | undefined>>
 }) {
   const { useHtmlField } = useFormContext()
-  const fieldProps = useHtmlField({ field, type, normalizeOnBlur })
+  const { input, meta } = useHtmlField({ field, type, normalizeOnBlur })
   return (
     <TextField
-      {...fieldProps.input}
-      error={fieldProps.meta.error != null}
-      helperText={fieldProps.meta.error}
+      {...input}
+      error={meta.error != null}
+      helperText={meta.error}
       {...props}
     />
+  )
+}
+
+function FormSwitchField({
+  field,
+  label,
+  ...props
+}: React.ComponentProps<typeof Switch> & {
+  field: FieldPath<z.ZodType<any, any, boolean | null | undefined>>
+  label?: React.ReactNode
+}) {
+  const { useHtmlField } = useFormContext()
+  const { input, meta } = useHtmlField({ field, type: 'checkbox' })
+  return (
+    <FormControl error={meta.error != null}>
+      <FormGroup>
+        <FormControlLabel
+          label={label}
+          control={<Switch {...input} {...props} />}
+        />
+      </FormGroup>
+      {meta.error ? <FormHelperText>{meta.error}</FormHelperText> : null}
+    </FormControl>
   )
 }
