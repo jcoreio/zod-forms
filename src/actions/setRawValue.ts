@@ -1,15 +1,15 @@
 import z from 'zod'
-import { BasePath, SchemaAt } from '../FieldPath'
+import { FieldPath } from '../FieldPath'
 
 export type SetRawValueAction<
   T extends z.ZodTypeAny,
-  Path extends BasePath
-> = ReturnType<typeof setRawValue<T, Path>>
+  Field extends FieldPath<T, any>
+> = ReturnType<typeof setRawValue<T, Field>>
 
 export function setRawValue<
   T extends z.ZodTypeAny,
-  Path extends BasePath
->(props: { path: Path; rawValue: z.input<SchemaAt<T, Path>> }) {
+  Field extends FieldPath<T, any>
+>(props: { field: Field; rawValue: z.input<Field['schema']> }) {
   return {
     type: 'setRawValue',
     ...props,

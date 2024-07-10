@@ -20,7 +20,7 @@ export function createFormReducer<T extends z.ZodTypeAny>({
       case 'setMounted':
         return { ...state, mounted: action.mounted }
       case 'setValue': {
-        const newValues = set(state.values, action.path, action.value)
+        const newValues = set(state.values, action.field.path, action.value)
         if (newValues === state.values) return state
         try {
           const newRawValues = inverseSchema.parse(newValues)
@@ -40,7 +40,11 @@ export function createFormReducer<T extends z.ZodTypeAny>({
         }
       }
       case 'setRawValue': {
-        const newRawValues = set(state.rawValues, action.path, action.rawValue)
+        const newRawValues = set(
+          state.rawValues,
+          action.field.path,
+          action.rawValue
+        )
         if (newRawValues === state.rawValues) return state
         try {
           const newValues = schema.parse(newRawValues)
@@ -57,6 +61,24 @@ export function createFormReducer<T extends z.ZodTypeAny>({
             rawValues: newRawValues,
             values: undefined,
           }
+        }
+      }
+      case 'setMeta': {
+        const { field, meta } = action
+        const oldMeta = state.fieldMeta[field.pathstring]
+        if (
+          Object.entries(meta).every(([key, value]) =>
+            Object.is(value, (oldMeta as any)?.[key])
+          )
+        ) {
+          return state
+        }
+        return {
+          ...state,
+          fieldMeta: {
+            ...state.fieldMeta,
+            [field.pathstring]: { ...oldMeta, ...meta },
+          },
         }
       }
       case 'initialize': {

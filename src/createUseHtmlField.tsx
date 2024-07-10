@@ -1,9 +1,7 @@
 import z from 'zod'
-import { BasePath, FieldPath, SchemaAt } from './FieldPath'
-import React, { HTMLInputTypeAttribute } from 'react'
-import { setValue as _setValue } from './actions/setValue'
-import { setRawValue as _setRawValue } from './actions/setRawValue'
+import { BasePath, FieldPath } from './FieldPath'
 import { createUseField } from './createUseField'
+import React, { HTMLInputTypeAttribute } from 'react'
 
 export const createUseHtmlField = <T extends z.ZodTypeAny>({
   useField,
@@ -27,6 +25,7 @@ export const createUseHtmlField = <T extends z.ZodTypeAny>({
       rawInitialValue,
       setValue,
       setRawValue,
+      setMeta,
       error,
       ...meta
     } = props
@@ -44,8 +43,8 @@ export const createUseHtmlField = <T extends z.ZodTypeAny>({
       [setRawValue, type]
     )
 
-    const onFocus = React.useCallback((e: React.FocusEvent) => {
-      // TODO
+    const onFocus = React.useCallback(() => {
+      setMeta({ visited: true })
     }, [])
 
     const onBlur = React.useCallback(
@@ -58,6 +57,7 @@ export const createUseHtmlField = <T extends z.ZodTypeAny>({
           if (normalizeOnBlur) setValue(field.schema.parse(newValue))
           else setRawValue(newValue)
         }
+        setMeta({ visited: true, touched: true })
       },
       [setRawValue, type]
     )

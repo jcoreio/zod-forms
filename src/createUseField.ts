@@ -1,10 +1,11 @@
 import z from 'zod'
 import { BasePath, FieldPath, SchemaAt } from './FieldPath'
-import { FormState } from './FormState'
+import { FieldMeta, FormState } from './FormState'
 import { get } from './util/get'
 import React from 'react'
 import { setValue as _setValue } from './actions/setValue'
 import { setRawValue as _setRawValue } from './actions/setRawValue'
+import { setMeta as _setMeta } from './actions/setMeta'
 import { FormAction } from './FormAction'
 import { Dispatch } from 'redux'
 
@@ -40,22 +41,16 @@ export const createUseField = <T extends z.ZodTypeAny>({
 
     const setValue = React.useCallback(
       (value: z.output<Schema>) =>
-        dispatch(
-          _setValue<T, any>({
-            path: field.path,
-            value,
-          })
-        ),
+        dispatch(_setValue<T, any>({ field, value })),
       [field.pathstring]
     )
     const setRawValue = React.useCallback(
       (rawValue: z.input<Schema>) =>
-        dispatch(
-          _setRawValue<T, any>({
-            path: field.path,
-            rawValue,
-          })
-        ),
+        dispatch(_setRawValue<T, any>({ field, rawValue })),
+      [field.pathstring]
+    )
+    const setMeta = React.useCallback(
+      (meta: Partial<FieldMeta>) => dispatch(_setMeta<T, any>({ field, meta })),
       [field.pathstring]
     )
 
@@ -66,7 +61,12 @@ export const createUseField = <T extends z.ZodTypeAny>({
       rawInitialValue,
       setValue,
       setRawValue,
+      setMeta,
       error,
+      dirty: !Object.is(value, initialValue),
+      pristine: Object.is(value, initialValue),
+      valid: !error,
+      invalid: Boolean(error),
       ...meta,
     }
   }
