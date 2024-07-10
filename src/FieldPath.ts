@@ -10,6 +10,10 @@ export class FieldPath<Root extends z.ZodTypeAny, Path extends BasePath> {
   readonly pathstring: string
   readonly schema: SchemaAt<Root, Path>
 
+  private readonly subfields:
+    | WeakMap<SubpathKey<SchemaAt<Root, Path>>, FieldPath<Root, any>>
+    | undefined = typeof WeakMap !== 'undefined' ? new WeakMap() : undefined
+
   private constructor({
     parent,
     root,
@@ -43,15 +47,19 @@ export class FieldPath<Root extends z.ZodTypeAny, Path extends BasePath> {
   get<K extends SubpathKey<SchemaAt<Root, Path>>>(
     key: K
   ): FieldPath<Root, [...Path, K]> {
+    const cached = this.subfields?.get(key)
+    if (cached) return cached
     const { root, path } = this
     const schema = subschema(this.schema, key)
     if (!schema) throw new Error(`invalid subschema key: ${key}`)
-    return new FieldPath({
+    const subfield = new FieldPath({
       root,
       parent: this as any,
       path: [...path, key] as any,
       schema: schema as any,
     })
+    this.subfields?.set(key, subfield)
+    return subfield
   }
 }
 
