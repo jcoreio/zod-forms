@@ -21,13 +21,14 @@ const NumberSchema = invertible(
 const testSchema = z.object({
   foo: z.array(z.object({ bar: NumberSchema, baz: z.number() })).optional(),
   tup: z.tuple([z.number(), z.object({ blah: z.string() })]),
+  bool: z.boolean(),
 })
 
 const form = createZodForm({ schema: testSchema })
 
 form.useField('foo', 0, 'bar').setValue(2)
 form.useField('tup', 1, 'blah').setValue('hello')
-form.useField('tup', 0, 'blah').setValue(5)
+form.useField('tup', 0).setValue(5)
 form
   .useHtmlField({ field: ['foo', 0, 'bar'] as const, type: 'text' })
   .meta.setValue(2)
@@ -35,3 +36,9 @@ form.useField(form.get('foo', 0, 'bar')).setValue(2)
 form.useField(form.get('foo', 0).get('bar')).setValue(2)
 form.useField(form.get('foo').get(0).get('bar')).setValue(2)
 form.useField(form.get('foo').get(0).get('bar')).setRawValue('5')
+form
+  .useHtmlField({ field: ['bool'] as const, type: 'checkbox' })
+  .meta.setValue(true)
+form
+  .useHtmlField({ field: form.get('bool'), type: 'checkbox' })
+  .meta.setValue(true)
