@@ -1,5 +1,5 @@
 import z from 'zod'
-import { BasePath, FieldPath, SchemaAt } from './FieldPath'
+import { FieldPath } from './FieldPath'
 import { FieldMeta, FormState } from './FormState'
 import { get } from './util/get'
 import React from 'react'
@@ -18,8 +18,8 @@ export const createUseField = <T extends z.ZodTypeAny>({
   useFormDispatch: () => Dispatch<FormAction<T>>
   useValidationErrorMap: () => { [K in string]?: string }
 }) =>
-  function useField<Path extends BasePath>(field: FieldPath<T, Path>) {
-    type Schema = SchemaAt<T, Path>
+  function useField<Field extends FieldPath<T, any>>(field: Field) {
+    type Schema = Field['schema']
 
     const dispatch = useFormDispatch()
 
@@ -45,16 +45,17 @@ export const createUseField = <T extends z.ZodTypeAny>({
 
     const setValue = React.useCallback(
       (value: z.output<Schema>) =>
-        dispatch(_setValue<T, any>({ field, value })),
+        dispatch(_setValue<T, Field>({ field, value })),
       [field.pathstring]
     )
     const setRawValue = React.useCallback(
       (rawValue: z.input<Schema>) =>
-        dispatch(_setRawValue<T, any>({ field, rawValue })),
+        dispatch(_setRawValue<T, Field>({ field, rawValue })),
       [field.pathstring]
     )
     const setMeta = React.useCallback(
-      (meta: Partial<FieldMeta>) => dispatch(_setMeta<T, any>({ field, meta })),
+      (meta: Partial<FieldMeta>) =>
+        dispatch(_setMeta<T, Field>({ field, meta })),
       [field.pathstring]
     )
 

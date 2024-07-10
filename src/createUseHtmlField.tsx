@@ -1,5 +1,5 @@
 import z from 'zod'
-import { BasePath, FieldPath } from './FieldPath'
+import { FieldPath } from './FieldPath'
 import { createUseField } from './createUseField'
 import React, { HTMLInputTypeAttribute } from 'react'
 
@@ -8,12 +8,12 @@ export const createUseHtmlField = <T extends z.ZodTypeAny>({
 }: {
   useField: ReturnType<typeof createUseField<T>>
 }) =>
-  function useHtmlField<Path extends BasePath>({
+  function useHtmlField<Field extends FieldPath<T, any>>({
     field,
     type,
     normalizeOnBlur,
   }: {
-    field: FieldPath<T, Path>
+    field: Field
     type: HTMLInputTypeAttribute
     normalizeOnBlur?: boolean
   }) {

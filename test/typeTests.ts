@@ -1,7 +1,6 @@
 import z, { RefinementCtx } from 'zod'
 import { createZodForm } from '../src/createZodForm'
-import { SchemaAt } from '../src/FieldPath'
-import { invert, invertible } from 'zod-invertible'
+import { invertible } from 'zod-invertible'
 
 const NumberSchema = invertible(
   z.string(),
@@ -25,8 +24,6 @@ const testSchema = z.object({
 })
 
 const form = createZodForm({ schema: testSchema })
-
-type T = SchemaAt<typeof testSchema, ['foo', 0, 'bar']>
 
 form.useField(form.root.get('foo').get(0).get('bar')).setValue(2)
 form.useField(form.root.get('foo').get(0).get('bar')).setRawValue('5')
