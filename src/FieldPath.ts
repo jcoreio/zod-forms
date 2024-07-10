@@ -1,61 +1,38 @@
 import z from 'zod'
 import { pathstring } from './util/pathstring'
 
-export class FieldPath<Root extends z.ZodTypeAny, Path extends BasePath> {
-  readonly root: Root
-  readonly parent: ParentPath<Path> extends []
-    ? undefined
-    : FieldPath<Root, ParentPath<Path>>
-  readonly path: Path
+export class FieldPath<T extends z.ZodTypeAny = z.ZodTypeAny> {
+  readonly path: BasePath
   readonly pathstring: string
-  readonly schema: SchemaAt<Root, Path>
+  readonly schema: T
 
-  private readonly subfields:
-    | WeakMap<SubpathKey<SchemaAt<Root, Path>>, FieldPath<Root, any>>
-    | undefined = typeof WeakMap !== 'undefined' ? new WeakMap() : undefined
+  private readonly subfields: WeakMap<SubpathKey<T>, FieldPath> | undefined =
+    typeof WeakMap !== 'undefined' ? new WeakMap() : undefined
 
-  private constructor({
-    parent,
-    root,
-    path,
-    schema,
-  }: {
-    parent: ParentPath<Path> extends []
-      ? undefined
-      : FieldPath<Root, ParentPath<Path>>
-    root: Root
-    path: Path
-    schema: SchemaAt<Root, Path>
-  }) {
-    if (!root) {
-      throw new Error(`root is required if parent is undefined`)
-    }
-    if (path.length && !parent) {
-      throw new Error(`parent is required if path is not empty`)
-    }
-    this.root = root
-    this.parent = parent as any
+  private constructor({ schema, path }: { schema: T; path: BasePath }) {
     this.path = path
     this.schema = schema
     this.pathstring = pathstring(path)
   }
 
-  static root<T extends z.ZodTypeAny>(schema: T): FieldPath<T, []> {
-    return new FieldPath({ root: schema, parent: undefined, path: [], schema })
+  static root<T extends z.ZodTypeAny>(schema: T) {
+    return new FieldPath({ schema, path: [] })
   }
 
-  get<K extends SubpathKey<SchemaAt<Root, Path>>>(
-    key: K
-  ): FieldPath<Root, [...Path, K]> {
+  get<K extends SubpathKey<T>>(key: K): FieldPath<SchemaAt<T, [K]>>
+  get<Path extends BasePath>(
+    ...path: Path
+  ): SchemaAt<T, Path> extends never ? never : FieldPath<SchemaAt<T, Path>>
+  get(key: any): FieldPath {
+    if (Array.isArray(key)) {
+      return key.reduce((field, key) => field.get(key), this)
+    }
     const cached = this.subfields?.get(key)
     if (cached) return cached
-    const { root, path } = this
     const schema = subschema(this.schema, key)
     if (!schema) throw new Error(`invalid subschema key: ${key}`)
     const subfield = new FieldPath({
-      root,
-      parent: this as any,
-      path: [...path, key] as any,
+      path: [...this.path, key] as any,
       schema: schema as any,
     })
     this.subfields?.set(key, subfield)
@@ -64,14 +41,6 @@ export class FieldPath<Root extends z.ZodTypeAny, Path extends BasePath> {
 }
 
 export type BasePath = (string | number | symbol)[]
-
-type ParentPath<P extends BasePath> = 0 extends 1 & P
-  ? any
-  : P extends [] | [any]
-  ? []
-  : P extends [infer Head, ...infer Tail extends BasePath]
-  ? [Head, ...ParentPath<Tail>]
-  : []
 
 export type SchemaAt<
   T extends z.ZodTypeAny,
@@ -137,7 +106,7 @@ export type SchemaAt<
     : never
   : T
 
-type SubpathKey<T extends z.ZodTypeAny> = T extends z.ZodObject<
+export type SubpathKey<T extends z.ZodTypeAny> = T extends z.ZodObject<
   infer Shape,
   infer UnknownKeys
 >
@@ -171,6 +140,16 @@ type SubpathKey<T extends z.ZodTypeAny> = T extends z.ZodObject<
   : T extends z.ZodBranded<infer U, any>
   ? SubpathKey<U>
   : never
+
+export type AllPaths<T extends z.ZodTypeAny> = SubpathKey<T> extends never
+  ? []
+  : [] | ValuesOf<SubpathKeyMap<T>>
+
+type ValuesOf<O> = O[keyof O]
+
+export type SubpathKeyMap<T extends z.ZodTypeAny> = {
+  [K in SubpathKey<T>]: [K, ...AllPaths<SchemaAt<T, [K]>>]
+}
 
 function subschema(
   schema: z.ZodTypeAny,

@@ -1,15 +1,14 @@
 import z from 'zod'
 import { FieldPath } from '../FieldPath'
 
-export type SetRawValueAction<
-  T extends z.ZodTypeAny,
-  Field extends FieldPath<T, any>
-> = ReturnType<typeof setRawValue<T, Field>>
+export type SetRawValueAction<Field extends FieldPath> = ReturnType<
+  typeof setRawValue<Field>
+>
 
-export function setRawValue<
-  T extends z.ZodTypeAny,
-  Field extends FieldPath<T, any>
->(props: { field: Field; rawValue: z.input<Field['schema']> }) {
+export function setRawValue<Field extends FieldPath>(props: {
+  field: Field
+  rawValue: z.input<Field['schema']>
+}) {
   return {
     type: 'setRawValue',
     ...props,

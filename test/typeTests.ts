@@ -25,5 +25,13 @@ const testSchema = z.object({
 
 const form = createZodForm({ schema: testSchema })
 
+form.useField('foo', 0, 'bar').setValue(2)
+form.useField('tup', 1, 'blah').setValue('hello')
+form.useField('tup', 0, 'blah').setValue(5)
+form
+  .useHtmlField({ field: ['foo', 0, 'bar'] as const, type: 'text' })
+  .meta.setValue(2)
+form.useField(form.get('foo', 0, 'bar')).setValue(2)
+form.useField(form.get('foo', 0).get('bar')).setValue(2)
 form.useField(form.get('foo').get(0).get('bar')).setValue(2)
 form.useField(form.get('foo').get(0).get('bar')).setRawValue('5')

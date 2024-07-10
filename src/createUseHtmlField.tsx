@@ -1,14 +1,46 @@
 import z from 'zod'
-import { FieldPath } from './FieldPath'
-import { createUseField } from './createUseField'
+import { BasePath, FieldPath, SchemaAt } from './FieldPath'
+import { createUseField, UseFieldProps } from './createUseField'
 import React, { HTMLInputTypeAttribute } from 'react'
 
+export type HtmlFieldInputProps = {
+  name: string
+  type: HTMLInputTypeAttribute
+  value: string
+  checked?: boolean
+  onChange: React.ChangeEventHandler
+  onFocus: React.FocusEventHandler
+  onBlur: React.FocusEventHandler
+}
+
+export type UseHtmlFieldProps<Field extends FieldPath> = {
+  input: HtmlFieldInputProps
+  meta: UseFieldProps<Field>
+}
+
+type UseHtmlFieldOptions<Field> = {
+  field: Field
+  type: HTMLInputTypeAttribute
+  normalizeOnBlur?: boolean
+}
+
+export interface UseHtmlField<T extends z.ZodTypeAny> {
+  <Field extends FieldPath>(
+    options: UseHtmlFieldOptions<Field>
+  ): UseHtmlFieldProps<Field>
+  <Path extends BasePath>(
+    options: UseHtmlFieldOptions<Path>
+  ): UseHtmlFieldProps<FieldPath<SchemaAt<T, Path>>>
+}
+
 export const createUseHtmlField = <T extends z.ZodTypeAny>({
+  root,
   useField,
 }: {
+  root: FieldPath<T>
   useField: ReturnType<typeof createUseField<T>>
-}) =>
-  function useHtmlField<Field extends FieldPath<T, any>>({
+}): UseHtmlField<T> => {
+  function useHtmlFieldBase<Field extends FieldPath>({
     field,
     type,
     normalizeOnBlur,
@@ -16,7 +48,7 @@ export const createUseHtmlField = <T extends z.ZodTypeAny>({
     field: Field
     type: HTMLInputTypeAttribute
     normalizeOnBlur?: boolean
-  }) {
+  }): UseHtmlFieldProps<Field> {
     const props = useField(field)
     const {
       value,
@@ -26,7 +58,6 @@ export const createUseHtmlField = <T extends z.ZodTypeAny>({
       setValue,
       setRawValue,
       setMeta,
-      error,
       ...meta
     } = props
 
@@ -65,6 +96,7 @@ export const createUseHtmlField = <T extends z.ZodTypeAny>({
     return React.useMemo(
       () => ({
         input: {
+          name: field.pathstring,
           type,
           value: rawValue || '',
           ...(type === 'checkbox' && { checked: Boolean(rawValue) }),
@@ -78,9 +110,28 @@ export const createUseHtmlField = <T extends z.ZodTypeAny>({
           rawValue,
           initialValue,
           rawInitialValue,
-          error,
+          setValue,
+          setRawValue,
+          setMeta,
         },
       }),
       [props, onChange]
     )
   }
+  function useHtmlField<Field extends FieldPath>(
+    options: UseHtmlFieldOptions<Field>
+  ): UseHtmlFieldProps<Field>
+  function useHtmlField<Path extends BasePath>(
+    options: UseHtmlFieldOptions<Path>
+  ): UseHtmlFieldProps<FieldPath<SchemaAt<T, Path>>>
+  function useHtmlField({
+    field,
+    ...rest
+  }: UseHtmlFieldOptions<FieldPath | BasePath>): UseHtmlFieldProps<any> {
+    return useHtmlFieldBase({
+      field: Array.isArray(field) ? root.get(...(field as any)) : field,
+      ...rest,
+    })
+  }
+  return useHtmlField
+}

@@ -41,14 +41,14 @@ export const createFormProvider = <T extends z.ZodTypeAny>({
       []
     )
     const formContext = React.useMemo(
-      () => ({
+      (): FormContextProps<T> => ({
         schema,
         inverseSchema,
         ...bindActionCreators(
           {
             initialize: initialize<T>,
-            setRawValue: setRawValue<T, any>,
-            setValue: setValue<T, any>,
+            setRawValue: setRawValue as any,
+            setValue: setValue as any,
           },
           dispatch
         ),

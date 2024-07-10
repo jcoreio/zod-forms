@@ -55,11 +55,12 @@ export function createZodForm<T extends z.ZodTypeAny>({
   const root = FieldPath.root(schema)
 
   const useField = createUseField({
+    root,
     useFormSelector,
     useFormDispatch,
     useValidationErrorMap,
   })
-  const useHtmlField = createUseHtmlField({ useField })
+  const useHtmlField = createUseHtmlField({ root, useField })
 
   const get: (typeof root)['get'] = (key: any) => root.get(key)
 
