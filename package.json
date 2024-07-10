@@ -1,0 +1,37 @@
+{
+  "name": "@jcoreio/zod-forms",
+  "description": "React form library based upon zod schemas",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jcoreio/zod-forms.git"
+  },
+  "homepage": "https://github.com/jcoreio/zod-forms",
+  "bugs": {
+    "url": "https://github.com/jcoreio/zod-forms/issues"
+  },
+  "author": "Andy Edwards",
+  "license": "MIT",
+  "keywords": [
+    "zod",
+    "react",
+    "forms"
+  ],
+  "devDependencies": {
+    "@jcoreio/eslint-plugin-implicit-dependencies": "^1.1.1",
+    "@jcoreio/toolchain": "4.6.0",
+    "@jcoreio/toolchain-circle": "^4.6.0",
+    "eslint": "^8.56.0"
+  },
+  "version": "0.0.0-development",
+  "sideEffects": false,
+  "scripts": {
+    "tc": "toolchain",
+    "toolchain": "toolchain",
+    "test": "toolchain test",
+    "prepublishOnly": "echo This package is meant to be published by semantic-release from the dist build directory. && exit 1"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "packageManager": "pnpm@8.11.0"
+}
