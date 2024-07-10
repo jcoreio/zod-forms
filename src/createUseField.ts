@@ -23,12 +23,16 @@ export const createUseField = <T extends z.ZodTypeAny>({
 
     const dispatch = useFormDispatch()
 
-    const value: z.output<Schema> | undefined = useFormSelector((state) =>
-      get(state.values, field.path)
-    ) as any
     const rawValue: z.input<Schema> | undefined = useFormSelector((state) =>
       get(state.rawValues, field.path)
     ) as any
+    let value: z.output<Schema> | undefined = useFormSelector((state) =>
+      get(state.values, field.path)
+    ) as any
+    if (value == undefined) {
+      const parsed = field.schema.safeParse(rawValue)
+      if (parsed.success) value = parsed.data
+    }
     const initialValue: z.output<Schema> | undefined = useFormSelector(
       (state) => get(state.initialValues, field.path)
     ) as any
