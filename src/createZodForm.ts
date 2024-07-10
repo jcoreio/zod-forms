@@ -14,6 +14,8 @@ import { createUseValidationErrorMap } from './createUseValidationErrorMap'
 import { createUseField } from './createUseField'
 import { createUseHtmlField } from './createUseHtmlField'
 import { useFormContext } from './useFormContext'
+import { useSubmit } from './useSubmit'
+import { useInitialize } from './useInitialize'
 
 export type ZodForm<T extends z.ZodTypeAny> = ReturnType<
   typeof createZodForm<T>
@@ -59,6 +61,8 @@ export function createZodForm<T extends z.ZodTypeAny>({
   return {
     FormProvider,
     useFormContext: useFormContext<T>,
+    useSubmit: useSubmit<T>,
+    useInitialize: useInitialize<T>,
     root,
     get,
     useField,

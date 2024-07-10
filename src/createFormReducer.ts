@@ -20,6 +20,22 @@ export function createFormReducer<T extends z.ZodTypeAny>({
     switch (action.type) {
       case 'setMounted':
         return { ...state, mounted: action.mounted }
+      case 'setHandlers': {
+        const {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          type,
+          ...handlers
+        } = action
+        return { ...state, ...handlers }
+      }
+      case 'setSubmitStatus': {
+        const {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          type,
+          ...status
+        } = action
+        return { ...state, ...status }
+      }
       case 'setValue': {
         const newValues = set(state.values, action.field.path, action.value)
         try {

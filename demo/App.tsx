@@ -11,6 +11,7 @@ import {
   FormControlLabel,
   FormHelperText,
   Box,
+  Button,
 } from '@mui/material'
 import { FieldPath } from '../src/FieldPath'
 import { useFormContext } from '../src/useFormContext'
@@ -80,47 +81,68 @@ export default function App() {
 }
 
 function App2() {
-  const { initialize } = form.useFormContext()
-  React.useEffect(() => {
-    initialize({
-      values: { trimString: '', min: 5, max: 10, requireMinLteMax: true },
-    })
-  }, [])
+  const initialValues = React.useMemo(
+    () => ({ trimString: '', min: 5, max: 10, requireMinLteMax: true }),
+    []
+  )
+  form.useInitialize({ values: initialValues })
+
+  const onSubmit = form.useSubmit({
+    onSubmit: async (values) => {
+      // eslint-disable-next-line no-console
+      console.log('onSubmit', values)
+      await new Promise<void>((r) => setTimeout(r, 1000))
+    },
+    onSubmitSucceeded: () => {
+      // eslint-disable-next-line no-console
+      console.log('onSubmitSucceeded')
+    },
+    onSubmitFailed: (error) => {
+      // eslint-disable-next-line no-console
+      console.error('onSubmitFailed', error)
+    },
+  })
+
   return (
-    <Paper sx={{ width: 600, p: 2 }}>
-      <Box sx={{ mb: 2 }}>
+    <form onSubmit={onSubmit}>
+      <Paper sx={{ width: 600, p: 2 }}>
+        <Box sx={{ mb: 2 }}>
+          <FormTextField
+            field={form.get('trimString')}
+            type="text"
+            label="Trimmed string"
+            normalizeOnBlur
+          />
+          <FormTextField
+            field={form.get('urlString')}
+            type="text"
+            label="URL"
+            normalizeOnBlur
+          />
+        </Box>
         <FormTextField
-          field={form.get('trimString')}
+          field={form.get('min')}
           type="text"
-          label="Trimmed string"
+          label="Min"
           normalizeOnBlur
         />
         <FormTextField
-          field={form.get('urlString')}
+          field={form.get('max')}
           type="text"
-          label="URL"
+          label="Max"
           normalizeOnBlur
         />
-      </Box>
-      <FormTextField
-        field={form.get('min')}
-        type="text"
-        label="Min"
-        normalizeOnBlur
-      />
-      <FormTextField
-        field={form.get('max')}
-        type="text"
-        label="Max"
-        normalizeOnBlur
-      />
-      <Box sx={{ mt: 2 }}>
-        <FormSwitchField
-          label="Require min <= max"
-          field={form.get('requireMinLteMax')}
-        />
-      </Box>
-    </Paper>
+        <Box sx={{ mt: 2 }}>
+          <FormSwitchField
+            label="Require min <= max"
+            field={form.get('requireMinLteMax')}
+          />
+        </Box>
+        <Box sx={{ mt: 2 }}>
+          <Button type="submit">Submit</Button>
+        </Box>
+      </Paper>
+    </form>
   )
 }
 
