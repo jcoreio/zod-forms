@@ -10,6 +10,7 @@ import {
   FormGroup,
   FormControlLabel,
   FormHelperText,
+  Box,
 } from '@mui/material'
 import { FieldPath } from '../src/FieldPath'
 import { useFormContext } from '../src/useFormContext'
@@ -39,6 +40,8 @@ const NumberSchema = invertible(
 
 const schema = z
   .object({
+    trimString: z.string().trim(),
+    urlString: z.string().trim().url().optional(),
     min: NumberSchema,
     max: NumberSchema,
     requireMinLteMax: z.boolean().optional(),
@@ -79,10 +82,26 @@ export default function App() {
 function App2() {
   const { initialize } = form.useFormContext()
   React.useEffect(() => {
-    initialize({ values: { min: 5, max: 10, requireMinLteMax: true } })
+    initialize({
+      values: { trimString: '', min: 5, max: 10, requireMinLteMax: true },
+    })
   }, [])
   return (
     <Paper sx={{ width: 600, p: 2 }}>
+      <Box sx={{ mb: 2 }}>
+        <FormTextField
+          field={form.get('trimString')}
+          type="text"
+          label="Trimmed string"
+          normalizeOnBlur
+        />
+        <FormTextField
+          field={form.get('urlString')}
+          type="text"
+          label="URL"
+          normalizeOnBlur
+        />
+      </Box>
       <FormTextField
         field={form.get('min')}
         type="text"
@@ -95,12 +114,12 @@ function App2() {
         label="Max"
         normalizeOnBlur
       />
-      <div>
+      <Box sx={{ mt: 2 }}>
         <FormSwitchField
           label="Require min <= max"
           field={form.get('requireMinLteMax')}
         />
-      </div>
+      </Box>
     </Paper>
   )
 }
