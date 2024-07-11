@@ -5,6 +5,7 @@ import {
   FieldPath,
   useHtmlField,
   useFormStatus,
+  text,
   numberFromText,
 } from '../src/index'
 import {
@@ -21,12 +22,13 @@ import {
 
 const schema = z
   .object({
-    trimString: z.string().trim(),
-    urlString: z.string().trim().url().nullable(),
-    min: numberFromText.pipe(z.number().finite()),
-    max: numberFromText.pipe(z.number().finite()),
+    trimString: text.trim(),
+    urlString: text.trim().url().nullable(),
+    min: numberFromText.finite(),
+    max: numberFromText.finite(),
+    optionalNumber: numberFromText.optional(),
     requireMinLteMax: z.boolean().optional(),
-    nested: z.object({ foo: z.number().optional() }).optional(),
+    nested: z.object({ foo: numberFromText.optional() }).optional(),
   })
   .superRefine((obj, ctx) => {
     if (
@@ -115,6 +117,12 @@ function App2() {
             field={form.get('requireMinLteMax')}
           />
         </Box>
+
+        <FormTextField
+          field={form.get('optionalNumber')}
+          type="text"
+          label="Optional Number"
+        />
         <Box sx={{ mt: 2 }}>
           <Button disabled={pristine || submitting} type="submit">
             Submit

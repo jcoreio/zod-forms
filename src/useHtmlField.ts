@@ -35,7 +35,6 @@ type UseHtmlFieldOptions<Field, Schema extends z.ZodTypeAny> = {
     ? 'checkbox'
     : Exclude<HTMLInputTypeAttribute, 'checkbox'>
   normalizeOnBlur?: boolean
-  blankValue?: any
 }
 
 export interface TypedUseHtmlField<T extends z.ZodTypeAny> {
@@ -46,8 +45,6 @@ export interface TypedUseHtmlField<T extends z.ZodTypeAny> {
     options: UseHtmlFieldOptions<Path, SchemaAt<T, Path>>
   ): UseHtmlFieldProps<FieldPath<SchemaAt<T, Path>>>
 }
-
-const PRESERVE_BLANK = Symbol('PRESERVE_BLANK')
 
 function useHtmlFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
   options: UseHtmlFieldOptions<Field, Field['schema']>
@@ -65,24 +62,11 @@ function useHtmlFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
     ...meta
   } = props
 
-  const blankValue = React.useMemo(() => {
-    if (type === 'checkbox') return false
-    if ('blankValue' in options) return options.blankValue
-    const { schema } = field
-    if (schema.safeParse(undefined).success) return undefined
-    if (schema.safeParse(null).success) return null
-    return PRESERVE_BLANK
-  }, [type, field.pathstring, options.blankValue, 'blankValue' in options])
-
   const getRawValue = React.useCallback(
     (el: HTMLInputElement) =>
-      type === 'checkbox'
-        ? el.checked
-        : blankValue === PRESERVE_BLANK || /\S/.test(el.value)
-        ? el.value
-        : blankValue,
+      type === 'checkbox' ? el.checked : el.value || '',
 
-    [type, blankValue]
+    [type]
   )
 
   const onChange = React.useCallback(
