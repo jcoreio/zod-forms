@@ -49,7 +49,7 @@ export interface TypedUseHtmlField<T extends z.ZodTypeAny> {
 function useHtmlFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>({
   field,
   type,
-  normalizeOnBlur,
+  normalizeOnBlur = true,
 }: {
   field: Field
   type: HTMLInputTypeAttribute

@@ -128,27 +128,15 @@ function App2() {
             field={form.get('trimString')}
             type="text"
             label="Trimmed string"
-            normalizeOnBlur
           />
           <FormTextField
             field={form.get('urlString')}
             type="text"
             label="URL"
-            normalizeOnBlur
           />
         </Box>
-        <FormTextField
-          field={form.get('min')}
-          type="text"
-          label="Min"
-          normalizeOnBlur
-        />
-        <FormTextField
-          field={form.get('max')}
-          type="text"
-          label="Max"
-          normalizeOnBlur
-        />
+        <FormTextField field={form.get('min')} type="text" label="Min" />
+        <FormTextField field={form.get('max')} type="text" label="Max" />
         <Box sx={{ mt: 2 }}>
           <FormSwitchField
             label="Require min <= max"
@@ -168,14 +156,12 @@ function App2() {
 function FormTextField({
   field,
   type,
-  normalizeOnBlur,
   ...props
 }: Omit<React.ComponentProps<typeof TextField>, 'type'> & {
   type: HTMLInputTypeAttribute
-  normalizeOnBlur?: boolean
   field: FieldPath<z.ZodType<any, any, string | null | undefined>>
 }) {
-  const { input, meta } = useHtmlField({ field, type, normalizeOnBlur })
+  const { input, meta } = useHtmlField({ field, type })
   const error = meta.touched ? meta.error : undefined
   return (
     <TextField {...input} error={error != null} helperText={error} {...props} />
