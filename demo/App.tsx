@@ -1,11 +1,11 @@
 import z from 'zod'
 import React, { HTMLInputTypeAttribute } from 'react'
-import { invertible } from 'zod-invertible'
 import {
   createZodForm,
   FieldPath,
   useHtmlField,
   useFormStatus,
+  numberFromText,
 } from '../src/index'
 import {
   Paper,
@@ -19,28 +19,12 @@ import {
   Button,
 } from '@mui/material'
 
-const toNumber = invertible(
-  z.string().nullish(),
-  (s, ctx) => {
-    if (!s?.trim()) return s == null ? s : undefined
-    const num = Number(s)
-    if (isNaN(num)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'invalid number',
-      })
-    }
-    return num
-  },
-  z.number().nullish(),
-  (n) => (n == null ? n : String(n))
-)
 const schema = z
   .object({
     trimString: z.string().trim(),
     urlString: z.string().trim().url().nullable(),
-    min: z.string().optional().pipe(toNumber).pipe(z.number().finite()),
-    max: z.string().optional().pipe(toNumber).pipe(z.number().finite()),
+    min: numberFromText.pipe(z.number().finite()),
+    max: numberFromText.pipe(z.number().finite()),
     requireMinLteMax: z.boolean().optional(),
     nested: z.object({ foo: z.number().optional() }).optional(),
   })

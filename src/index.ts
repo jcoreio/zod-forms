@@ -17,3 +17,4 @@ export {
 export { useInitialize } from './useInitialize'
 export { useSubmit } from './useSubmit'
 export { useSubmitEventHandler } from './useSubmitEventHandler'
+export { numberFromText } from './numberFromText'
