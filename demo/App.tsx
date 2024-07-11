@@ -1,7 +1,12 @@
 import z from 'zod'
 import React, { HTMLInputTypeAttribute } from 'react'
 import { invertible } from 'zod-invertible'
-import { createZodForm } from '../src/createZodForm'
+import {
+  createZodForm,
+  FieldPath,
+  useHtmlField,
+  useFormStatus,
+} from '../src/index'
 import {
   Paper,
   TextField,
@@ -13,9 +18,6 @@ import {
   Box,
   Button,
 } from '@mui/material'
-import { FieldPath } from '../src/FieldPath'
-import { useHtmlField } from '../src/useHtmlField'
-import { useFormStatus } from '../src/useFormStatus'
 
 const blankTo = (blankValue = undefined) =>
   invertible(

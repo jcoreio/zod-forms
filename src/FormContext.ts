@@ -10,6 +10,7 @@ import { setSubmitStatus } from './actions/setSubmitStatus'
 import { SelectFormValues } from './createSelectFormValues'
 import { SelectFieldErrorMap } from './createSelectFieldErrorMap'
 import { SelectFormStatus } from './createSelectFormStatus'
+import { setMeta } from './actions/setMeta'
 
 export const FormContext =
   React.createContext<FormContextProps<z.ZodTypeAny> | null>(null)
@@ -20,6 +21,7 @@ export type FormContextProps<T extends z.ZodTypeAny> = {
   root: FieldPath<T>
   initialize: typeof initialize<T>
   setHandlers: typeof setHandlers<T>
+  setMeta: typeof setMeta
   setRawValue: typeof setRawValue
   setValue: typeof setValue
   submit: typeof submit

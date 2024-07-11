@@ -15,6 +15,7 @@ import { createFormMiddleware } from './createFormMiddleware'
 import { setHandlers } from './actions/setHandlers'
 import { submit } from './actions/submit'
 import { setSubmitStatus } from './actions/setSubmitStatus'
+import { setMeta } from './actions/setMeta'
 
 export const createFormProvider = <T extends z.ZodTypeAny>(
   props: Pick<
@@ -53,6 +54,7 @@ export const createFormProvider = <T extends z.ZodTypeAny>(
             setHandlers: setHandlers<T>,
             submit,
             setSubmitStatus: setSubmitStatus<T>,
+            setMeta: setMeta as any,
             setRawValue: setRawValue as any,
             setValue: setValue as any,
           },

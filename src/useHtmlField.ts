@@ -5,7 +5,7 @@ import React, { HTMLInputTypeAttribute } from 'react'
 import { invert } from 'zod-invertible'
 import { useFormContext } from './useFormContext'
 
-type HtmlFieldInputProps = {
+export type HtmlFieldInputProps = {
   name: string
   type: HTMLInputTypeAttribute
   value: string
@@ -15,7 +15,7 @@ type HtmlFieldInputProps = {
   onBlur: React.FocusEventHandler
 }
 
-type ValidUseHtmlFieldProps<Field extends FieldPath> = {
+export type ValidUseHtmlFieldProps<Field extends FieldPath> = {
   input: HtmlFieldInputProps
   meta: UseFieldProps<Field>
 }
