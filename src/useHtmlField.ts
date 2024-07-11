@@ -35,6 +35,7 @@ type UseHtmlFieldOptions<Field, Schema extends z.ZodTypeAny> = {
     ? 'checkbox'
     : Exclude<HTMLInputTypeAttribute, 'checkbox'>
   normalizeOnBlur?: boolean
+  blankValue?: any
 }
 
 export interface TypedUseHtmlField<T extends z.ZodTypeAny> {
@@ -46,15 +47,12 @@ export interface TypedUseHtmlField<T extends z.ZodTypeAny> {
   ): UseHtmlFieldProps<FieldPath<SchemaAt<T, Path>>>
 }
 
-function useHtmlFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>({
-  field,
-  type,
-  normalizeOnBlur = true,
-}: {
-  field: Field
-  type: HTMLInputTypeAttribute
-  normalizeOnBlur?: boolean
-}): UseHtmlFieldProps<Field> {
+const PRESERVE_BLANK = Symbol('PRESERVE_BLANK')
+
+function useHtmlFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
+  options: UseHtmlFieldOptions<Field, Field['schema']>
+): UseHtmlFieldProps<Field> {
+  const { field, type, normalizeOnBlur = true } = options
   const props = (useField as TypedUseField<T>)(field)
   const {
     value,
@@ -67,15 +65,33 @@ function useHtmlFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>({
     ...meta
   } = props
 
+  const blankValue = React.useMemo(() => {
+    if (type === 'checkbox') return false
+    if ('blankValue' in options) return options.blankValue
+    const { schema } = field
+    if (schema.safeParse(undefined).success) return undefined
+    if (schema.safeParse(null).success) return null
+    return PRESERVE_BLANK
+  }, [type, field.pathstring, options.blankValue, 'blankValue' in options])
+
+  const getRawValue = React.useCallback(
+    (el: HTMLInputElement) =>
+      type === 'checkbox'
+        ? el.checked
+        : blankValue === PRESERVE_BLANK || /\S/.test(el.value)
+        ? el.value
+        : blankValue,
+
+    [type, blankValue]
+  )
+
   const onChange = React.useCallback(
     (e: React.ChangeEvent) => {
       if (e.currentTarget instanceof HTMLInputElement) {
-        setRawValue(
-          type === 'checkbox' ? e.currentTarget.checked : e.currentTarget.value
-        )
+        setRawValue(getRawValue(e.currentTarget))
       }
     },
-    [setRawValue, type]
+    [getRawValue, setRawValue]
   )
 
   const onFocus = React.useCallback(() => {
@@ -85,8 +101,7 @@ function useHtmlFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>({
   const onBlur = React.useCallback(
     (e: React.FocusEvent) => {
       if (e.currentTarget instanceof HTMLInputElement) {
-        let newValue =
-          type === 'checkbox' ? e.currentTarget.checked : e.currentTarget.value
+        let newValue = getRawValue(e.currentTarget)
         if (normalizeOnBlur) {
           const parsed = field.schema.safeParse(newValue)
           const formatted = parsed.success
@@ -98,7 +113,7 @@ function useHtmlFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>({
       }
       setMeta({ visited: true, touched: true })
     },
-    [setRawValue, type]
+    [getRawValue, setRawValue]
   )
 
   return React.useMemo(

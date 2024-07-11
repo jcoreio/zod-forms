@@ -19,14 +19,6 @@ import {
   Button,
 } from '@mui/material'
 
-const blankTo = (blankValue = undefined) =>
-  invertible(
-    z.any().optional(),
-    (s) => (typeof s === 'string' && !s.trim() ? blankValue : s),
-    z.any().nullish(),
-    (s) => s
-  )
-
 const toNumber = invertible(
   z.string().nullish(),
   (s, ctx) => {
@@ -46,19 +38,9 @@ const toNumber = invertible(
 const schema = z
   .object({
     trimString: z.string().trim(),
-    urlString: blankTo(undefined).pipe(z.string().trim().url().optional()),
-    min: z
-      .string()
-      .optional()
-      .pipe(blankTo(undefined))
-      .pipe(toNumber)
-      .pipe(z.number().finite()),
-    max: z
-      .string()
-      .optional()
-      .pipe(blankTo(undefined))
-      .pipe(toNumber)
-      .pipe(z.number().finite()),
+    urlString: z.string().trim().url().nullable(),
+    min: z.string().optional().pipe(toNumber).pipe(z.number().finite()),
+    max: z.string().optional().pipe(toNumber).pipe(z.number().finite()),
     requireMinLteMax: z.boolean().optional(),
     nested: z.object({ foo: z.number().optional() }).optional(),
   })
@@ -97,7 +79,13 @@ export default function App() {
 
 function App2() {
   const initialValues = React.useMemo(
-    () => ({ trimString: '', min: 5, max: 10, requireMinLteMax: true }),
+    () => ({
+      trimString: '',
+      urlString: null,
+      min: 5,
+      max: 10,
+      requireMinLteMax: true,
+    }),
     []
   )
   form.useInitialize({ values: initialValues })
