@@ -36,6 +36,18 @@ export function createFormReducer<T extends z.ZodTypeAny>({
         } = action
         return { ...state, ...status }
       }
+      case 'submitSucceeded': {
+        return {
+          ...state,
+          submitting: false,
+          submitSucceeded: true,
+          submitFailed: false,
+          submitError: undefined,
+          submitPromise: undefined,
+          initialValues: state.submittedValues,
+          rawInitialValues: state.rawSubmittedValues,
+        }
+      }
       case 'setValue': {
         const newValues = set(state.values, action.field.path, action.value)
         try {
@@ -43,6 +55,7 @@ export function createFormReducer<T extends z.ZodTypeAny>({
           schema.parse(newRawValues)
           return {
             ...state,
+            submitError: undefined,
             validationError: undefined,
             rawValues: newRawValues,
             values: newValues,
@@ -57,6 +70,7 @@ export function createFormReducer<T extends z.ZodTypeAny>({
           const newParsed = schema.safeParse(rawValues)
           const result = {
             ...state,
+            submitError: undefined,
             validationError: !newRawParsed.success
               ? newRawParsed.error
               : newParsed.success
@@ -79,6 +93,7 @@ export function createFormReducer<T extends z.ZodTypeAny>({
           const newValues = schema.parse(newRawValues)
           return {
             ...state,
+            submitError: undefined,
             validationError: undefined,
             rawValues: newRawValues,
             values: newValues,
@@ -86,6 +101,7 @@ export function createFormReducer<T extends z.ZodTypeAny>({
         } catch (error) {
           return {
             ...state,
+            submitError: undefined,
             validationError: error,
             rawValues: newRawValues,
             values: undefined,

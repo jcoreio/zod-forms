@@ -7,6 +7,7 @@ import { SetMetaAction } from './actions/setMeta'
 import { FieldPath } from './FieldPath'
 import { SetHandlersAction } from './actions/setHandlers'
 import { SubmitAction } from './actions/submit'
+import { SubmitSucceededAction } from './actions/submitSucceeded'
 import { SetSubmitStatusAction } from './actions/setSubmitStatus'
 
 export type FormAction<T extends z.ZodTypeAny> =
@@ -17,4 +18,5 @@ export type FormAction<T extends z.ZodTypeAny> =
   | SetMetaAction<FieldPath>
   | SetHandlersAction<T>
   | SubmitAction
+  | SubmitSucceededAction
   | SetSubmitStatusAction<T>

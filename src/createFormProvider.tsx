@@ -5,39 +5,36 @@ import { setMounted } from './actions/setMounted'
 import { createFormReducer } from './createFormReducer'
 import { FormAction } from './FormAction'
 import { FormState } from './FormState'
-import { FormContextProps } from './FormContextProps'
-import { Provider, ReactReduxContextValue } from 'react-redux'
+import { Provider } from 'react-redux'
 import { initialize } from './actions/initialize'
 import { setRawValue } from './actions/setRawValue'
 import { setValue } from './actions/setValue'
-import { FormContext } from './FormContext'
+import { FormContext, FormContextProps } from './FormContext'
+import { FormStateContext } from './FormStateContext'
 import { createFormMiddleware } from './createFormMiddleware'
 import { setHandlers } from './actions/setHandlers'
 import { submit } from './actions/submit'
 import { setSubmitStatus } from './actions/setSubmitStatus'
 
-export const createFormProvider = <T extends z.ZodTypeAny>({
-  schema,
-  inverseSchema,
-  useField,
-  useHtmlField,
-  FormReactReduxContext,
-}: Pick<
-  FormContextProps<T>,
-  'schema' | 'inverseSchema' | 'useField' | 'useHtmlField'
-> & {
-  FormReactReduxContext: React.Context<ReactReduxContextValue<
-    FormState<T>,
-    FormAction<T>
-  > | null>
-}) =>
+export const createFormProvider = <T extends z.ZodTypeAny>(
+  props: Pick<
+    FormContextProps<T>,
+    | 'root'
+    | 'schema'
+    | 'inverseSchema'
+    | 'selectFormStatus'
+    | 'selectFieldErrorMap'
+    | 'selectFormValues'
+  >
+) =>
   function FormProvider({ children }: { children: React.ReactElement }) {
     const storeRef = React.useRef<Store<FormState<T>, FormAction<T>>>()
-    if (!storeRef.current)
+    if (!storeRef.current) {
       storeRef.current = createStore(
-        createFormReducer({ schema, inverseSchema }),
+        createFormReducer(props),
         applyMiddleware(createFormMiddleware())
       )
+    }
     const store = storeRef.current
     const { dispatch } = store
 
@@ -49,10 +46,7 @@ export const createFormProvider = <T extends z.ZodTypeAny>({
     )
     const formContext = React.useMemo(
       (): FormContextProps<T> => ({
-        schema,
-        inverseSchema,
-        useField,
-        useHtmlField,
+        ...props,
         ...bindActionCreators(
           {
             initialize: initialize<T>,
@@ -70,7 +64,10 @@ export const createFormProvider = <T extends z.ZodTypeAny>({
 
     return (
       <FormContext.Provider value={formContext as any}>
-        <Provider store={store} context={FormReactReduxContext}>
+        <Provider
+          store={store}
+          context={FormStateContext as FormStateContext<T>}
+        >
           {children}
         </Provider>
       </FormContext.Provider>

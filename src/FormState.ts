@@ -11,6 +11,8 @@ export type FormState<T extends z.ZodTypeAny> = {
   fieldMeta: Record<string, FieldMeta>
   rawValues?: z.input<T>
   values?: z.output<T>
+  submittedValues?: z.output<T>
+  rawSubmittedValues?: z.input<T>
   rawInitialValues?: z.input<T>
   initialValues?: z.output<T>
   validationError?: any

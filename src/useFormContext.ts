@@ -1,7 +1,6 @@
 import z from 'zod'
 import React from 'react'
-import { FormContextProps } from './FormContextProps'
-import { FormContext } from './FormContext'
+import { FormContext, FormContextProps } from './FormContext'
 
 export function useFormContext<T extends z.ZodTypeAny>(): FormContextProps<T> {
   const props: FormContextProps<T> = React.useContext(FormContext) as any

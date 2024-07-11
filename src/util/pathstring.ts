@@ -11,5 +11,5 @@ export function pathstring(path: BasePath): string {
 }
 
 function isValidIdentifier(s: string): boolean {
-  return /^[_$a-z][_$a-z0-9]$/i.test(s)
+  return /^[_$a-z][_$a-z0-9]*$/i.test(s)
 }

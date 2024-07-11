@@ -14,6 +14,8 @@ export function setSubmitStatus<T extends z.ZodTypeAny>(
       | 'submitPromise'
       | 'submitSucceeded'
       | 'submitFailed'
+      | 'submittedValues'
+      | 'rawSubmittedValues'
     >
   >
 ) {

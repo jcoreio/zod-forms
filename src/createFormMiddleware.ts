@@ -4,6 +4,7 @@ import { FormAction } from './FormAction'
 import { FormState } from './FormState'
 import { SubmitAction } from './actions/submit'
 import { setSubmitStatus } from './actions/setSubmitStatus'
+import { submitSucceeded } from './actions/submitSucceeded'
 
 export function createFormMiddleware<T extends z.ZodTypeAny>(): Middleware<
   // eslint-disable-next-line @typescript-eslint/ban-types
@@ -22,6 +23,7 @@ export function createFormMiddleware<T extends z.ZodTypeAny>(): Middleware<
         onSubmitSucceeded,
         onSubmitFailed,
         values,
+        rawValues,
         initialValues,
       } = nextState
       const submitPromise = (async () => {
@@ -31,6 +33,8 @@ export function createFormMiddleware<T extends z.ZodTypeAny>(): Middleware<
       store.dispatch(
         setSubmitStatus({
           submitting: true,
+          submittedValues: values,
+          rawSubmittedValues: rawValues,
           submitError: undefined,
           submitSucceeded: false,
           submitFailed: false,
@@ -40,15 +44,7 @@ export function createFormMiddleware<T extends z.ZodTypeAny>(): Middleware<
       submitPromise.then(
         () => {
           if (store.getState().submitPromise !== submitPromise) return
-          store.dispatch(
-            setSubmitStatus({
-              submitting: false,
-              submitError: undefined,
-              submitSucceeded: true,
-              submitFailed: false,
-              submitPromise: undefined,
-            })
-          )
+          store.dispatch(submitSucceeded())
           onSubmitSucceeded?.()
         },
         (error) => {

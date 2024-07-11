@@ -14,20 +14,23 @@ import {
   Button,
 } from '@mui/material'
 import { FieldPath } from '../src/FieldPath'
-import { useFormContext } from '../src/useFormContext'
+import { useHtmlField } from '../src/useHtmlField'
+import { useFormStatus } from '../src/useFormStatus'
 
-const NumberSchema = invertible(
-  z.string(),
-  (s: string, ctx: z.RefinementCtx): number => {
-    if (!s?.trim()) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: 'is required',
-      })
-      return NaN
-    }
+const blankTo = (blankValue = undefined) =>
+  invertible(
+    z.any().optional(),
+    (s) => (typeof s === 'string' && !s.trim() ? blankValue : s),
+    z.any().nullish(),
+    (s) => s
+  )
+
+const toNumber = invertible(
+  z.string().nullish(),
+  (s, ctx) => {
+    if (!s?.trim()) return s == null ? s : undefined
     const num = Number(s)
-    if (!Number.isFinite(num)) {
+    if (isNaN(num)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: 'invalid number',
@@ -35,17 +38,27 @@ const NumberSchema = invertible(
     }
     return num
   },
-  z.number().finite(),
-  (n) => String(n)
+  z.number().nullish(),
+  (n) => (n == null ? n : String(n))
 )
-
 const schema = z
   .object({
     trimString: z.string().trim(),
-    urlString: z.string().trim().url().optional(),
-    min: NumberSchema,
-    max: NumberSchema,
+    urlString: blankTo(undefined).pipe(z.string().trim().url().optional()),
+    min: z
+      .string()
+      .optional()
+      .pipe(blankTo(undefined))
+      .pipe(toNumber)
+      .pipe(z.number().finite()),
+    max: z
+      .string()
+      .optional()
+      .pipe(blankTo(undefined))
+      .pipe(toNumber)
+      .pipe(z.number().finite()),
     requireMinLteMax: z.boolean().optional(),
+    nested: z.object({ foo: z.number().optional() }).optional(),
   })
   .superRefine((obj, ctx) => {
     if (
@@ -103,6 +116,8 @@ function App2() {
     },
   })
 
+  const { submitting, pristine } = useFormStatus()
+
   return (
     <form onSubmit={onSubmit}>
       <Paper sx={{ width: 600, p: 2 }}>
@@ -139,7 +154,9 @@ function App2() {
           />
         </Box>
         <Box sx={{ mt: 2 }}>
-          <Button type="submit">Submit</Button>
+          <Button disabled={pristine || submitting} type="submit">
+            Submit
+          </Button>
         </Box>
       </Paper>
     </form>
@@ -156,7 +173,6 @@ function FormTextField({
   normalizeOnBlur?: boolean
   field: FieldPath<z.ZodType<any, any, string | null | undefined>>
 }) {
-  const { useHtmlField } = useFormContext()
   const { input, meta } = useHtmlField({ field, type, normalizeOnBlur })
   const error = meta.touched ? meta.error : undefined
   return (
@@ -172,7 +188,6 @@ function FormSwitchField({
   field: FieldPath<z.ZodType<any, any, boolean | null | undefined>>
   label?: React.ReactNode
 }) {
-  const { useHtmlField } = useFormContext()
   const { input, meta } = useHtmlField({ field, type: 'checkbox' })
   const error = meta.touched ? meta.error : undefined
   return (
