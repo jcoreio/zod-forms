@@ -24,11 +24,9 @@ The displayed value will also be trimmed whenever the field is blurred.
 
 ```ts
 import z from 'zod'
-// `text` is like z.string(), but coerces whitespace-only values to null or undefined
-import { text } from '@jcoreio/zod-form'
 
 const schema = z.object({
-  url: text.trim().url(),
+  url: z.string().trim().url(),
 })
 ```
 
@@ -51,15 +49,19 @@ const {
 ## Create a field component
 
 ```ts
+import { FieldPathForRawValue } from '@jcoreio/zod-form'
+
 function FormInput({
   field,
   type,
   ...props
 }: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'> & {
-  field: FieldPath<z.ZodType<any, any, string | null | undefined>>
   type: HTMLInputTypeAttribute
+  // This ensures that only fields that accept string, null or undefined
+  // as input can be passed to <FormInput>
+  field: FieldPathForRawValue<string | null | undefined>
 }) {
-  // This hook gets the state in a convenient form for an `<input>` element.
+  // This hook is designed to provide the smoothest integration with simple <input>s.
   const { input, meta } = useHtmlField({ field, type })
 
   const inputRef = React.createRef<HTMLInputElement>()
@@ -111,7 +113,7 @@ function MyFormContent() {
   return (
     <form onSubmit={onSubmit}>
       <FormInput
-        // this is how we connect <FormInput> to the `url` field
+        // this is how we bind <FormInput> to the `url` field
         field={myForm.get('url')}
         type="text"
         placeholder="URL"

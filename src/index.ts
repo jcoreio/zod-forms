@@ -1,6 +1,10 @@
 export { createZodForm, type ZodForm } from './createZodForm'
 export { type FieldMeta } from './FormState'
-export { FieldPath } from './FieldPath'
+export {
+  FieldPath,
+  type FieldPathForValue,
+  type FieldPathForRawValue,
+} from './FieldPath'
 export { useField, type UseFieldProps, type TypedUseField } from './useField'
 export { type FormContext } from './FormContext'
 export { useFormContext } from './useFormContext'
@@ -17,5 +21,3 @@ export {
 export { useInitialize } from './useInitialize'
 export { useSubmit } from './useSubmit'
 export { useSubmitEventHandler } from './useSubmitEventHandler'
-export { text } from './text'
-export { numberFromText } from './numberFromText'

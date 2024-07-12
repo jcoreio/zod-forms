@@ -15,7 +15,10 @@ export function createSelectFieldErrorMap() {
       Object.fromEntries(
         errors.flatMap((e) =>
           isZodError(e)
-            ? e.issues.map(({ path, message }) => [pathstring(path), message])
+            ? e.issues.map((issue) => [
+                pathstring(issue.path),
+                messageForIssue(issue),
+              ])
             : []
         )
       )
@@ -24,4 +27,20 @@ export function createSelectFieldErrorMap() {
 
 function isZodError(error: any): error is z.ZodError {
   return error && error.name === 'ZodError'
+}
+
+/**
+ * Gets less confusing error messages for ordinary users for certain ZodIssues
+ */
+function messageForIssue(issue: z.ZodIssue): string {
+  if (issue.code === 'invalid_type') {
+    return issue.received === 'null'
+      ? // Without this, the error would say "Expected <type>, received null"
+        'Required'
+      : issue.expected === 'number' || issue.expected === 'bigint'
+      ? // Without this, invalid text input for z.number() would say "Expected number, received string"
+        'Invalid number'
+      : issue.message
+  }
+  return issue.message
 }

@@ -5,7 +5,7 @@ import {
   FieldPath,
   useHtmlField,
   useFormStatus,
-  numberFromText,
+  FieldPathForRawValue,
 } from '../src/index'
 import {
   Paper,
@@ -23,12 +23,12 @@ const schema = z
   .object({
     trimString: z.string().trim(),
     urlString: z.string().trim().url().nullable(),
-    min: numberFromText.finite(),
-    max: numberFromText.finite(),
+    min: z.number().finite(),
+    max: z.number().finite(),
     optionalNumber: z.number().optional(),
     numberInput: z.number().optional(),
     requireMinLteMax: z.boolean().optional(),
-    nested: z.object({ foo: numberFromText.optional() }).optional(),
+    nested: z.object({ foo: z.number().optional() }).optional(),
     bigint: z.bigint().optional(),
   })
   .superRefine((obj, ctx) => {
@@ -118,12 +118,14 @@ function App2() {
             field={form.get('requireMinLteMax')}
           />
         </Box>
-        <FormTextField
-          field={form.get('optionalNumber')}
-          type="tel"
-          label="Optional Number"
-        />
-        <FormTextField field={form.get('bigint')} type="tel" label="BigInt" />
+        <Box sx={{ mt: 2 }}>
+          <FormTextField
+            field={form.get('optionalNumber')}
+            type="tel"
+            label="Optional Number"
+          />
+          <FormTextField field={form.get('bigint')} type="tel" label="BigInt" />
+        </Box>
         <Box sx={{ mt: 2 }}>
           <FormTextField
             field={form.get('numberInput')}
@@ -156,9 +158,7 @@ function FormTextField({
   ...props
 }: Omit<React.ComponentProps<typeof TextField>, 'type'> & {
   type: HTMLInputTypeAttribute
-  field: FieldPath<
-    z.ZodType<any, any, string | number | bigint | null | undefined>
-  >
+  field: FieldPathForRawValue<string | number | bigint | null | undefined>
 }) {
   const { input, meta } = useHtmlField({ field, type })
   const error = meta.touched ? meta.error : undefined

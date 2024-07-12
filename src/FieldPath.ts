@@ -1,6 +1,13 @@
 import z from 'zod'
 import { pathstring } from './util/pathstring'
 
+export type FieldPathForValue<Value, RawValue = any> = FieldPath<
+  z.ZodType<Value, any, RawValue>
+>
+export type FieldPathForRawValue<RawValue> = FieldPath<
+  z.ZodType<any, any, RawValue>
+>
+
 export class FieldPath<T extends z.ZodTypeAny = z.ZodTypeAny> {
   readonly path: BasePath
   readonly pathstring: string
