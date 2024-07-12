@@ -5,7 +5,6 @@ import {
   FieldPath,
   useHtmlField,
   useFormStatus,
-  text,
   numberFromText,
 } from '../src/index'
 import {
@@ -22,13 +21,14 @@ import {
 
 const schema = z
   .object({
-    trimString: text.trim(),
-    urlString: text.trim().url().nullable(),
+    trimString: z.string().trim(),
+    urlString: z.string().trim().url().nullable(),
     min: numberFromText.finite(),
     max: numberFromText.finite(),
-    optionalNumber: numberFromText.optional(),
+    optionalNumber: z.number().optional(),
     requireMinLteMax: z.boolean().optional(),
     nested: z.object({ foo: numberFromText.optional() }).optional(),
+    bigint: z.bigint().optional(),
   })
   .superRefine((obj, ctx) => {
     if (
@@ -66,7 +66,7 @@ export default function App() {
 function App2() {
   const initialValues = React.useMemo(
     () => ({
-      trimString: '',
+      trimString: 'trim',
       urlString: null,
       min: 5,
       max: 10,
@@ -120,9 +120,10 @@ function App2() {
 
         <FormTextField
           field={form.get('optionalNumber')}
-          type="text"
+          type="tel"
           label="Optional Number"
         />
+        <FormTextField field={form.get('bigint')} type="tel" label="BigInt" />
         <Box sx={{ mt: 2 }}>
           <Button disabled={pristine || submitting} type="submit">
             Submit
@@ -139,7 +140,9 @@ function FormTextField({
   ...props
 }: Omit<React.ComponentProps<typeof TextField>, 'type'> & {
   type: HTMLInputTypeAttribute
-  field: FieldPath<z.ZodType<any, any, string | null | undefined>>
+  field: FieldPath<
+    z.ZodType<any, any, string | number | bigint | null | undefined>
+  >
 }) {
   const { input, meta } = useHtmlField({ field, type })
   const error = meta.touched ? meta.error : undefined

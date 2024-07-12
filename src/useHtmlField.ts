@@ -4,6 +4,8 @@ import { useField, TypedUseField, UseFieldProps } from './useField'
 import React, { HTMLInputTypeAttribute } from 'react'
 import { invert } from 'zod-invertible'
 import { useFormContext } from './useFormContext'
+import { acceptsNumber } from './util/acceptsNumber'
+import { acceptsBigint } from './util/acceptsBigint'
 
 export type HtmlFieldInputProps = {
   name: string
@@ -22,12 +24,14 @@ export type ValidUseHtmlFieldProps<Field extends FieldPath> = {
 
 export type UseHtmlFieldProps<Field extends FieldPath> = z.input<
   Field['schema']
-> extends string | boolean | null | undefined
+> extends string | number | bigint | boolean | null | undefined
   ? {
       input: HtmlFieldInputProps
       meta: UseFieldProps<Field>
     }
-  : { ERROR: 'field schema input must be a nullish boolean or string' }
+  : {
+      ERROR: 'field schema input must be a nullish string, number, boolean or bigint'
+    }
 
 type UseHtmlFieldOptions<Field, Schema extends z.ZodTypeAny> = {
   field: Field
@@ -62,20 +66,34 @@ function useHtmlFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
     ...meta
   } = props
 
-  const getRawValue = React.useCallback(
-    (el: HTMLInputElement) =>
-      type === 'checkbox' ? el.checked : el.value || '',
+  const { schema } = field
 
-    [type]
-  )
+  // tempRawValue is used for storing blank text when we've coerced the
+  // raw value to null or undefined, or storing numeric text when we've
+  // coerced the raw value to a number or bigint.
+  // This way we can set a raw value that will parse better in the form
+  // state without interfering with the text the user is typing.
+  const [tempRawValue, setTempRawValue] = React.useState(rawValue)
+
+  const tryNumber = React.useMemo(() => acceptsNumber(schema), [schema])
+  const tryBigint = React.useMemo(() => acceptsBigint(schema), [schema])
 
   const onChange = React.useCallback(
     (e: React.ChangeEvent) => {
       if (e.currentTarget instanceof HTMLInputElement) {
-        setRawValue(getRawValue(e.currentTarget))
+        const rawValue = getRawValue(e.currentTarget)
+        const normalized = normalizeRawValue(rawValue, {
+          schema,
+          tryNumber,
+          tryBigint,
+        })
+        if (typeof rawValue === 'string' && typeof normalized !== 'string') {
+          setTempRawValue(rawValue)
+        }
+        setRawValue(normalized)
       }
     },
-    [getRawValue, setRawValue]
+    [getRawValue, setRawValue, schema]
   )
 
   const onFocus = React.useCallback(() => {
@@ -85,19 +103,24 @@ function useHtmlFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
   const onBlur = React.useCallback(
     (e: React.FocusEvent) => {
       if (e.currentTarget instanceof HTMLInputElement) {
-        let newValue = getRawValue(e.currentTarget)
+        let rawValue = normalizeRawValue(getRawValue(e.currentTarget), {
+          schema,
+          tryNumber,
+          tryBigint,
+        })
         if (normalizeOnBlur) {
-          const parsed = field.schema.safeParse(newValue)
+          const parsed = field.schema.safeParse(rawValue)
           const formatted = parsed.success
             ? invert(field.schema).safeParse(parsed.data)
             : undefined
-          if (formatted?.success) newValue = formatted.data
+          if (formatted?.success) rawValue = formatted.data
         }
-        setRawValue(newValue)
+        setRawValue(rawValue)
+        setTempRawValue(undefined)
       }
       setMeta({ visited: true, touched: true })
     },
-    [getRawValue, setRawValue]
+    [getRawValue, setRawValue, schema]
   )
 
   return React.useMemo(
@@ -105,8 +128,12 @@ function useHtmlFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
       input: {
         name: field.pathstring,
         type,
-        value: rawValue || '',
-        checked: Boolean(rawValue),
+        value:
+          typeof rawValue === 'boolean'
+            ? rawValue
+            : typeof rawValue === 'string'
+            ? rawValue || tempRawValue || ''
+            : tempRawValue || (rawValue == null ? '' : String(rawValue) || ''),
         ...(type === 'checkbox' && { checked: Boolean(rawValue) }),
         onChange,
         onFocus,
@@ -123,8 +150,51 @@ function useHtmlFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
         setMeta,
       },
     }),
-    [props, onChange]
+    [props, tempRawValue, onChange]
   ) as any
+}
+
+function getRawValue(el: HTMLInputElement | HTMLSelectElement) {
+  return el.type === 'checkbox' ? el.checked : el.value
+}
+
+function normalizeBlank(schema: z.ZodTypeAny): any {
+  if (schema.safeParse(undefined).success) return undefined
+  if (schema.safeParse(null).success) return null
+  return undefined
+}
+
+function safeBigInt(rawValue: string): bigint | undefined {
+  try {
+    return BigInt(rawValue)
+  } catch (error) {
+    return undefined
+  }
+}
+
+function normalizeRawValue(
+  rawValue: string | boolean,
+  {
+    schema,
+    tryNumber,
+    tryBigint,
+  }: { schema: z.ZodTypeAny; tryNumber: boolean; tryBigint: boolean }
+): string | boolean | number | bigint | null | undefined {
+  if (typeof rawValue === 'boolean') return rawValue
+  if (typeof rawValue === 'string' && !/\S/.test(rawValue)) {
+    return normalizeBlank(schema)
+  }
+  if (typeof rawValue === 'string' && !schema.safeParse(rawValue).success) {
+    if (tryNumber) {
+      const num = Number(rawValue)
+      if (!isNaN(num)) return num
+    }
+    if (tryBigint) {
+      const bigint = safeBigInt(rawValue)
+      if (bigint != null) return bigint
+    }
+  }
+  return rawValue
 }
 
 export function useHtmlField<Field extends FieldPath>(
