@@ -13,8 +13,7 @@ export class FieldPath<T extends z.ZodTypeAny = z.ZodTypeAny> {
   readonly pathstring: string
   readonly schema: T
 
-  private readonly subfields: WeakMap<SubpathKey<T>, FieldPath> | undefined =
-    typeof WeakMap !== 'undefined' ? new WeakMap() : undefined
+  private subfields: Map<SubpathKey<T>, FieldPath> | undefined
 
   private constructor({ schema, path }: { schema: T; path: BasePath }) {
     this.path = path
@@ -34,15 +33,16 @@ export class FieldPath<T extends z.ZodTypeAny = z.ZodTypeAny> {
     if (Array.isArray(key)) {
       return key.reduce((field, key) => field.get(key), this)
     }
-    // const cached = this.subfields?.get(key)
-    // if (cached) return cached
+    const cached = this.subfields?.get(key)
+    if (cached) return cached
     const schema = subschema(this.schema, key)
     if (!schema) throw new Error(`invalid subschema key: ${key}`)
     const subfield = new FieldPath({
       path: [...this.path, key] as any,
       schema: schema as any,
     })
-    // this.subfields?.set(key, subfield)
+    if (this.subfields == null) this.subfields = new Map()
+    this.subfields.set(key, subfield)
     return subfield
   }
 }
