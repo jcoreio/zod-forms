@@ -28,7 +28,7 @@ export function createFormMiddleware<T extends z.ZodTypeAny>(): Middleware<
       } = nextState
       const submitPromise = (async () => {
         if (nextState.validationError) throw nextState.validationError
-        await onSubmit?.(values, { initialValues })
+        for (const fn of onSubmit) await fn(values, { initialValues })
       })()
       store.dispatch(
         setSubmitStatus({
@@ -42,12 +42,12 @@ export function createFormMiddleware<T extends z.ZodTypeAny>(): Middleware<
         })
       )
       submitPromise.then(
-        () => {
+        async () => {
           if (store.getState().submitPromise !== submitPromise) return
           store.dispatch(submitSucceeded())
-          onSubmitSucceeded?.()
+          for (const fn of onSubmitSucceeded) await fn()
         },
-        (error) => {
+        async (error) => {
           if (store.getState().submitPromise !== submitPromise) return
           store.dispatch(
             setSubmitStatus({
@@ -58,7 +58,7 @@ export function createFormMiddleware<T extends z.ZodTypeAny>(): Middleware<
               submitPromise: undefined,
             })
           )
-          onSubmitFailed?.(error)
+          for (const fn of onSubmitFailed) await fn(error)
         }
       )
     }

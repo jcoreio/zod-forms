@@ -5,10 +5,11 @@ import { SetValueAction } from './actions/setValue'
 import { SetRawValueAction } from './actions/setRawValue'
 import { SetMetaAction } from './actions/setMeta'
 import { FieldPath } from './FieldPath'
-import { SetHandlersAction } from './actions/setHandlers'
 import { SubmitAction } from './actions/submit'
 import { SubmitSucceededAction } from './actions/submitSucceeded'
 import { SetSubmitStatusAction } from './actions/setSubmitStatus'
+import { AddHandlersAction } from './actions/addHandlers'
+import { RemoveHandlersAction } from './actions/removeHandlers'
 
 export type FormAction<T extends z.ZodTypeAny> =
   | SetMountedAction
@@ -16,7 +17,8 @@ export type FormAction<T extends z.ZodTypeAny> =
   | SetValueAction<FieldPath>
   | SetRawValueAction<FieldPath>
   | SetMetaAction<FieldPath>
-  | SetHandlersAction<T>
+  | AddHandlersAction<T>
+  | RemoveHandlersAction<T>
   | SubmitAction
   | SubmitSucceededAction
   | SetSubmitStatusAction<T>

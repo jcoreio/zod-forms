@@ -12,10 +12,11 @@ import { setValue } from './actions/setValue'
 import { FormContext, FormContextProps } from './FormContext'
 import { FormStateContext } from './FormStateContext'
 import { createFormMiddleware } from './createFormMiddleware'
-import { setHandlers } from './actions/setHandlers'
 import { submit } from './actions/submit'
 import { setSubmitStatus } from './actions/setSubmitStatus'
 import { setMeta } from './actions/setMeta'
+import { addHandlers } from './actions/addHandlers'
+import { removeHandlers } from './actions/removeHandlers'
 
 export const createFormProvider = <T extends z.ZodTypeAny>(
   props: Pick<
@@ -51,7 +52,8 @@ export const createFormProvider = <T extends z.ZodTypeAny>(
         ...bindActionCreators(
           {
             initialize: initialize<T>,
-            setHandlers: setHandlers<T>,
+            addHandlers: addHandlers<T>,
+            removeHandlers: removeHandlers<T>,
             submit,
             setSubmitStatus: setSubmitStatus<T>,
             setMeta: setMeta as any,

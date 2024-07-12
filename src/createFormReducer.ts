@@ -20,14 +20,39 @@ export function createFormReducer<T extends z.ZodTypeAny>({
     switch (action.type) {
       case 'setMounted':
         return { ...state, mounted: action.mounted }
-      case 'setHandlers': {
-        const {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          type,
-          ...handlers
-        } = action
-        return { ...state, ...handlers }
+      case 'addHandlers': {
+        const { onSubmit, onSubmitSucceeded, onSubmitFailed } = action
+        return {
+          ...state,
+          ...(onSubmit && { onSubmit: setAdd(state.onSubmit, onSubmit) }),
+          ...(onSubmitSucceeded && {
+            onSubmitSucceeded: setAdd(
+              state.onSubmitSucceeded,
+              onSubmitSucceeded
+            ),
+          }),
+          ...(onSubmitFailed && {
+            onSubmitFailed: setAdd(state.onSubmitFailed, onSubmitFailed),
+          }),
+        }
       }
+      case 'removeHandlers': {
+        const { onSubmit, onSubmitSucceeded, onSubmitFailed } = action
+        return {
+          ...state,
+          ...(onSubmit && { onSubmit: setDelete(state.onSubmit, onSubmit) }),
+          ...(onSubmitSucceeded && {
+            onSubmitSucceeded: setDelete(
+              state.onSubmitSucceeded,
+              onSubmitSucceeded
+            ),
+          }),
+          ...(onSubmitFailed && {
+            onSubmitFailed: setDelete(state.onSubmitFailed, onSubmitFailed),
+          }),
+        }
+      }
+
       case 'setSubmitStatus': {
         const {
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -169,4 +194,18 @@ export function createFormReducer<T extends z.ZodTypeAny>({
     }
     return state
   }
+}
+
+function setAdd<T>(set: Set<T>, elem: T) {
+  if (set.has(elem)) return set
+  set = new Set(set)
+  set.add(elem)
+  return set
+}
+
+function setDelete<T>(set: Set<T>, elem: T) {
+  if (!set.has(elem)) return set
+  set = new Set(set)
+  set.delete(elem)
+  return set
 }

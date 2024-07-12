@@ -1,5 +1,10 @@
 export { createZodForm, type ZodForm } from './createZodForm'
-export { type FieldMeta } from './FormState'
+export {
+  type FieldMeta,
+  type SubmitHandler,
+  type SubmitSuccededHandler,
+  type SubmitFailedHandler,
+} from './FormState'
 export {
   FieldPath,
   type FieldPathForValue,
