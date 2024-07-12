@@ -26,6 +26,7 @@ const schema = z
     min: numberFromText.finite(),
     max: numberFromText.finite(),
     optionalNumber: z.number().optional(),
+    numberInput: z.number().optional(),
     requireMinLteMax: z.boolean().optional(),
     nested: z.object({ foo: numberFromText.optional() }).optional(),
     bigint: z.bigint().optional(),
@@ -117,13 +118,28 @@ function App2() {
             field={form.get('requireMinLteMax')}
           />
         </Box>
-
         <FormTextField
           field={form.get('optionalNumber')}
           type="tel"
           label="Optional Number"
         />
         <FormTextField field={form.get('bigint')} type="tel" label="BigInt" />
+        <Box sx={{ mt: 2 }}>
+          <FormTextField
+            field={form.get('numberInput')}
+            type="number"
+            label='type="number"'
+          />
+          <FormTextField
+            field={form.get('numberInput')}
+            type="text"
+            label='inputmode="numeric"'
+            inputProps={{
+              inputMode: 'numeric',
+              pattern: '[0-9]*',
+            }}
+          />
+        </Box>
         <Box sx={{ mt: 2 }}>
           <Button disabled={pristine || submitting} type="submit">
             Submit
