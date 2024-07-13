@@ -1,6 +1,6 @@
 # @jcoreio/zod-forms
 
-React form library based upon zod schemas
+A more seamless way to build React forms from Zod schemas
 
 (not published yet)
 
@@ -9,6 +9,25 @@ React form library based upon zod schemas
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 [![npm version](https://badge.fury.io/js/%40jcoreio%2Fzod-forms.svg)](https://badge.fury.io/js/%40jcoreio%2Fzod-forms)
+
+# Features
+
+- 100% typesafe paths, input and output types for deeply nested fields
+- Supports `z.string().optional()`, `z.string().nullable()`, `z.number()` etc in inputs out of the box
+- Interprets blank inputs as `undefined` or `null` by default, depending on what the field schema
+  accepts
+- Normalizes inputs on blur by default (e.g. with `z.string().blur()` you'll see the trim on blur)
+- Supports Zod schemas with different input and output types (as long as you use
+  `zod-invertible` to specify how to format from output back to input)
+- Allows you to programmatically set either input or output values
+- Each step of a wizard form can declare its own submit handler independent from the enclosing
+  `<form>` element. This enables animated transitions between steps without a separate
+  `<form>`s or submit button for each step.
+
+# Limitations
+
+- Designed specifically for Zod and React only
+- Not as focused on high performance/large form state as `final-form` or `react-hooks-form`
 
 # Quickstart
 
