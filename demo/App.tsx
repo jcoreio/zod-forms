@@ -6,8 +6,8 @@ import {
   useHtmlField,
   useFormStatus,
   FieldPathForRawValue,
-  useField,
   useFormContext,
+  useArrayField,
 } from '../src/index'
 import {
   Paper,
@@ -227,7 +227,7 @@ function ArrayField({
 }: {
   field: FieldPath<SchemaAt<typeof schema, ['array']>>
 }) {
-  const { rawValue, remove } = useField(field)
+  const { rawValue, remove } = useArrayField(field)
   return (
     <List>
       {rawValue?.map((v, index) => (

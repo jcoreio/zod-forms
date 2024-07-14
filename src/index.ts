@@ -11,6 +11,11 @@ export {
   type FieldPathForRawValue,
 } from './FieldPath'
 export { useField, type UseFieldProps, type TypedUseField } from './useField'
+export {
+  useArrayField,
+  type UseArrayFieldProps,
+  type TypedUseArrayField,
+} from './useArrayField'
 export { type FormContext } from './FormContext'
 export { useFormContext } from './useFormContext'
 export { type FormStatus } from './createSelectFormStatus'
