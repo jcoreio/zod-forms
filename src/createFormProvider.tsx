@@ -63,7 +63,7 @@ export const createFormProvider = <T extends z.ZodTypeAny>(
           },
           dispatch
         ),
-        array: bindActionCreators(arrayActions, dispatch),
+        arrayActions: bindActionCreators(arrayActions, dispatch),
       }),
       []
     )

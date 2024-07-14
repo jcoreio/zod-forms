@@ -29,7 +29,7 @@ export type FormContextProps<T extends z.ZodTypeAny> = {
   setValue: typeof setValue
   submit: typeof submit
   setSubmitStatus: typeof setSubmitStatus<T>
-  array: typeof arrayActions
+  arrayActions: typeof arrayActions
   selectFormStatus: SelectFormStatus
   selectFieldErrorMap: SelectFieldErrorMap
   selectFormValues: SelectFormValues<T>

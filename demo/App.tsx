@@ -109,7 +109,7 @@ function App2() {
   const { submitting, pristine } = useFormStatus()
 
   const {
-    array: { pushRaw },
+    arrayActions: { pushRaw },
   } = useFormContext<typeof schema>()
 
   return (
@@ -227,10 +227,7 @@ function ArrayField({
 }: {
   field: FieldPath<SchemaAt<typeof schema, ['array']>>
 }) {
-  const { rawValue } = useField(field)
-  const {
-    array: { remove },
-  } = useFormContext<typeof schema>()
+  const { rawValue, remove } = useField(field)
   return (
     <List>
       {rawValue?.map((v, index) => (
@@ -246,7 +243,7 @@ function ArrayField({
             placeholder="Display Text"
           />
           <Box sx={{ flexGrow: 1 }} />
-          <IconButton sx={{ mt: 1 }} onClick={() => remove(field, index)}>
+          <IconButton sx={{ mt: 1 }} onClick={() => remove(index)}>
             <Remove />
           </IconButton>
         </ListItem>

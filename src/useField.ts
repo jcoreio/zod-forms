@@ -23,8 +23,10 @@ import isEqual from 'fast-deep-equal'
 import { PathInSchema, PathstringInSchema } from './util/PathInSchema'
 import { parsePathstring } from './util/parsePathstring'
 import { SchemaAt } from './util/SchemaAt'
+import { arrayActions } from './actions/arrayActions'
+import { acceptsArray } from './util/acceptsArray'
 
-export type UseFieldProps<Field extends FieldPath> = FieldMeta &
+type BaseUseFieldProps<Field extends FieldPath> = FieldMeta &
   FormStatus & {
     value: z.output<Field['schema']> | undefined
     rawValue: z.input<Field['schema']> | undefined
@@ -43,6 +45,21 @@ export type UseFieldProps<Field extends FieldPath> = FieldMeta &
     invalid: boolean
   }
 
+export type InternalUseFieldProps<Field extends FieldPath> =
+  BaseUseFieldProps<Field> & {
+    [K in keyof typeof arrayActions]?: (typeof arrayActions)[K] extends (
+      field: FieldPath,
+      ...rest: infer Rest
+    ) => infer Return
+      ? (...rest: Rest) => Return
+      : never
+  }
+
+export type UseFieldProps<Field extends FieldPath> = BaseUseFieldProps<Field> &
+  (NonNullable<z.input<Field['schema']>> extends any[]
+    ? ReturnType<typeof bindActionsToField<typeof arrayActions>>
+    : unknown)
+
 export interface TypedUseField<T extends z.ZodTypeAny> {
   <Field extends FieldPath>(field: Field): UseFieldProps<Field>
   <Path extends PathInSchema<T>>(path: Path): UseFieldProps<
@@ -58,8 +75,17 @@ function useFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
 ): UseFieldProps<Field> {
   type Schema = Field['schema']
 
-  const { selectFormValues, selectFieldErrorMap } = useFormContext<T>()
+  const { selectFormValues, selectFieldErrorMap, arrayActions } =
+    useFormContext<T>()
   const status = useFormStatus()
+
+  const boundArrayActions = React.useMemo(
+    () =>
+      acceptsArray(field.schema)
+        ? bindActionsToField(arrayActions, field)
+        : undefined,
+    [field.pathstring]
+  )
 
   const dispatch = useFormDispatch<T>()
   const useFormSelector = untypedUseFormSelector as TypedUseFormSelector<T>
@@ -115,19 +141,20 @@ function useFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
   )
 
   return React.useMemo(
-    () => ({
+    (): InternalUseFieldProps<Field> => ({
       setValue,
       setRawValue,
       setMeta,
       error,
+      ...boundArrayActions,
       ...values,
       ...status,
+      ...meta,
       valid: !error,
       invalid: Boolean(error),
-      ...meta,
     }),
-    [field.pathstring, values, status, meta, error]
-  )
+    [field.pathstring, values, status, meta, error, boundArrayActions]
+  ) as any
 }
 
 export function useField<Field extends FieldPath>(
@@ -149,4 +176,25 @@ export function useField<T extends z.ZodTypeAny>(
   return useFieldBase(
     field instanceof FieldPath ? field : root.get(field as any)
   )
+}
+
+function bindActionsToField<
+  Actions extends { [K in string]: (field: FieldPath, ...rest: any[]) => any }
+>(
+  actions: Actions,
+  field: FieldPath
+): {
+  [K in keyof Actions]: Actions[K] extends (
+    field: FieldPath,
+    ...rest: infer Rest
+  ) => infer Return
+    ? (...rest: Rest) => Return
+    : never
+} {
+  return Object.fromEntries(
+    Object.entries(actions).map(([key, action]: any) => [
+      key,
+      (...args: any[]) => action(field, ...args),
+    ])
+  ) as any
 }
