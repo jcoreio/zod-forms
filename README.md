@@ -27,7 +27,7 @@ A more seamless way to build React forms from Zod schemas
 # Limitations
 
 - Designed specifically for Zod and React only
-- Not as focused on high performance/large form state as `final-form` or `react-hooks-form`
+- Not currently focused on high performance/large form state like `final-form` or `react-hooks-form`
 
 # Quickstart
 

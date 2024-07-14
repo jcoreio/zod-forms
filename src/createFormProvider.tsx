@@ -17,6 +17,7 @@ import { setSubmitStatus } from './actions/setSubmitStatus'
 import { setMeta } from './actions/setMeta'
 import { addHandlers } from './actions/addHandlers'
 import { removeHandlers } from './actions/removeHandlers'
+import { arrayActions } from './actions/arrayActions'
 
 export const createFormProvider = <T extends z.ZodTypeAny>(
   props: Pick<
@@ -62,6 +63,7 @@ export const createFormProvider = <T extends z.ZodTypeAny>(
           },
           dispatch
         ),
+        array: bindActionCreators(arrayActions, dispatch),
       }),
       []
     )

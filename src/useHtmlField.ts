@@ -1,11 +1,14 @@
 import z from 'zod'
-import { BasePath, FieldPath, SchemaAt } from './FieldPath'
+import { BasePath, FieldPath } from './FieldPath'
 import { useField, TypedUseField, UseFieldProps } from './useField'
 import React, { HTMLInputTypeAttribute } from 'react'
 import { invert } from 'zod-invertible'
 import { useFormContext } from './useFormContext'
 import { acceptsNumber } from './util/acceptsNumber'
 import { acceptsBigint } from './util/acceptsBigint'
+import { PathInSchema, PathstringInSchema } from './util/PathInSchema'
+import { parsePathstring } from './util/parsePathstring'
+import { SchemaAt } from './util/SchemaAt'
 
 export type HtmlFieldInputProps = {
   name: string
@@ -45,9 +48,12 @@ export interface TypedUseHtmlField<T extends z.ZodTypeAny> {
   <Field extends FieldPath>(
     options: UseHtmlFieldOptions<Field, Field['schema']>
   ): UseHtmlFieldProps<Field>
-  <Path extends BasePath>(
+  <Path extends PathInSchema<T>>(
     options: UseHtmlFieldOptions<Path, SchemaAt<T, Path>>
   ): UseHtmlFieldProps<FieldPath<SchemaAt<T, Path>>>
+  <Path extends PathstringInSchema<T>>(
+    options: UseHtmlFieldOptions<Path, SchemaAt<T, parsePathstring<Path>>>
+  ): UseHtmlFieldProps<FieldPath<SchemaAt<T, parsePathstring<Path>>>>
 }
 
 function useHtmlFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
@@ -200,9 +206,18 @@ function normalizeRawValue(
 export function useHtmlField<Field extends FieldPath>(
   options: UseHtmlFieldOptions<Field, Field['schema']>
 ): UseHtmlFieldProps<Field>
-export function useHtmlField<T extends z.ZodTypeAny, Path extends BasePath>(
+export function useHtmlField<
+  T extends z.ZodTypeAny,
+  Path extends PathInSchema<T>
+>(
   options: UseHtmlFieldOptions<Path, SchemaAt<T, Path>>
 ): UseHtmlFieldProps<FieldPath<SchemaAt<T, Path>>>
+export function useHtmlField<
+  T extends z.ZodTypeAny,
+  Path extends PathstringInSchema<T>
+>(
+  options: UseHtmlFieldOptions<Path, SchemaAt<T, parsePathstring<Path>>>
+): UseHtmlFieldProps<FieldPath<SchemaAt<T, parsePathstring<Path>>>>
 export function useHtmlField({
   field,
   ...rest
@@ -212,7 +227,7 @@ export function useHtmlField({
 >): UseHtmlFieldProps<any> {
   const { root } = useFormContext()
   return useHtmlFieldBase({
-    field: Array.isArray(field) ? root.get(...(field as any)) : field,
+    field: field instanceof FieldPath ? field : root.get(field),
     ...rest,
   })
 }

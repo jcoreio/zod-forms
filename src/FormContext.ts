@@ -12,6 +12,7 @@ import { SelectFormStatus } from './createSelectFormStatus'
 import { setMeta } from './actions/setMeta'
 import { addHandlers } from './actions/addHandlers'
 import { removeHandlers } from './actions/removeHandlers'
+import { arrayActions } from './actions/arrayActions'
 
 export const FormContext =
   React.createContext<FormContextProps<z.ZodTypeAny> | null>(null)
@@ -28,6 +29,7 @@ export type FormContextProps<T extends z.ZodTypeAny> = {
   setValue: typeof setValue
   submit: typeof submit
   setSubmitStatus: typeof setSubmitStatus<T>
+  array: typeof arrayActions
   selectFormStatus: SelectFormStatus
   selectFieldErrorMap: SelectFieldErrorMap
   selectFormValues: SelectFormValues<T>

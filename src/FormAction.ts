@@ -10,6 +10,7 @@ import { SubmitSucceededAction } from './actions/submitSucceeded'
 import { SetSubmitStatusAction } from './actions/setSubmitStatus'
 import { AddHandlersAction } from './actions/addHandlers'
 import { RemoveHandlersAction } from './actions/removeHandlers'
+import { ArrayAction } from './actions/arrayActions'
 
 export type FormAction<T extends z.ZodTypeAny> =
   | SetMountedAction
@@ -22,3 +23,4 @@ export type FormAction<T extends z.ZodTypeAny> =
   | SubmitAction
   | SubmitSucceededAction
   | SetSubmitStatusAction<T>
+  | ArrayAction

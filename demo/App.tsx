@@ -6,6 +6,8 @@ import {
   useHtmlField,
   useFormStatus,
   FieldPathForRawValue,
+  useField,
+  useFormContext,
 } from '../src/index'
 import {
   Paper,
@@ -17,7 +19,13 @@ import {
   FormHelperText,
   Box,
   Button,
+  Typography,
+  List,
+  ListItem,
+  IconButton,
 } from '@mui/material'
+import { Add, Remove } from '@mui/icons-material'
+import { SchemaAt } from '../src/util/SchemaAt'
 
 const schema = z
   .object({
@@ -28,8 +36,13 @@ const schema = z
     optionalNumber: z.number().optional(),
     numberInput: z.number().optional(),
     requireMinLteMax: z.boolean().optional(),
-    nested: z.object({ foo: z.number().optional() }).optional(),
+    nested: z
+      .object({ foo: z.array(z.number().optional()).optional() })
+      .optional(),
     bigint: z.bigint().optional(),
+    array: z
+      .array(z.object({ value: z.number(), displayText: z.string() }))
+      .optional(),
   })
   .superRefine((obj, ctx) => {
     if (
@@ -95,9 +108,13 @@ function App2() {
 
   const { submitting, pristine } = useFormStatus()
 
+  const {
+    array: { pushRaw },
+  } = useFormContext<typeof schema>()
+
   return (
     <form onSubmit={onSubmit}>
-      <Paper sx={{ width: 600, p: 2 }}>
+      <Paper sx={{ maxWidth: 600, p: 2, margin: '32px auto' }}>
         <Box sx={{ mb: 2 }}>
           <FormTextField
             field={form.get('trimString')}
@@ -143,6 +160,21 @@ function App2() {
           />
         </Box>
         <Box sx={{ mt: 2 }}>
+          <FormTextField
+            field={form.get('nested.foo[0]')}
+            type="tel"
+            label="nested.foo[0]"
+          />
+          <FormTextField field={form.get('bigint')} type="tel" label="BigInt" />
+        </Box>
+        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
+          <Typography variant="h6">Array</Typography>
+          <IconButton onClick={() => pushRaw(form.get('array'), {} as any)}>
+            <Add />
+          </IconButton>
+        </Box>
+        <ArrayField field={form.get('array')} />
+        <Box sx={{ mt: 2 }}>
           <Button disabled={pristine || submitting} type="submit">
             Submit
           </Button>
@@ -187,5 +219,38 @@ function FormSwitchField({
       </FormGroup>
       {error ? <FormHelperText>{error}</FormHelperText> : null}
     </FormControl>
+  )
+}
+
+function ArrayField({
+  field,
+}: {
+  field: FieldPath<SchemaAt<typeof schema, ['array']>>
+}) {
+  const { rawValue } = useField(field)
+  const {
+    array: { remove },
+  } = useFormContext<typeof schema>()
+  return (
+    <List>
+      {rawValue?.map((v, index) => (
+        <ListItem key={index} sx={{ pl: 0, pr: 0, alignItems: 'flex-start' }}>
+          <FormTextField
+            field={field.get([index, 'value'])}
+            type="text"
+            placeholder="Value"
+          />
+          <FormTextField
+            field={field.get([index, 'displayText'])}
+            type="text"
+            placeholder="Display Text"
+          />
+          <Box sx={{ flexGrow: 1 }} />
+          <IconButton sx={{ mt: 1 }} onClick={() => remove(field, index)}>
+            <Remove />
+          </IconButton>
+        </ListItem>
+      ))}
+    </List>
   )
 }

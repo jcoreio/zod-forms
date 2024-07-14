@@ -1,5 +1,5 @@
 import z from 'zod'
-import { BasePath, FieldPath, SchemaAt } from './FieldPath'
+import { BasePath, FieldPath } from './FieldPath'
 import { FieldMeta } from './FormState'
 import { get } from './util/get'
 import React from 'react'
@@ -20,6 +20,9 @@ import { createSelector } from 'reselect'
 import { shallowEqual } from 'react-redux'
 import { FormStatus } from './createSelectFormStatus'
 import isEqual from 'fast-deep-equal'
+import { PathInSchema, PathstringInSchema } from './util/PathInSchema'
+import { parsePathstring } from './util/parsePathstring'
+import { SchemaAt } from './util/SchemaAt'
 
 export type UseFieldProps<Field extends FieldPath> = FieldMeta &
   FormStatus & {
@@ -42,8 +45,11 @@ export type UseFieldProps<Field extends FieldPath> = FieldMeta &
 
 export interface TypedUseField<T extends z.ZodTypeAny> {
   <Field extends FieldPath>(field: Field): UseFieldProps<Field>
-  <Path extends BasePath>(...path: Path): UseFieldProps<
+  <Path extends PathInSchema<T>>(path: Path): UseFieldProps<
     FieldPath<SchemaAt<T, Path>>
+  >
+  <Pathstring extends PathstringInSchema<T>>(path: Pathstring): UseFieldProps<
+    FieldPath<SchemaAt<T, parsePathstring<Pathstring>>>
   >
 }
 
@@ -95,16 +101,16 @@ function useFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
     (
       value: z.output<Schema>,
       options?: Omit<SetValueAction<Field>, 'type' | 'field' | 'value'>
-    ) => dispatch(_setValue<Field>({ field, value, ...options })),
+    ) => dispatch(_setValue<Field>(field, value, options)),
     [field.pathstring]
   )
   const setRawValue = React.useCallback(
     (rawValue: z.input<Schema>) =>
-      dispatch(_setRawValue<Field>({ field, rawValue })),
+      dispatch(_setRawValue<Field>(field, rawValue)),
     [field.pathstring]
   )
   const setMeta = React.useCallback(
-    (meta: Partial<FieldMeta>) => dispatch(_setMeta<Field>({ field, meta })),
+    (meta: Partial<FieldMeta>) => dispatch(_setMeta<Field>(field, meta)),
     [field.pathstring]
   )
 
@@ -127,14 +133,20 @@ function useFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
 export function useField<Field extends FieldPath>(
   field: Field
 ): UseFieldProps<Field>
-export function useField<T extends z.ZodTypeAny, Path extends BasePath>(
-  ...field: Path
+export function useField<T extends z.ZodTypeAny, Path extends PathInSchema<T>>(
+  field: Path
 ): UseFieldProps<FieldPath<SchemaAt<T, Path>>>
+export function useField<
+  T extends z.ZodTypeAny,
+  Pathstring extends PathstringInSchema<T>
+>(
+  field: Pathstring
+): UseFieldProps<FieldPath<SchemaAt<T, parsePathstring<Pathstring>>>>
 export function useField<T extends z.ZodTypeAny>(
-  ...field: [FieldPath] | BasePath
+  field: FieldPath | BasePath | string
 ): UseFieldProps<any> {
   const { root } = useFormContext<T>()
   return useFieldBase(
-    field[0] instanceof FieldPath ? field[0] : root.get(...(field as any))
+    field instanceof FieldPath ? field : root.get(field as any)
   )
 }

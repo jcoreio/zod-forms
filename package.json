@@ -38,6 +38,7 @@
     "@jcoreio/toolchain-react": "^4.6.1",
     "@jcoreio/toolchain-semantic-release": "^4.6.1",
     "@jcoreio/toolchain-typescript": "^4.6.1",
+    "@mui/icons-material": "^5.16.1",
     "@mui/material": "^5.16.0",
     "@rsbuild/core": "1.0.0-alpha.7",
     "@rsbuild/plugin-react": "1.0.0-alpha.7",

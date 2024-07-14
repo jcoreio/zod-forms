@@ -5,12 +5,13 @@ export type SetMetaAction<Field extends FieldPath> = ReturnType<
   typeof setMeta<Field>
 >
 
-export function setMeta<Field extends FieldPath>(props: {
-  field: Field
+export function setMeta<Field extends FieldPath>(
+  field: Field,
   meta: Partial<FieldMeta>
-}) {
+) {
   return {
     type: 'setMeta',
-    ...props,
+    field,
+    meta,
   } as const
 }

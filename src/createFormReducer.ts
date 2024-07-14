@@ -3,209 +3,89 @@ import z from 'zod'
 import { FormAction } from './FormAction'
 import { FormState } from './FormState'
 import { initFormState } from './initFormState'
-import { set } from './util/set'
-import { invert } from 'zod-invertible'
+import { addHandlersReducer } from './reducers/addHandlers'
+import { removeHandlersReducer } from './reducers/removeHandlers'
+import { createSetValueReducer } from './reducers/setValue'
+import { createSetRawValueReducer } from './reducers/setRawValue'
+import { setMetaReducer } from './reducers/setMeta'
+import { submitSucceededReducer } from './reducers/submitSucceeded'
+import { setSubmitStatusReducer } from './reducers/setSubmitStatus'
+import { createInitializeReducer } from './reducers/initialize'
+import { arrayPopReducer } from './reducers/arrayPop'
+import { arrayMoveReducer } from './reducers/arrayMove'
+import { arrayRemoveReducer } from './reducers/arrayRemove'
+import { arrayRemoveAllReducer } from './reducers/arrayRemoveAll'
+import { arrayShiftReducer } from './reducers/arrayShift'
+import { arraySwapReducer } from './reducers/arraySwap'
+import { arrayPushRawReducer } from './reducers/arrayPushRaw'
+import { arrayInsertRawReducer } from './reducers/arrayInsertRaw'
+import { arraySpliceRawReducer } from './reducers/arraySpliceRaw'
+import { arrayUnshiftRawReducer } from './reducers/arrayUnshiftRaw'
+import { arrayPushReducer } from './reducers/arrayPush'
+import { arrayUnshiftReducer } from './reducers/arrayUnshift'
+import { arrayInsertReducer } from './reducers/arrayInsert'
+import { arraySpliceReducer } from './reducers/arraySplice'
 
-export function createFormReducer<T extends z.ZodTypeAny>({
-  schema,
-  inverseSchema,
-}: {
+export function createFormReducer<T extends z.ZodTypeAny>(options: {
   schema: T
   inverseSchema: z.ZodType<z.input<T>, any, z.output<T>>
 }): Reducer<FormState<T>, FormAction<T>> {
-  return (
+  const initializeReducer = createInitializeReducer(options)
+  const setValueReducer = createSetValueReducer(options)
+  const setRawValueReducer = createSetRawValueReducer(options)
+  const formReducer = (
     state: FormState<T> = initFormState(),
     action: FormAction<T>
   ): FormState<T> => {
     switch (action.type) {
       case 'setMounted':
         return { ...state, mounted: action.mounted }
-      case 'addHandlers': {
-        const { onSubmit, onSubmitSucceeded, onSubmitFailed } = action
-        return {
-          ...state,
-          ...(onSubmit && { onSubmit: setAdd(state.onSubmit, onSubmit) }),
-          ...(onSubmitSucceeded && {
-            onSubmitSucceeded: setAdd(
-              state.onSubmitSucceeded,
-              onSubmitSucceeded
-            ),
-          }),
-          ...(onSubmitFailed && {
-            onSubmitFailed: setAdd(state.onSubmitFailed, onSubmitFailed),
-          }),
-        }
-      }
-      case 'removeHandlers': {
-        const { onSubmit, onSubmitSucceeded, onSubmitFailed } = action
-        return {
-          ...state,
-          ...(onSubmit && { onSubmit: setDelete(state.onSubmit, onSubmit) }),
-          ...(onSubmitSucceeded && {
-            onSubmitSucceeded: setDelete(
-              state.onSubmitSucceeded,
-              onSubmitSucceeded
-            ),
-          }),
-          ...(onSubmitFailed && {
-            onSubmitFailed: setDelete(state.onSubmitFailed, onSubmitFailed),
-          }),
-        }
-      }
-
-      case 'setSubmitStatus': {
-        const {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          type,
-          ...status
-        } = action
-        return { ...state, ...status }
-      }
-      case 'submitSucceeded': {
-        return {
-          ...state,
-          submitting: false,
-          submitSucceeded: true,
-          submitFailed: false,
-          submitError: undefined,
-          submitPromise: undefined,
-          initialValues: state.submittedValues,
-          rawInitialValues: state.rawSubmittedValues,
-        }
-      }
-      case 'setValue': {
-        const newValues = set(state.values, action.field.path, action.value)
-        try {
-          const newRawValues = inverseSchema.parse(newValues)
-          schema.parse(newRawValues)
-          return {
-            ...state,
-            submitError: undefined,
-            validationError: undefined,
-            rawValues: newRawValues,
-            values: newValues,
-          }
-        } catch (error) {
-          const newRawParsed = invert(action.field.schema).safeParse(
-            action.value
-          )
-          const rawValues = newRawParsed.success
-            ? set(state.rawValues, action.field.path, newRawParsed.data)
-            : state.rawValues
-          const newParsed = schema.safeParse(rawValues)
-          const result = {
-            ...state,
-            submitError: undefined,
-            validationError: !newRawParsed.success
-              ? newRawParsed.error
-              : newParsed.success
-              ? undefined
-              : newParsed.error,
-            rawValues,
-            values: newParsed.success ? newParsed.data : state.values,
-          }
-          return result
-        }
-      }
-      case 'setRawValue': {
-        const newRawValues = set(
-          state.rawValues,
-          action.field.path,
-          action.rawValue
-        )
-        if (newRawValues === state.rawValues) return state
-        try {
-          const newValues = schema.parse(newRawValues)
-          return {
-            ...state,
-            submitError: undefined,
-            validationError: undefined,
-            rawValues: newRawValues,
-            values: newValues,
-          }
-        } catch (error) {
-          return {
-            ...state,
-            submitError: undefined,
-            validationError: error,
-            rawValues: newRawValues,
-            values: undefined,
-          }
-        }
-      }
-      case 'setMeta': {
-        const { field, meta } = action
-        const oldMeta = state.fieldMeta[field.pathstring]
-        if (
-          Object.entries(meta).every(([key, value]) =>
-            Object.is(value, (oldMeta as any)?.[key])
-          )
-        ) {
-          return state
-        }
-        return {
-          ...state,
-          fieldMeta: {
-            ...state.fieldMeta,
-            [field.pathstring]: { ...oldMeta, ...meta },
-          },
-        }
-      }
-      case 'initialize': {
-        const { keepSubmitSucceeded } = action
-        try {
-          const rawValues =
-            action.rawValues ??
-            (action.values ? inverseSchema.parse(action.values) : undefined)
-          const values =
-            action.values ??
-            (action.rawValues ? schema.parse(action.rawValues) : undefined)
-          return {
-            ...state,
-            validationError: undefined,
-            initialized: true,
-            submitting: false,
-            submitFailed: false,
-            submitSucceeded: keepSubmitSucceeded
-              ? state.submitSucceeded
-              : false,
-            rawValues,
-            values,
-            rawInitialValues: rawValues,
-            initialValues: values,
-          }
-        } catch (error) {
-          return {
-            ...state,
-            validationError: error,
-            initialized: true,
-            submitting: false,
-            submitFailed: false,
-            submitSucceeded: keepSubmitSucceeded
-              ? state.submitSucceeded
-              : false,
-            rawValues: action.rawValues,
-            values: action.values,
-            rawInitialValues: action.rawValues,
-            initialValues: action.values,
-          }
-        }
-      }
+      case 'addHandlers':
+        return addHandlersReducer(state, action)
+      case 'removeHandlers':
+        return removeHandlersReducer(state, action)
+      case 'initialize':
+        return initializeReducer(state, action)
+      case 'setSubmitStatus':
+        return setSubmitStatusReducer(state, action)
+      case 'submitSucceeded':
+        return submitSucceededReducer(state)
+      case 'setValue':
+        return setValueReducer(state, action)
+      case 'setRawValue':
+        return setRawValueReducer(state, action)
+      case 'setMeta':
+        return setMetaReducer(state, action)
+      case 'arrayInsert':
+        return arrayInsertReducer(formReducer, state, action)
+      case 'arrayInsertRaw':
+        return arrayInsertRawReducer(formReducer, state, action)
+      case 'arrayMove':
+        return arrayMoveReducer(formReducer, state, action)
+      case 'arrayPop':
+        return arrayPopReducer(formReducer, state, action)
+      case 'arrayPush':
+        return arrayPushReducer(formReducer, state, action)
+      case 'arrayPushRaw':
+        return arrayPushRawReducer(formReducer, state, action)
+      case 'arrayRemove':
+        return arrayRemoveReducer(formReducer, state, action)
+      case 'arrayRemoveAll':
+        return arrayRemoveAllReducer(formReducer, state, action)
+      case 'arrayShift':
+        return arrayShiftReducer(formReducer, state, action)
+      case 'arraySplice':
+        return arraySpliceReducer(formReducer, state, action)
+      case 'arraySpliceRaw':
+        return arraySpliceRawReducer(formReducer, state, action)
+      case 'arraySwap':
+        return arraySwapReducer(formReducer, state, action)
+      case 'arrayUnshift':
+        return arrayUnshiftReducer(formReducer, state, action)
+      case 'arrayUnshiftRaw':
+        return arrayUnshiftRawReducer(formReducer, state, action)
     }
     return state
   }
-}
-
-function setAdd<T>(set: Set<T>, elem: T) {
-  if (set.has(elem)) return set
-  set = new Set(set)
-  set.add(elem)
-  return set
-}
-
-function setDelete<T>(set: Set<T>, elem: T) {
-  if (!set.has(elem)) return set
-  set = new Set(set)
-  set.delete(elem)
-  return set
+  return formReducer
 }
