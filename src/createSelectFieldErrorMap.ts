@@ -34,8 +34,9 @@ function isZodError(error: any): error is z.ZodError {
  */
 function messageForIssue(issue: z.ZodIssue): string {
   if (issue.code === 'invalid_type') {
-    return issue.received === 'null'
+    return issue.received === 'null' || issue.received === 'undefined'
       ? // Without this, the error would say "Expected <type>, received null"
+        // or "Invalid number" as below
         'Required'
       : issue.expected === 'number' || issue.expected === 'bigint'
       ? // Without this, invalid text input for z.number() would say "Expected number, received string"
