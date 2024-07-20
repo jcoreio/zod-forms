@@ -227,18 +227,18 @@ function ArrayField({
 }: {
   field: FieldPath<SchemaAt<typeof schema, ['array']>>
 }) {
-  const { rawValue, remove } = useArrayField(field)
+  const { elements, remove } = useArrayField(field)
   return (
     <List>
-      {rawValue?.map((v, index) => (
+      {elements.map((element, index) => (
         <ListItem key={index} sx={{ pl: 0, pr: 0, alignItems: 'flex-start' }}>
           <FormTextField
-            field={field.get([index, 'value'])}
+            field={element.get('value')}
             type="text"
             placeholder="Value"
           />
           <FormTextField
-            field={field.get([index, 'displayText'])}
+            field={element.get('displayText')}
             type="text"
             placeholder="Display Text"
           />

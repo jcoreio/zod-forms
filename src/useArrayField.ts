@@ -14,7 +14,9 @@ export type UseArrayFieldProps<Field extends FieldPath> = NonNullable<
   z.input<Field['schema']>
 > extends any[]
   ? UseFieldProps<Field> &
-      ReturnType<typeof bindActionsToField<typeof arrayActions>>
+      ReturnType<typeof bindActionsToField<typeof arrayActions>> & {
+        elements: FieldPath<SchemaAt<Field['schema'], [number]>>[]
+      }
   : { ERROR: 'not an array field' }
 
 export interface TypedUseArrayField<T extends z.ZodTypeAny> {
@@ -38,9 +40,21 @@ function useArrayFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
     () => bindActionsToField(arrayActions, field),
     [field.pathstring]
   )
+  const elements = React.useMemo(() => {
+    const length =
+      useFieldProps.value?.length ??
+      (Array.isArray(useFieldProps.rawValue)
+        ? useFieldProps.rawValue.length
+        : 0)
+    return [...new Array(length).keys()].map((index) =>
+      // @ts-expect-error field isn't fully typed
+      field.subfield(index)
+    )
+  }, [useFieldProps.value, useFieldProps.rawValue])
+
   return React.useMemo(
-    () => ({ ...useFieldProps, ...boundArrayActions }),
-    [useFieldProps, boundArrayActions]
+    () => ({ ...useFieldProps, ...boundArrayActions, elements }),
+    [useFieldProps, boundArrayActions, elements]
   ) as any
 }
 
