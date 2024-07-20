@@ -16,20 +16,21 @@ import {
 } from './useFormSelector'
 import { useFormContext } from './useFormContext'
 import { useFormStatus } from './useFormStatus'
-import { createSelector } from 'reselect'
+import { createSelector, createStructuredSelector } from 'reselect'
 import { shallowEqual } from 'react-redux'
 import { FormStatus } from './createSelectFormStatus'
 import isEqual from 'fast-deep-equal'
 import { PathInSchema, PathstringInSchema } from './util/PathInSchema'
 import { parsePathstring } from './util/parsePathstring'
 import { SchemaAt } from './util/SchemaAt'
+import { maybeParse } from './util/maybeParse'
 
 export type UseFieldProps<Field extends FieldPath> = FieldMeta &
   FormStatus & {
     value: z.output<Field['schema']> | undefined
-    rawValue: z.input<Field['schema']> | undefined
+    rawValue: unknown
     initialValue: z.output<Field['schema']> | undefined
-    rawInitialValue: z.input<Field['schema']> | undefined
+    rawInitialValue: unknown
     setValue: (
       value: z.output<Field['schema']>,
       options?: Omit<SetValueAction<Field>, 'type' | 'field' | 'value'>
@@ -68,24 +69,37 @@ function useFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
     () =>
       createSelector(
         [selectFormValues],
-        ({ values, rawValues, initialValues, rawInitialValues }) => {
-          const value = get(values, field.path) as z.output<Schema> | undefined
-          const initialValue = get(initialValues, field.path) as
-            | z.output<Schema>
-            | undefined
-          const dirty = !isEqual(value, initialValue)
-          const pristine = !dirty
-          return {
-            value,
-            rawValue: get(rawValues, field.path) as z.input<Schema> | undefined,
-            initialValue,
-            rawInitialValue: get(rawInitialValues, field.path) as
-              | z.input<Schema>
-              | undefined,
-            dirty,
-            pristine,
+        createSelector(
+          [
+            createStructuredSelector({
+              value: ({ values }) =>
+                get(values, field.path) as z.output<Schema> | undefined,
+              rawValue: ({ rawValues }) =>
+                get(rawValues, field.path) as unknown,
+              initialValue: ({ initialValues }) =>
+                get(initialValues, field.path) as z.output<Schema> | undefined,
+              rawInitialValue: ({ rawInitialValues }) =>
+                get(rawInitialValues, field.path) as unknown,
+            }),
+          ],
+          ({
+            rawValue,
+            value = maybeParse(field.schema, rawValue),
+            rawInitialValue,
+            initialValue = maybeParse(field.schema, rawInitialValue),
+          }) => {
+            const dirty = !isEqual(value, initialValue)
+            const pristine = !dirty
+            return {
+              value,
+              rawValue,
+              initialValue,
+              rawInitialValue,
+              dirty,
+              pristine,
+            }
           }
-        }
+        )
       ),
     [field.pathstring]
   )
