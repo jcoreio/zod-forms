@@ -41,6 +41,21 @@ export const createFormProvider = <T extends z.ZodTypeAny>(
     const store = storeRef.current
     const { dispatch } = store
 
+    const getValues = React.useCallback(() => store.getState().values, [])
+    const getRawValues = React.useCallback(() => store.getState().rawValues, [])
+    const getInitialValues = React.useCallback(
+      () => store.getState().initialValues,
+      []
+    )
+    const getRawInitialValues = React.useCallback(
+      () => store.getState().rawInitialValues,
+      []
+    )
+    const getStatus = React.useCallback(
+      () => props.selectFormStatus(store.getState()),
+      []
+    )
+
     React.useEffect(
       () => () => {
         store.dispatch(setMounted(false))
@@ -50,6 +65,11 @@ export const createFormProvider = <T extends z.ZodTypeAny>(
     const formContext = React.useMemo(
       (): FormContextProps<T> => ({
         ...props,
+        getValues,
+        getRawValues,
+        getInitialValues,
+        getRawInitialValues,
+        getStatus,
         ...bindActionCreators(
           {
             initialize: initialize<T>,

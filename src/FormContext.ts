@@ -8,7 +8,10 @@ import { submit } from './actions/submit'
 import { setSubmitStatus } from './actions/setSubmitStatus'
 import { SelectFormValues } from './createSelectFormValues'
 import { SelectFieldErrorMap } from './createSelectFieldErrorMap'
-import { SelectFormStatus } from './createSelectFormStatus'
+import {
+  createSelectFormStatus,
+  SelectFormStatus,
+} from './createSelectFormStatus'
 import { setMeta } from './actions/setMeta'
 import { addHandlers } from './actions/addHandlers'
 import { removeHandlers } from './actions/removeHandlers'
@@ -33,4 +36,9 @@ export type FormContextProps<T extends z.ZodTypeAny> = {
   selectFormStatus: SelectFormStatus
   selectFieldErrorMap: SelectFieldErrorMap
   selectFormValues: SelectFormValues<T>
+  getValues: () => z.output<T> | undefined
+  getRawValues: () => z.input<T> | undefined
+  getInitialValues: () => z.output<T> | undefined
+  getRawInitialValues: () => z.input<T> | undefined
+  getStatus: () => ReturnType<ReturnType<typeof createSelectFormStatus>>
 }
