@@ -18,11 +18,11 @@ export type FormState<T extends z.ZodTypeAny> = {
   mounted: boolean
   initialized: boolean
   fieldMeta: Record<string, FieldMeta>
-  rawValues?: z.input<T>
+  rawValues?: unknown
   values?: z.output<T>
   submittedValues?: z.output<T>
   rawSubmittedValues?: z.input<T>
-  rawInitialValues?: z.input<T>
+  rawInitialValues?: unknown
   initialValues?: z.output<T>
   validationError?: any
   submitPromise?: Promise<void>

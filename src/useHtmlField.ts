@@ -79,7 +79,9 @@ function useHtmlFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
   // coerced the raw value to a number or bigint.
   // This way we can set a raw value that will parse better in the form
   // state without interfering with the text the user is typing.
-  const [tempRawValue, setTempRawValue] = React.useState(rawValue)
+  const [tempRawValue, setTempRawValue] = React.useState(
+    rawValue as string | null | undefined
+  )
 
   const tryNumber = React.useMemo(() => acceptsNumber(schema), [schema])
   const tryBigint = React.useMemo(() => acceptsBigint(schema), [schema])
@@ -136,7 +138,7 @@ function useHtmlFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
         type,
         value:
           typeof rawValue === 'boolean'
-            ? rawValue
+            ? String(rawValue)
             : typeof rawValue === 'string'
             ? rawValue || tempRawValue || ''
             : tempRawValue || (rawValue == null ? '' : String(rawValue) || ''),
