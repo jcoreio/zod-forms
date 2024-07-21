@@ -12,6 +12,7 @@ import { useInitialize } from './useInitialize'
 import { createSelectFormStatus } from './createSelectFormStatus'
 import { createSelectFieldErrorMap } from './createSelectFieldErrorMap'
 import { createSelectFormValues } from './createSelectFormValues'
+import { TypedUseArrayField, useArrayField } from './useArrayField'
 
 export type ZodForm<T extends z.ZodTypeAny> = ReturnType<
   typeof createZodForm<T>
@@ -49,6 +50,7 @@ export function createZodForm<T extends z.ZodTypeAny>({
     useFormValues: useFormValues<T>,
     useInitialize: useInitialize<T>,
     useSubmit: useSubmit<T>,
+    useArrayField: useArrayField as TypedUseArrayField<T>,
     useField: useField as TypedUseField<T>,
     useHtmlField: useHtmlField as TypedUseHtmlField<T>,
   }
