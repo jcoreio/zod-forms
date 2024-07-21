@@ -102,6 +102,7 @@ it(`boolean field test`, async function () {
     undefined
   )
   await act(() => fireEvent.blur(input, { target: { value: '' } }))
+  await act(() => formContext?.setRawValue(root.get('field'), undefined as any))
   expect(component.queryByTestId('field-helperText')?.innerHTML).to.equal(
     'Required'
   )
