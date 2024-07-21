@@ -30,4 +30,3 @@ export {
 } from './useHtmlField'
 export { useInitialize } from './useInitialize'
 export { useSubmit } from './useSubmit'
-export { useSubmitEventHandler } from './useSubmitEventHandler'

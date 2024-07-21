@@ -9,7 +9,6 @@ import { useFormStatus } from './useFormStatus'
 import { useFormValues } from './useFormValues'
 import { useSubmit } from './useSubmit'
 import { useInitialize } from './useInitialize'
-import { useSubmitEventHandler } from './useSubmitEventHandler'
 import { createSelectFormStatus } from './createSelectFormStatus'
 import { createSelectFieldErrorMap } from './createSelectFieldErrorMap'
 import { createSelectFormValues } from './createSelectFormValues'
@@ -50,7 +49,6 @@ export function createZodForm<T extends z.ZodTypeAny>({
     useFormValues: useFormValues<T>,
     useInitialize: useInitialize<T>,
     useSubmit: useSubmit<T>,
-    useSubmitEventHandler,
     useField: useField as TypedUseField<T>,
     useHtmlField: useHtmlField as TypedUseHtmlField<T>,
   }
