@@ -39,7 +39,7 @@ export function createZodForm<T extends z.ZodTypeAny>({
     selectFormValues,
   })
 
-  const get: (typeof root)['get'] = (key: any) => root.get(key)
+  const get: (typeof root)['get'] = root.get.bind(root)
 
   return {
     root,

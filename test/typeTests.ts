@@ -1,6 +1,52 @@
 import z, { RefinementCtx } from 'zod'
 import { createZodForm } from '../src/createZodForm'
 import { invertible } from 'zod-invertible'
+import { assertEqual } from './util/assertEqual'
+import { PathInType } from '../src/util/PathInType'
+import { parsePathstring } from '../src/util/parsePathstring'
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function pathInTypeTest() {
+  assertEqual<
+    PathInType<
+      [{ foo: number }, { bar: { baz: string } }, ...{ qux: boolean }[]]
+    >,
+    | []
+    | [number]
+    | [number, 'foo']
+    | [number, 'bar']
+    | [number, 'bar', 'baz']
+    | [number, 'qux']
+  >(true)
+
+  assertEqual<
+    PathInType<[{ foo: number }, { bar: string }]>,
+    [] | [number] | [number, 'foo'] | [number, 'bar']
+  >(true)
+
+  assertEqual<
+    PathInType<{ foo: { bar?: { baz: string; qux?: { blah?: string }[] } } }>,
+    | []
+    | ['foo']
+    | ['foo', 'bar']
+    | ['foo', 'bar', 'baz']
+    | ['foo', 'bar', 'qux']
+    | ['foo', 'bar', 'qux', number]
+    | ['foo', 'bar', 'qux', number, 'blah']
+  >(true)
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function parsePathstringTest() {
+  assertEqual<
+    parsePathstring<'foo.bar["baz[a\\""][0].qux[4]'>,
+    ['foo', 'bar', 'baz[a"', 0, 'qux', 4]
+  >(true)
+  assertEqual<
+    parsePathstring<'["baz\\n[a\\"bl]ah\\t"].test'>,
+    ['baz\n[a"bl]ah\t', 'test']
+  >(true)
+}
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function typeTests() {

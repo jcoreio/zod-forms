@@ -1,11 +1,10 @@
 import { BasePath } from '../FieldPath'
 
-export type parsePathstring<
-  Path extends string,
-  IsTail = false
-> = Path extends ''
+export type parsePathstring<Path extends string, IsTail = false> = [
+  Path
+] extends ['']
   ? []
-  : Path extends `[${infer Rest}`
+  : [Path] extends [`[${infer Rest}`]
   ? Rest extends `${infer N extends number}]${infer Tail}`
     ? [N, ...parsePathstring<Tail, true>]
     : ExtractInitialStringLiteral<Rest> extends infer StringLiteral extends string
@@ -16,17 +15,17 @@ export type parsePathstring<
           : never)
       ]
     : never
-  : IsTail extends true
-  ? Path extends `.${infer Rest}`
+  : [IsTail] extends [true]
+  ? [Path] extends [`.${infer Rest}`]
     ? parsePathstring<Rest>
     : never
-  : Path extends `${infer Head}[${infer Tail}`
-  ? Path extends `${infer Head2}.${infer Tail2}`
+  : [Path] extends [`${infer Head}[${infer Tail}`]
+  ? [Path] extends [`${infer Head2}.${infer Tail2}`]
     ? Head2 extends `${Head}[${string}` // make sure we pick up to . or [, whichever comes first
       ? [Head, ...parsePathstring<`[${Tail}`, true>]
       : [Head2, ...parsePathstring<`.${Tail2}`, true>]
     : [Head, ...parsePathstring<`[${Tail}`, true>]
-  : Path extends `${infer Head}.${infer Tail}`
+  : [Path] extends [`${infer Head}.${infer Tail}`]
   ? [Head, ...parsePathstring<`.${Tail}`, true>]
   : [Path]
 
@@ -34,9 +33,11 @@ export type parsePathstring<
  * If T starts with a quoted string literal, returns that string literal.
  * Otherwise returns never
  */
-type ExtractInitialStringLiteral<T extends string> = T extends `"${infer Rest}`
+type ExtractInitialStringLiteral<T extends string> = [T] extends [
+  `"${infer Rest}`
+]
   ? `"${RestOfStringLiteral<Rest, '"'>}`
-  : T extends `'${infer Rest}`
+  : [T] extends [`'${infer Rest}`]
   ? `'${RestOfStringLiteral<Rest, "'">}`
   : never
 
@@ -49,7 +50,7 @@ type RestOfStringLiteral<
    * The opening quote type
    */
   Q extends '"' | "'"
-> = T extends `${infer A}${Q}${infer B}` // find the next quote
+> = [T] extends [`${infer A}${Q}${infer B}`] // find the next quote
   ? A extends `${infer C}\\${infer D}` // the quote may be escaped, so find the first backslash
     ? D extends '' // nothing after the backslash, so it escapes the quote Q
       ? `${A}${Q}${RestOfStringLiteral<B, Q>}` // keep scanning until the closing quote

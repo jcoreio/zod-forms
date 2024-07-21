@@ -2,10 +2,7 @@ import z from 'zod'
 
 type BasePath = (string | number)[]
 
-export type SchemaAt<
-  T extends z.ZodTypeAny,
-  Path extends BasePath
-> = 0 extends 1 & Path
+export type SchemaAt<T extends z.ZodTypeAny, Path> = 0 extends 1 & Path
   ? z.ZodTypeAny
   : 0 extends 1 & T
   ? z.ZodTypeAny

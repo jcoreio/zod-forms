@@ -5,7 +5,7 @@ import { useFormContext } from './useFormContext'
 import { PathInSchema, PathstringInSchema } from './util/PathInSchema'
 import { parsePathstring } from './util/parsePathstring'
 import { SchemaAt } from './util/SchemaAt'
-import { TypedUseField, UseFieldProps } from './useField'
+import { UseFieldProps } from './useField'
 import { bindActionsToField } from './util/bindActionsToField'
 import { arrayActions } from './actions/arrayActions'
 import { useField } from './useField'
@@ -31,11 +31,11 @@ export interface TypedUseArrayField<T extends z.ZodTypeAny> {
   ): UseArrayFieldProps<FieldPath<SchemaAt<T, parsePathstring<Pathstring>>>>
 }
 
-function useArrayFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
+function useArrayFieldBase<Field extends FieldPath>(
   field: Field
 ): UseArrayFieldProps<Field> {
   const { arrayActions } = useFormContext()
-  const useFieldProps = (useField as TypedUseField<T>)(field)
+  const useFieldProps = useField(field)
   const boundArrayActions = React.useMemo(
     () => bindActionsToField(arrayActions, field),
     [field.pathstring]
@@ -46,10 +46,7 @@ function useArrayFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
       (Array.isArray(useFieldProps.rawValue)
         ? useFieldProps.rawValue.length
         : 0)
-    return [...new Array(length).keys()].map((index) =>
-      // @ts-expect-error field isn't fully typed
-      field.subfield(index)
-    )
+    return [...new Array(length).keys()].map((index) => field.subfield(index))
   }, [useFieldProps.value, useFieldProps.rawValue])
 
   return React.useMemo(

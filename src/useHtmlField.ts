@@ -1,6 +1,6 @@
 import z from 'zod'
 import { BasePath, FieldPath } from './FieldPath'
-import { useField, TypedUseField, UseFieldProps } from './useField'
+import { useField, UseFieldProps } from './useField'
 import React, { HTMLInputTypeAttribute } from 'react'
 import { invert } from 'zod-invertible'
 import { useFormContext } from './useFormContext'
@@ -56,11 +56,11 @@ export interface TypedUseHtmlField<T extends z.ZodTypeAny> {
   ): UseHtmlFieldProps<FieldPath<SchemaAt<T, parsePathstring<Path>>>>
 }
 
-function useHtmlFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
+function useHtmlFieldBase<Field extends FieldPath>(
   options: UseHtmlFieldOptions<Field, Field['schema']>
 ): UseHtmlFieldProps<Field> {
   const { field, type, normalizeOnBlur = true } = options
-  const props = (useField as TypedUseField<T>)(field)
+  const props = useField(field)
   const {
     value,
     rawValue,

@@ -57,23 +57,22 @@ export class FieldPath<T extends z.ZodTypeAny = z.ZodTypeAny> {
 
 export type BasePath = (string | number)[]
 
-export type SubpathKey<T extends z.ZodTypeAny> = T extends z.ZodObject<
-  infer Shape,
-  infer UnknownKeys
->
+export type SubpathKey<T extends z.ZodTypeAny> = 0 extends 1 & T
+  ? any
+  : 0 extends 1 & z.input<T>
+  ? any
+  : T extends z.ZodObject<infer Shape, infer UnknownKeys>
   ? UnknownKeys extends 'passthrough'
     ? string
     : keyof Shape
   : T extends z.ZodRecord<infer Key, any>
-  ? z.output<Key>
+  ? z.input<Key>
   : T extends z.ZodMap<infer Key, any>
-  ? z.output<Key>
+  ? z.input<Key>
   : T extends z.ZodArray<any>
   ? number
-  : T extends z.ZodTuple<infer Elements, infer Rest>
-  ? Rest extends z.ZodTypeAny
-    ? number
-    : keyof Elements
+  : T extends z.ZodTuple<any, any>
+  ? number
   : T extends z.ZodLazy<infer U>
   ? SubpathKey<U>
   : T extends z.ZodUnion<infer Options>

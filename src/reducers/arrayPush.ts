@@ -15,9 +15,6 @@ export function arrayPushReducer<T extends z.ZodTypeAny>(
   const array = get(state.rawValues, field.path)
   return reducer(
     state,
-    setValue({
-      field: field.get([Array.isArray(array) ? array.length : 0]),
-      value,
-    })
+    setValue(field.get([Array.isArray(array) ? array.length : 0]), value)
   )
 }
