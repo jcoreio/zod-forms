@@ -12,7 +12,7 @@ export function FormTextField({
 } & Omit<React.ComponentProps<typeof TextField>, 'type'>) {
   const { input, meta } = useHtmlField({ field, type })
 
-  const error = meta.touched || meta.submitFailed ? meta.error : undefined
+  const error = meta.touched ? meta.error : undefined
   return (
     <TextField
       {...input}

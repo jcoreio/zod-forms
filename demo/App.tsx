@@ -106,7 +106,7 @@ function App2() {
     },
   })
 
-  const { submitting, pristine } = useFormStatus()
+  // const { submitting, pristine } = useFormStatus()
 
   const {
     arrayActions: { pushRaw },
@@ -175,16 +175,23 @@ function App2() {
         </Box>
         <ArrayField field={form.get('array')} />
         <Box sx={{ mt: 2 }}>
-          <Button disabled={pristine || submitting} type="submit">
-            Submit
-          </Button>
+          <SubmitButton />
         </Box>
       </Paper>
     </form>
   )
 }
 
-function FormTextField({
+const SubmitButton = React.memo(function SubmitButton() {
+  const { pristine, submitting } = useFormStatus()
+  return (
+    <Button disabled={pristine || submitting} type="submit">
+      Submit
+    </Button>
+  )
+})
+
+const FormTextField = React.memo(function FormTextField({
   field,
   type,
   ...props
@@ -197,9 +204,9 @@ function FormTextField({
   return (
     <TextField {...input} error={error != null} helperText={error} {...props} />
   )
-}
+})
 
-function FormSwitchField({
+const FormSwitchField = React.memo(function FormSwitchField({
   field,
   label,
   ...props
@@ -220,9 +227,9 @@ function FormSwitchField({
       {error ? <FormHelperText>{error}</FormHelperText> : null}
     </FormControl>
   )
-}
+})
 
-function ArrayField({
+const ArrayField = React.memo(function ArrayField({
   field,
 }: {
   field: FieldPath<SchemaAt<typeof schema, ['array']>>
@@ -250,4 +257,4 @@ function ArrayField({
       ))}
     </List>
   )
-}
+})

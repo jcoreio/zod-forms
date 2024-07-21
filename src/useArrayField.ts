@@ -5,17 +5,40 @@ import { useFormContext } from './useFormContext'
 import { PathInSchema, PathstringInSchema } from './util/PathInSchema'
 import { parsePathstring } from './util/parsePathstring'
 import { SchemaAt } from './util/SchemaAt'
-import { UseFieldProps } from './useField'
 import { bindActionsToField } from './util/bindActionsToField'
 import { arrayActions } from './actions/arrayActions'
-import { useField } from './useField'
+import { createSelector, createStructuredSelector } from 'reselect'
+import { get } from './util/get'
+import isEqual from 'fast-deep-equal'
+import {
+  TypedUseFormSelector,
+  useFormSelector as untypedUseFormSelector,
+} from './useFormSelector'
+import { shallowEqual } from 'react-redux'
+import { setValue } from './actions/setValue'
+import { setRawValue } from './actions/setRawValue'
+import { setMeta } from './actions/setMeta'
+import { FieldMeta } from './FormState'
 
 export type UseArrayFieldProps<Field extends FieldPath> = NonNullable<
   z.input<Field['schema']>
 > extends any[]
-  ? UseFieldProps<Field> &
-      ReturnType<typeof bindActionsToField<typeof arrayActions>> & {
+  ? FieldMeta &
+      ReturnType<
+        typeof bindActionsToField<
+          typeof arrayActions & {
+            setValue: typeof setValue
+            setRawValue: typeof setRawValue
+            setMeta: typeof setMeta
+          }
+        >
+      > & {
         elements: FieldPath<SchemaAt<Field['schema'], [number]>>[]
+        error?: string
+        dirty: boolean
+        pristine: boolean
+        valid: boolean
+        invalid: boolean
       }
   : { ERROR: 'not an array field' }
 
@@ -34,24 +57,82 @@ export interface TypedUseArrayField<T extends z.ZodTypeAny> {
 function useArrayFieldBase<Field extends FieldPath>(
   field: Field
 ): UseArrayFieldProps<Field> {
-  const { arrayActions } = useFormContext()
-  const useFieldProps = useField(field)
-  const boundArrayActions = React.useMemo(
-    () => bindActionsToField(arrayActions, field),
+  type Schema = Field['schema']
+
+  const {
+    arrayActions,
+    setValue,
+    setRawValue,
+    setMeta,
+    selectFormValues,
+    selectFieldErrorMap,
+  } = useFormContext()
+
+  const useFormSelector = untypedUseFormSelector as TypedUseFormSelector<Schema>
+
+  const valuesSelector = React.useMemo(
+    () =>
+      createSelector(
+        [selectFormValues],
+        createSelector(
+          [
+            createStructuredSelector({
+              value: ({ values }) =>
+                get(values, field.path) as z.output<Schema> | undefined,
+              rawValue: ({ rawValues }) =>
+                get(rawValues, field.path) as unknown,
+              initialValue: ({ initialValues }) =>
+                get(initialValues, field.path) as z.output<Schema> | undefined,
+            }),
+          ],
+          ({ rawValue, value, initialValue }) => {
+            const dirty = !isEqual(value, initialValue)
+            const pristine = !dirty
+            return {
+              dirty,
+              pristine,
+              length: Array.isArray(rawValue) ? rawValue.length : 0,
+            }
+          }
+        )
+      ),
     [field.pathstring]
   )
-  const elements = React.useMemo(() => {
-    const length =
-      useFieldProps.value?.length ??
-      (Array.isArray(useFieldProps.rawValue)
-        ? useFieldProps.rawValue.length
-        : 0)
-    return [...new Array(length).keys()].map((index) => field.subfield(index))
-  }, [useFieldProps.value, useFieldProps.rawValue])
+
+  const { dirty, pristine, length } = useFormSelector(
+    valuesSelector,
+    shallowEqual
+  )
+
+  const error = useFormSelector(
+    (state) => selectFieldErrorMap(state)[field.pathstring]
+  )
+  const meta = useFormSelector((state) => state.fieldMeta[field.pathstring])
+
+  const boundActions = React.useMemo(
+    () =>
+      bindActionsToField(
+        { ...arrayActions, setValue, setRawValue, setMeta },
+        field
+      ),
+    [field.pathstring]
+  )
+  const elements = React.useMemo(
+    () => [...new Array(length).keys()].map((index) => field.subfield(index)),
+    [length]
+  )
 
   return React.useMemo(
-    () => ({ ...useFieldProps, ...boundArrayActions, elements }),
-    [useFieldProps, boundArrayActions, elements]
+    () => ({
+      ...meta,
+      ...boundActions,
+      elements,
+      dirty,
+      pristine,
+      valid: !error,
+      invalid: Boolean(error),
+    }),
+    [dirty, boundActions, elements, meta, error]
   ) as any
 }
 

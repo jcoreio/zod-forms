@@ -1,4 +1,4 @@
-# Types
+# Typescript Types
 
 ## `FieldMeta`
 
