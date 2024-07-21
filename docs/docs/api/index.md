@@ -2,6 +2,7 @@
 
 - [`createZodForm`](createZodForm) - Creates a form for a Zod schema
 - [`FieldPath`](FieldPath.md) - Encapsulates a path to a field in a form and the schema at that path
+- [`useArrayField`](useArrayField.md) - React custom hook for working with array fields
 - [`useField`](useField.md) - React custom hook for connecting a component to field state
 - [`useFormContext`](useFormContext.md) - React custom hook for getting the enclosing form context
 - [`useFormStatus`](useFormStatus.md) - React custom hook for getting the overall form validation and submission status

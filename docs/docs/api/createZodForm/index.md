@@ -16,7 +16,7 @@ If you want to use `.transform`s in `schema`, you must declare them via
 [`zod-invertible`](https://github.com/jcoreio/zod-invertible) so that it's possible
 to format final values into raw values; otherwise `createZodForm` will throw an error.
 
-## Returns `ZodForm<T>`
+## Returns [`ZodForm<T>`](../types/ZodForm.md)
 
 An object with the following properties:
 
@@ -28,5 +28,6 @@ An object with the following properties:
 - [`useFormValues`](../useFormValues.md) bound to schema type `T`
 - [`useInitialize`](../useInitialize.md) bound to schema type `T`
 - [`useSubmit`](../useSubmit.md) bound to schema type `T`
+- [`useArrayField`](../useArrayField.md) bound to schema type `T`
 - [`useField`](../useField.md) bound to schema type `T`
 - [`useHtmlField`](../useHtmlField.md) bound to schema type `T`

@@ -10,7 +10,7 @@ import { FieldPath } from '@jcoreio/zod-form'
 class FieldPath<T extends ZodTypeAny = ZodTypeAny>
 ```
 
-### `path: BasePath`
+### `path: (string | number)[]`
 
 The array representation of this path
 
