@@ -1,6 +1,7 @@
 {
   "label": "How To",
   "position": 2,
+  "collapsed": false,
   "link": {
     "type": "generated-index",
     "description": "Tips on how to accomplish things with zod-form"
