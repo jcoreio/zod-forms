@@ -119,8 +119,8 @@ function useHtmlFieldBase<Field extends FieldPath>(
           ? invert(field.schema).safeParse(parsed.data)
           : undefined
         if (formatted?.success) rawValue = formatted.data
+        setRawValue(rawValue)
       }
-      setRawValue(rawValue)
       setTempRawValue(undefined)
       setMeta({ visited: true, touched: true })
     },
