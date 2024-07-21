@@ -16,7 +16,7 @@ export {
   type UseArrayFieldProps,
   type TypedUseArrayField,
 } from './useArrayField'
-export { type FormContext } from './FormContext'
+export { type FormContextProps } from './FormContext'
 export { useFormContext } from './useFormContext'
 export { type FormStatus } from './createSelectFormStatus'
 export { useFormStatus } from './useFormStatus'

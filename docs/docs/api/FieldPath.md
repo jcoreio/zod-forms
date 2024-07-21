@@ -7,7 +7,7 @@ import { FieldPath } from '@jcoreio/zod-form'
 ```
 
 ```ts
-class FieldPath<T extends ZodTypeAny = ZodTypeAny>
+class FieldPath<T extends z.ZodTypeAny = z.ZodTypeAny>
 ```
 
 ### `path: (string | number)[]`
@@ -24,8 +24,7 @@ The Zod schema at this path
 
 ### `get(path): FieldPath`
 
-Gets a subpath under this `FieldPath`. `path` may either be a `string` containing an idiomatic JS path
-like `'foo[0].bar'` or a `(string | number)[]` representing the path like `['foo', 0, 'bar']`.
+Gets a subpath under this `FieldPath`. `path` may either be a [pathstring](../concepts.md#pathstrings) or a [path array](../concepts.md#path-arrays).
 
 The full method signature (not shown here) is fully typed and extracts the type of the subschema at
 the given path, and should produce a TS error if the path is invalid or doesn't exist in [`schema`](#schema-t).

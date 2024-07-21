@@ -37,8 +37,8 @@ export type FormContextProps<T extends z.ZodTypeAny> = {
   selectFieldErrorMap: SelectFieldErrorMap
   selectFormValues: SelectFormValues<T>
   getValues: () => z.output<T> | undefined
-  getRawValues: () => z.input<T> | undefined
+  getRawValues: () => unknown
   getInitialValues: () => z.output<T> | undefined
-  getRawInitialValues: () => z.input<T> | undefined
+  getRawInitialValues: () => unknown
   getStatus: () => ReturnType<ReturnType<typeof createSelectFormStatus>>
 }

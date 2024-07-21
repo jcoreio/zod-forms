@@ -211,7 +211,7 @@ const FormSwitchField = React.memo(function FormSwitchField({
   label,
   ...props
 }: React.ComponentProps<typeof Switch> & {
-  field: FieldPath<z.ZodType<any, any, boolean | null | undefined>>
+  field: FieldPathForRawValue<boolean | null | undefined>
   label?: React.ReactNode
 }) {
   const { input, meta } = useHtmlField({ field, type: 'checkbox' })

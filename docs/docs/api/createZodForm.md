@@ -7,7 +7,7 @@ import { createZodForm } from '@jcoreio/zod-form'
 ```
 
 ```ts
-createZodForm<T extends ZodTypeAny>(options: { schema: T }): ZodForm<T>
+createZodForm<T extends z.ZodTypeAny>(options: { schema: T }): ZodForm<T>
 ```
 
 ## Requirements
@@ -22,7 +22,7 @@ An object with the following properties:
 
 - `root` - the root [`FieldPath`](./FieldPath.md)
 - `get` - shortcut for `root`[`.get(...)`](./FieldPath.md#getpath)
-- [`FormProvider`](#FormProvider) - React component to provide form context to its descendants
+- [`FormProvider`](#formprovider) - React component to provide form context to its descendants
 - [`useFormContext`](./useFormContext.md) bound to schema type `T`
 - [`useFormStatus`](./useFormStatus.md) bound to schema type `T`
 - [`useFormValues`](./useFormValues.md) bound to schema type `T`
@@ -34,8 +34,20 @@ An object with the following properties:
 
 ## `FormProvider`
 
-A React component to provide formc ontext to its descendants.
+A React component to provide form context to its descendants.
 
 ```ts
 const { FormProvider } = createZodForm({ schema })
+```
+
+### Example
+
+```ts
+function MyForm() {
+  return (
+    <FormProvider>
+      <MyFormContent />
+    </FormProvider>
+  )
+}
 ```
