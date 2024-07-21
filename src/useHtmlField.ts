@@ -1,7 +1,7 @@
 import z from 'zod'
 import { BasePath, FieldPath } from './FieldPath'
 import { useField, UseFieldProps } from './useField'
-import React, { HTMLInputTypeAttribute } from 'react'
+import React, { ChangeEvent, HTMLInputTypeAttribute } from 'react'
 import { invert } from 'zod-invertible'
 import { useFormContext } from './useFormContext'
 import { acceptsNumber } from './util/acceptsNumber'
@@ -88,18 +88,16 @@ function useHtmlFieldBase<Field extends FieldPath>(
 
   const onChange = React.useCallback(
     (e: React.ChangeEvent) => {
-      if (e.currentTarget instanceof HTMLInputElement) {
-        const rawValue = getRawValue(e.currentTarget)
-        const normalized = normalizeRawValue(rawValue, {
-          schema,
-          tryNumber,
-          tryBigint,
-        })
-        if (typeof rawValue === 'string' && typeof normalized !== 'string') {
-          setTempRawValue(rawValue)
-        }
-        setRawValue(normalized)
+      const rawValue = getRawValue(e)
+      const normalized = normalizeRawValue(rawValue, {
+        schema,
+        tryNumber,
+        tryBigint,
+      })
+      if (typeof rawValue === 'string' && typeof normalized !== 'string') {
+        setTempRawValue(rawValue)
       }
+      setRawValue(normalized)
     },
     [getRawValue, setRawValue, schema]
   )
@@ -110,22 +108,20 @@ function useHtmlFieldBase<Field extends FieldPath>(
 
   const onBlur = React.useCallback(
     (e: React.FocusEvent) => {
-      if (e.currentTarget instanceof HTMLInputElement) {
-        let rawValue = normalizeRawValue(getRawValue(e.currentTarget), {
-          schema,
-          tryNumber,
-          tryBigint,
-        })
-        if (normalizeOnBlur) {
-          const parsed = field.schema.safeParse(rawValue)
-          const formatted = parsed.success
-            ? invert(field.schema).safeParse(parsed.data)
-            : undefined
-          if (formatted?.success) rawValue = formatted.data
-        }
-        setRawValue(rawValue)
-        setTempRawValue(undefined)
+      let rawValue = normalizeRawValue(getRawValue(e), {
+        schema,
+        tryNumber,
+        tryBigint,
+      })
+      if (normalizeOnBlur) {
+        const parsed = field.schema.safeParse(rawValue)
+        const formatted = parsed.success
+          ? invert(field.schema).safeParse(parsed.data)
+          : undefined
+        if (formatted?.success) rawValue = formatted.data
       }
+      setRawValue(rawValue)
+      setTempRawValue(undefined)
       setMeta({ visited: true, touched: true })
     },
     [getRawValue, setRawValue, schema]
@@ -162,8 +158,12 @@ function useHtmlFieldBase<Field extends FieldPath>(
   ) as any
 }
 
-function getRawValue(el: HTMLInputElement | HTMLSelectElement) {
-  return el.type === 'checkbox' ? el.checked : el.value
+function getRawValue(e: ChangeEvent) {
+  const { target } = e
+  if (target instanceof HTMLInputElement) {
+    return target.type === 'checkbox' ? target.checked : target.value
+  }
+  return (target as any).value
 }
 
 function normalizeBlank(schema: z.ZodTypeAny): any {
