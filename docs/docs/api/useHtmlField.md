@@ -11,7 +11,7 @@ export function useHtmlField({ field, type, normalizeOnBlur }): UseHtmlFieldProp
 ```
 
 The full [`TypedUseHtmlField<T>`](types.md#typedusehtmlfield) method signature extracts the type of the subschema at
-the given path, and should produce a TS error if the path is invalid, doesn't exist in [`schema`](#schema-t), or its subschema doesn't accept
+the given path, and should produce a TS error if the path is invalid, doesn't exist in the schema, or its subschema doesn't accept
 `string | number | bigint | boolean | null | undefined`.
 
 ## Options

@@ -14,7 +14,7 @@ export function useArrayField(path): UseArrayFieldProps`
 `path` may be a [`FieldPath`](FieldPath.md), [pathstring](../concepts.md#pathstrings) or [path array](../concepts.md#path-arrays).
 
 The full [`TypedUseArrayField<T>`](types.md#typedusearrayfield) method signature extracts the type of the subschema at
-the given path, and should produce a TS error if the path is invalid, not array valued, or doesn't exist in [`schema`](#schema-t).
+the given path, and should produce a TS error if the path is invalid, not array valued, or doesn't exist in the schema.
 
 ## Returns [`UseArrayFieldProps`](types.md#usearrayfieldprops)
 
