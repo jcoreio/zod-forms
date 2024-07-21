@@ -60,14 +60,17 @@ type RestOfStringLiteral<
     : `${A}${Q}` // no backslash, Q is a closing quote and we're done!
   : never
 
-type EscapeChars = {
-  '\\': '\\'
-  n: '\n'
-  t: '\t'
-  r: '\r'
-  f: '\f'
-  '"': '"'
-  "'": "'"
+type EscapeChars = typeof EscapeChars
+const EscapeChars = {
+  "'": "'",
+  '"': '"',
+  '\\': '\\',
+  b: '\b',
+  f: '\f',
+  n: '\n',
+  r: '\r',
+  t: '\t',
+  v: '\v',
 }
 
 type ProcessEscapes<T extends string> = T extends `${infer A}\\${infer B}`
@@ -82,87 +85,35 @@ type ProcessStringLiteral<T extends string> = T extends `"${infer Content}"`
   ? ProcessEscapes<Content>
   : never
 
-/**
- * Just duplicate the behavior of the TS types exactly until if/when I can
- * find a way to parse string escapes correctly in TS
- */
+const pathstringRx =
+  /((?:^|\.)([^.[\]]+))|\[((\d+)|("(?:[^\\"]|\\['"\\bfnrtv])+"|'(?:[^\\']|\\['"\\bfnrtv])+'))\]/g
+
 export function parsePathstring(pathstring: string): BasePath {
-  let match
-  if (
-    (match =
-      /^\["(.*?)"\]([.[].*)?$/.exec(pathstring) ||
-      /^\['(.*?)'\]([.[].*)?$/.exec(pathstring))
-  ) {
-    return [match[1], ...parsePathstringTail(match[2])]
+  const path: BasePath = []
+  let lastIndex = 0
+  for (const match of pathstring.matchAll(pathstringRx)) {
+    if (
+      match.index !== lastIndex ||
+      (match.index === 0 && match[0][0] === '.')
+    ) {
+      throw new Error(`invalid pathstring: ${pathstring} (at ${match.index})`)
+    }
+    lastIndex = match.index + match[0].length
+    if (match[2]) path.push(match[2])
+    else if (match[4]) path.push(parseInt(match[4]))
+    else if (match[5]) {
+      path.push(
+        match[5]
+          .substring(1, match[5].length - 1)
+          .replace(
+            /\\['"\\bfnrtv]/g,
+            (m) => EscapeChars[m[1] as keyof EscapeChars]
+          )
+      )
+    }
   }
-  if (
-    (match = /^\[([-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[-+]?\d+)?)\]([.[].*)?$/.exec(
-      pathstring
-    ))
-  ) {
-    return [Number(match[1]), ...parsePathstringTail(match[2])]
+  if (lastIndex !== pathstring.length) {
+    throw new Error(`invalid pathstring: ${pathstring} (at ${lastIndex})`)
   }
-  if ((match = /^(.*?)\[(.*)$/.exec(pathstring))) {
-    return [
-      ...parsePathstring(match[1]),
-      ...parsePathstringTail(`[${match[2]}`),
-    ]
-  }
-
-  if ((match = /^(.*?)\.(.*)$/.exec(pathstring))) {
-    return [
-      ...parsePathstring(match[1]),
-      ...parsePathstringTail(`.${match[2]}`),
-    ]
-  }
-  return [
-    /^([-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[-+]?\d+)?)$/.test(pathstring)
-      ? Number(pathstring)
-      : pathstring,
-  ]
-}
-
-function parsePathstringTail(pathstring: string): BasePath {
-  if (!pathstring) return []
-
-  let match
-  if (
-    (match =
-      /^\["(.*?)"\]([.[].*)?$/.exec(pathstring) ||
-      /^\['(.*?)'\]([.[].*)?$/.exec(pathstring))
-  ) {
-    return [match[1], ...parsePathstringTail(match[2])]
-  }
-  if (
-    (match = /^\[([-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[-+]?\d+)?)\]([.[].*)?$/.exec(
-      pathstring
-    ))
-  ) {
-    return [Number(match[1]), ...parsePathstringTail(match[2])]
-  }
-  if ((match = /^\.(.*?)\[(.*)$/.exec(pathstring))) {
-    return [
-      ...parsePathstring(match[1]),
-      ...parsePathstringTail(`[${match[2]}`),
-    ]
-  }
-
-  if ((match = /^\.(.*?)\.(.*)$/.exec(pathstring))) {
-    return [
-      ...parsePathstring(match[1]),
-      ...parsePathstringTail(`.${match[2]}`),
-    ]
-  }
-  if ((match = /^\.(.*)$/.exec(pathstring))) {
-    return [
-      /^([-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[-+]?\d+)?)$/.test(match[1])
-        ? Number(match[1])
-        : match[1],
-    ]
-  }
-  return [
-    /^([-+]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[-+]?\d+)?)$/.test(pathstring)
-      ? Number(pathstring)
-      : pathstring,
-  ]
+  return path
 }
