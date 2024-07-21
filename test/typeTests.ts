@@ -38,6 +38,7 @@ function pathInTypeTest() {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function parsePathstringTest() {
+  assertEqual<parsePathstring<'foo.32.bar'>, ['foo', '32', 'bar']>(true)
   assertEqual<
     parsePathstring<'foo.bar["baz[a\\""][0].qux[4]'>,
     ['foo', 'bar', 'baz[a"', 0, 'qux', 4]

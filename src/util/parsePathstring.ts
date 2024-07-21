@@ -71,7 +71,7 @@ const EscapeChars = {
   r: '\r',
   t: '\t',
   v: '\v',
-}
+} as const
 
 type ProcessEscapes<T extends string> = T extends `${infer A}\\${infer B}`
   ? B extends `${infer C extends keyof EscapeChars}${infer D}`

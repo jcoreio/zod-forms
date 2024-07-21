@@ -5,6 +5,7 @@ import { parsePathstring } from '../src/util/parsePathstring'
 
 describe(`parsePathstring`, function () {
   for (const [input, expected] of [
+    ['foo.32.bar', ['foo', '32', 'bar']],
     [
       'foo.bar.baz["q\\nu][\\"x"][32].blah',
       ['foo', 'bar', 'baz', 'q\nu]["x', 32, 'blah'],
