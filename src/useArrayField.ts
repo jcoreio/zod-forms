@@ -108,6 +108,7 @@ function useArrayFieldBase<Field extends FieldPath>(
     (state) => selectFieldErrorMap(state)[field.pathstring]
   )
   const meta = useFormSelector((state) => state.fieldMeta[field.pathstring])
+  const submitFailed = useFormSelector((state) => state.submitFailed)
 
   const boundActions = React.useMemo(
     () =>
@@ -124,15 +125,16 @@ function useArrayFieldBase<Field extends FieldPath>(
 
   return React.useMemo(
     () => ({
-      ...meta,
       ...boundActions,
+      visited: meta?.visited || false,
+      touched: meta?.touched || submitFailed,
       elements,
       dirty,
       pristine,
       valid: !error,
       invalid: Boolean(error),
     }),
-    [dirty, boundActions, elements, meta, error]
+    [dirty, boundActions, elements, meta, submitFailed, error]
   ) as any
 }
 

@@ -109,6 +109,7 @@ function useFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
     (state) => selectFieldErrorMap(state)[field.pathstring]
   )
   const meta = useFormSelector((state) => state.fieldMeta[field.pathstring])
+  const submitFailed = useFormSelector((state) => state.submitFailed)
 
   const boundActions = React.useMemo(
     () => bindActionsToField({ setValue, setRawValue, setMeta }, field),
@@ -119,12 +120,13 @@ function useFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
     () => ({
       ...boundActions,
       ...values,
-      ...meta,
+      visited: meta?.visited || false,
+      touched: meta?.touched || submitFailed,
       error,
       valid: !error,
       invalid: Boolean(error),
     }),
-    [field.pathstring, values, meta, error]
+    [field.pathstring, values, meta, error, submitFailed]
   ) as any
 }
 
