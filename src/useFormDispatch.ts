@@ -9,5 +9,8 @@ export const useFormDispatch = createDispatchHook(
 ) as typeof useFormDispatchType
 
 declare function useFormDispatchType<
-  T extends z.ZodTypeAny = z.ZodNever
+  T extends z.ZodTypeAny = z.ZodBranded<
+    z.ZodNever,
+    'you must pass a schema type'
+  >
 >(): Dispatch<FormAction<T>>
