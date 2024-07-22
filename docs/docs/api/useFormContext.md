@@ -6,6 +6,12 @@ React custom hook for getting the enclosing [`FormContextProps`](types#formconte
 import { useFormContext } from '@jcoreio/zod-forms'
 ```
 
+```ts
+export function useFormContext<T extends z.ZodTypeAny>(): FormContextProps<T>
+```
+
+You must pass an explicit schema type for `T` unless you use the [`useFormContext` returned by `createZodForm`](createZodForm.md#returns-zodformt).
+
 ## Returns [`FormContextProps<T>`](types#formcontextprops)
 
 An object with the following properties:

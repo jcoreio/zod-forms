@@ -17,6 +17,8 @@ export function useSubmit<T extends z.ZodTypeAny>(handlers?: {
 }): React.FormEventHandler
 ```
 
+All values types will be `unknown` unless you pass an explicit schema type for `T` or use the [`useSubmit` returned by `createZodForm`](createZodForm.md#returns-zodformt).
+
 ## Options
 
 - `onSubmit` - the function to submit the values to the backend. May be `async`.

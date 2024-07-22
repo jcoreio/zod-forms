@@ -17,6 +17,8 @@ export function useInitialize<T extends z.ZodTypeAny>(
 ): void
 ```
 
+You must pass an explicit schema type for `T` unless you use the [`useInitialize` returned by `createZodForm`](createZodForm.md#returns-zodformt).
+
 Any time `deps` is not shallow equal to its value on the previous render (similar to `useEffect`),
 the form is reinitialized.
 

@@ -6,6 +6,17 @@ React custom hook for subscribing to the entire form values.
 import { useFormValues } from '@jcoreio/zod-forms'
 ```
 
+```ts
+export function useFormValues<T extends z.ZodTypeAny>(): {
+  values: z.output<T> | undefined
+  rawValues: unknown
+  initialValues: z.output<T> | undefined
+  initialRawValues: unknown
+}
+```
+
+All types will be `unknown` unless you pass an explicit schema type for `T` or use the [`useFormValues` returned by `createZodForm`](createZodForm.md#returns-zodformt).
+
 ## Returns
 
 An object containing the following properties. Causes a rerender when any field value changes.
