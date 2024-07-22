@@ -209,27 +209,30 @@ export function useHtmlField<Field extends FieldPath>(
   options: UseHtmlFieldOptions<Field, Field['schema']>
 ): UseHtmlFieldProps<Field>
 export function useHtmlField<
-  T extends z.ZodTypeAny,
-  Path extends PathInSchema<T>
+  T extends z.ZodTypeAny = z.ZodBranded<
+    z.ZodNever,
+    'cast to TypedUseHtmlField<T> to pass a path array'
+  >,
+  Path extends PathInSchema<T> = any
 >(
   options: UseHtmlFieldOptions<Path, SchemaAt<T, Path>>
 ): UseHtmlFieldProps<FieldPath<SchemaAt<T, Path>>>
 export function useHtmlField<
-  T extends z.ZodTypeAny,
-  Path extends PathstringInSchema<T>
+  T extends z.ZodTypeAny = z.ZodBranded<
+    z.ZodNever,
+    'cast to TypedUseHtmlField<T> to pass a pathstring'
+  >,
+  Path extends PathstringInSchema<T> = any
 >(
   options: UseHtmlFieldOptions<Path, SchemaAt<T, parsePathstring<Path>>>
 ): UseHtmlFieldProps<FieldPath<SchemaAt<T, parsePathstring<Path>>>>
-export function useHtmlField({
+export function useHtmlField<T extends z.ZodTypeAny>({
   field,
   ...rest
-}: UseHtmlFieldOptions<
-  FieldPath | BasePath,
-  z.ZodTypeAny
->): UseHtmlFieldProps<any> {
-  const { root } = useFormContext()
+}: UseHtmlFieldOptions<FieldPath | BasePath, T>): UseHtmlFieldProps<any> {
+  const { root } = useFormContext<T>()
   return useHtmlFieldBase({
-    field: field instanceof FieldPath ? field : root.get(field),
+    field: field instanceof FieldPath ? field : root.get(field as any),
     ...rest,
   })
 }

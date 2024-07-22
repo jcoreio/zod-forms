@@ -3,7 +3,9 @@ import { Handlers } from './actions/addHandlers'
 import React from 'react'
 import { useFormContext } from './useFormContext'
 
-export function useSubmit<T extends z.ZodTypeAny>(handlers?: Handlers<T>) {
+export function useSubmit<T extends z.ZodTypeAny = z.ZodUnknown>(
+  handlers?: Handlers<T>
+) {
   const handlersRef = React.useRef<Handlers<T> | undefined>(handlers)
   handlersRef.current = handlers
   const { addHandlers, removeHandlers } = useFormContext<T>()

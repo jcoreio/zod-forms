@@ -8,6 +8,6 @@ export const useFormDispatch = createDispatchHook(
   FormStateContext
 ) as typeof useFormDispatchType
 
-declare function useFormDispatchType<T extends z.ZodTypeAny>(): Dispatch<
-  FormAction<T>
->
+declare function useFormDispatchType<
+  T extends z.ZodTypeAny = z.ZodNever
+>(): Dispatch<FormAction<T>>

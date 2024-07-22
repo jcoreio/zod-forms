@@ -4,7 +4,7 @@ import { render, act, fireEvent } from '@testing-library/react'
 import sinon from 'sinon'
 import React from 'react'
 import z from 'zod'
-import { createZodForm, SubmitHandler, useSubmit } from '../src'
+import { createZodForm, SubmitHandler } from '../src'
 import { FormContextProps } from '../src/FormContext'
 import { FormCheckboxField } from './FormCheckboxField'
 
@@ -13,9 +13,10 @@ it(`boolean field test`, async function () {
     field: z.boolean(),
   })
   const onSubmit = sinon.spy<SubmitHandler<typeof schema>>(() => {})
-  const { FormProvider, root, useInitialize, useFormContext } = createZodForm({
-    schema,
-  })
+  const { FormProvider, root, useInitialize, useFormContext, useSubmit } =
+    createZodForm({
+      schema,
+    })
 
   let formContext: FormContextProps<typeof schema> | undefined
 

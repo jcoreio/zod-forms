@@ -10,13 +10,15 @@ import { useHtmlField } from '@jcoreio/zod-forms'
 export function useHtmlField({ field, type, normalizeOnBlur }): UseHtmlFieldProps`
 ```
 
-The full [`TypedUseHtmlField<T>`](types.md#typedusehtmlfield) method signature extracts the type of the subschema at
-the given path, and should produce a TS error if the path is invalid, doesn't exist in the schema, or its subschema doesn't accept
+The full method signature extracts the type of the subschema at the given path, and should produce a
+TS error if the path is invalid, doesn't exist in the schema, or its subschema doesn't accept
 `string | number | bigint | boolean | null | undefined`.
 
 ## Options
 
-- `field` - a [`FieldPath`](FieldPath.md), [pathstring](../concepts.md#pathstrings) or [path array](../concepts.md#path-arrays).
+- `field` - a [`FieldPath`](FieldPath.md). If you cast `useHtmlField` to [`TypedUseArrayField`](types.md#typedusearrayfield)
+  or use the [`useHtmlField` returned from `createZodForm`](createZodForm.md#returns-zodformt),
+  `path` may be a [pathstring](../concepts.md#pathstrings) or [path array](../concepts.md#path-arrays).
 - `type` - the `type` attribute for the `<input>` element
 - `normalizeOnBlur` (optional, defaults to `true`) - whether to normalize the displayed value on blur
 

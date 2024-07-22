@@ -3,7 +3,7 @@ import React, { DependencyList } from 'react'
 import { useFormContext } from './useFormContext'
 import { InitializeAction } from './actions/initialize'
 
-export function useInitialize<T extends z.ZodTypeAny>(
+export function useInitialize<T extends z.ZodTypeAny = z.ZodNever>(
   options: Omit<InitializeAction<T>, 'type'>,
   deps: DependencyList = [options.values, options.rawValues]
 ) {

@@ -11,10 +11,12 @@ import { useArrayField } from '@jcoreio/zod-forms'
 export function useArrayField(path): UseArrayFieldProps`
 ```
 
-`path` may be a [`FieldPath`](FieldPath.md), [pathstring](../concepts.md#pathstrings) or [path array](../concepts.md#path-arrays).
+`path` may be a [`FieldPath`](FieldPath.md). If you cast to [`TypedUseArrayField`](types.md#typedusearrayfield)
+or use the [`useArrayField` returned from `createZodForm`](createZodForm.md#returns-zodformt),
+`path` may be a [pathstring](../concepts.md#pathstrings) or [path array](../concepts.md#path-arrays).
 
-The full [`TypedUseArrayField<T>`](types.md#typedusearrayfield) method signature extracts the type of the subschema at
-the given path, and should produce a TS error if the path is invalid, not array valued, or doesn't exist in the schema.
+The full method signature extracts the type of the subschema at the given path, and should produce a TS error
+if the path is invalid, not array valued, or doesn't exist in the schema.
 
 ## Returns [`UseArrayFieldProps`](types.md#usearrayfieldprops)
 

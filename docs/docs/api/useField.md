@@ -6,6 +6,8 @@ to programmatically set the value.
 To connect `<input>` elements to form state, [`useHtmlField`](useHtmlField.md) is probably more useful;
 `useField` is better for custom field components that aren't based upon `<input>`s.
 
+For array fields, use [`useArrayField`](useArrayField.md).
+
 ```ts
 import { useField } from '@jcoreio/zod-forms'
 ```
@@ -14,10 +16,12 @@ import { useField } from '@jcoreio/zod-forms'
 export function useField(path): UseFieldProps`
 ```
 
-`path` may be a [`FieldPath`](FieldPath.md), [pathstring](../concepts.md#pathstrings) or [path array](../concepts.md#path-arrays).
+`path` may be a [`FieldPath`](FieldPath.md). If you cast to [`TypedUseField`](types.md#typedusefield),
+or use the [`useField` returned by `createZodForm`](createZodForm.md#returns-zodformt), `path` may be
+a [pathstring](../concepts.md#pathstrings) or [path array](../concepts.md#path-arrays).
 
-The full [`TypedUseField<T>`](types.md#typedusefield) method signature extracts the type of the subschema at
-the given path, and should produce a TS error if the path is invalid or doesn't exist in the schema.
+The full method signature (not shown here) extracts the type of the subschema at the given path,
+and should produce a TS error if the path is invalid or doesn't exist in the schema.
 
 ## Returns [`UseFieldProps`](types.md#usefieldprops)
 

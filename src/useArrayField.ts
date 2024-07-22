@@ -57,7 +57,7 @@ export interface TypedUseArrayField<T extends z.ZodTypeAny> {
 function useArrayFieldBase<Field extends FieldPath>(
   field: Field
 ): UseArrayFieldProps<Field> {
-  type Schema = Field['schema']
+  type T = Field['schema']
 
   const {
     arrayActions,
@@ -66,9 +66,9 @@ function useArrayFieldBase<Field extends FieldPath>(
     setMeta,
     selectFormValues,
     selectFieldErrorMap,
-  } = useFormContext()
+  } = useFormContext<T>()
 
-  const useFormSelector = untypedUseFormSelector as TypedUseFormSelector<Schema>
+  const useFormSelector = untypedUseFormSelector as TypedUseFormSelector<T>
 
   const valuesSelector = React.useMemo(
     () =>
@@ -78,11 +78,11 @@ function useArrayFieldBase<Field extends FieldPath>(
           [
             createStructuredSelector({
               value: ({ values }) =>
-                get(values, field.path) as z.output<Schema> | undefined,
+                get(values, field.path) as z.output<T> | undefined,
               rawValue: ({ rawValues }) =>
                 get(rawValues, field.path) as unknown,
               initialValue: ({ initialValues }) =>
-                get(initialValues, field.path) as z.output<Schema> | undefined,
+                get(initialValues, field.path) as z.output<T> | undefined,
             }),
           ],
           ({ rawValue, value, initialValue }) => {
@@ -142,18 +142,24 @@ export function useArrayField<Field extends FieldPath>(
   field: Field
 ): UseArrayFieldProps<Field>
 export function useArrayField<
-  T extends z.ZodTypeAny,
-  Path extends PathInSchema<T>
+  T extends z.ZodTypeAny = z.ZodBranded<
+    z.ZodNever,
+    'cast to TypedUseArrayField<T> to pass a path array'
+  >,
+  Path extends PathInSchema<T> = any
 >(field: Path): UseArrayFieldProps<FieldPath<SchemaAt<T, Path>>>
 export function useArrayField<
-  T extends z.ZodTypeAny,
-  Pathstring extends PathstringInSchema<T>
+  T extends z.ZodTypeAny = z.ZodBranded<
+    z.ZodNever,
+    'cast to TypedUseArrayField<T> to pass a pathstring'
+  >,
+  Pathstring extends PathstringInSchema<T> = any
 >(
   field: Pathstring
 ): UseArrayFieldProps<FieldPath<SchemaAt<T, parsePathstring<Pathstring>>>>
 export function useArrayField<T extends z.ZodTypeAny>(
   field: FieldPath | BasePath | string
-): UseArrayFieldProps<any> {
+): UseArrayFieldProps<any> | { ERROR: string } {
   const { root } = useFormContext<T>()
   return useArrayFieldBase(
     field instanceof FieldPath ? field : root.get(field as any)

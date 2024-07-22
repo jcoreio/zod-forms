@@ -4,7 +4,7 @@ import { render, act, fireEvent } from '@testing-library/react'
 import sinon from 'sinon'
 import React from 'react'
 import z from 'zod'
-import { createZodForm, SubmitHandler, useSubmit } from '../src'
+import { createZodForm, SubmitHandler } from '../src'
 import { FormTextField } from './FormTextField'
 import { FormContextProps } from '../src/FormContext'
 
@@ -13,9 +13,10 @@ it(`number field test`, async function () {
     field: z.number().min(-10).max(10),
   })
   const onSubmit = sinon.spy<SubmitHandler<typeof schema>>(() => {})
-  const { FormProvider, root, useInitialize, useFormContext } = createZodForm({
-    schema,
-  })
+  const { FormProvider, root, useInitialize, useFormContext, useSubmit } =
+    createZodForm({
+      schema,
+    })
 
   let formContext: FormContextProps<typeof schema> | undefined
 

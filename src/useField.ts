@@ -133,18 +133,25 @@ function useFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
 export function useField<Field extends FieldPath>(
   field: Field
 ): UseFieldProps<Field>
-export function useField<T extends z.ZodTypeAny, Path extends PathInSchema<T>>(
-  field: Path
-): UseFieldProps<FieldPath<SchemaAt<T, Path>>>
 export function useField<
-  T extends z.ZodTypeAny,
-  Pathstring extends PathstringInSchema<T>
+  T extends z.ZodTypeAny = z.ZodBranded<
+    z.ZodNever,
+    'cast to TypedUseArray<T> to pass a path array'
+  >,
+  Path extends PathInSchema<T> = any
+>(field: Path): UseFieldProps<FieldPath<SchemaAt<T, Path>>>
+export function useField<
+  T extends z.ZodTypeAny = z.ZodBranded<
+    z.ZodNever,
+    'cast to TypedUseArray<T> to pass a pathstring'
+  >,
+  Pathstring extends PathstringInSchema<T> = any
 >(
   field: Pathstring
 ): UseFieldProps<FieldPath<SchemaAt<T, parsePathstring<Pathstring>>>>
 export function useField<T extends z.ZodTypeAny>(
   field: FieldPath | BasePath | string
-): UseFieldProps<any> {
+): UseFieldProps<any> | { ERROR: string } {
   const { root } = useFormContext<T>()
   return useFieldBase(
     field instanceof FieldPath ? field : root.get(field as any)
