@@ -22,7 +22,7 @@ In this example, we'll have a `url` field that must be a valid URL.
 Using `.trim()` ensures that the submitted value will be trimmed.
 The displayed value will also be trimmed whenever the field is blurred.
 
-```ts
+```tsx
 import z from 'zod'
 
 const schema = z.object({
@@ -32,7 +32,7 @@ const schema = z.object({
 
 ## Create a form
 
-```ts
+```tsx
 import { createZodForm } from '@jcoreio/zod-form'
 
 const {
@@ -48,7 +48,7 @@ const {
 
 ## Create a field component
 
-```ts
+```tsx
 import { FieldPathForRawValue } from '@jcoreio/zod-form'
 
 function FormInput({
