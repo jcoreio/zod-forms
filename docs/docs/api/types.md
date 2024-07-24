@@ -275,6 +275,23 @@ export type UseFieldProps<Field extends FieldPath> = FieldMeta & {
 }
 ```
 
+## `UseHtmlFieldOptions`
+
+```ts
+export type UseHtmlFieldOptions<
+  Field,
+  Schema extends z.ZodTypeAny = Field extends FieldPath<infer S>
+    ? S
+    : z.ZodTypeAny
+> = {
+  field: Field
+  type: z.input<Schema> extends boolean | null | undefined
+    ? 'checkbox'
+    : Exclude<HTMLInputTypeAttribute, 'checkbox'>
+  normalizeOnBlur?: boolean
+}
+```
+
 ## `UseHtmlFieldProps`
 
 ```ts

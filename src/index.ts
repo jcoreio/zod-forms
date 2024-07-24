@@ -24,6 +24,7 @@ export { useFormValues } from './useFormValues'
 export {
   useHtmlField,
   type TypedUseHtmlField,
+  type UseHtmlFieldOptions,
   type UseHtmlFieldProps,
   type HtmlFieldInputProps,
   type ValidUseHtmlFieldProps,

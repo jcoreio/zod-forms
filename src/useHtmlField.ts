@@ -36,7 +36,12 @@ export type UseHtmlFieldProps<Field extends FieldPath> = z.input<
       ERROR: 'field schema input must be a nullish string, number, boolean or bigint'
     }
 
-type UseHtmlFieldOptions<Field, Schema extends z.ZodTypeAny> = {
+export type UseHtmlFieldOptions<
+  Field,
+  Schema extends z.ZodTypeAny = Field extends FieldPath<infer S>
+    ? S
+    : z.ZodTypeAny
+> = {
   field: Field
   type: z.input<Schema> extends boolean | null | undefined
     ? 'checkbox'
