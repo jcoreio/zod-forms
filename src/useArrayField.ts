@@ -128,6 +128,7 @@ function useArrayFieldBase<Field extends FieldPath>(
       ...boundActions,
       visited: meta?.visited || false,
       touched: meta?.touched || submitFailed,
+      error,
       elements,
       dirty,
       pristine,
