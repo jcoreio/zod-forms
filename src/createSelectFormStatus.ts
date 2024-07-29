@@ -20,10 +20,22 @@ export function createSelectFormStatus() {
 
   const selectPristine = createSelector(
     [
-      (state: FormState<any>) => state.values,
-      (state: FormState<any>) => state.initialValues,
+      createSelector(
+        [
+          (state: FormState<any>) => state.values,
+          (state: FormState<any>) => state.initialValues,
+        ],
+        isEqual
+      ),
+      createSelector(
+        [
+          (state: FormState<any>) => state.rawValues,
+          (state: FormState<any>) => state.rawInitialValues,
+        ],
+        isEqual
+      ),
     ],
-    isEqual
+    (pristine, rawPristine) => pristine && rawPristine
   )
 
   return createStructuredSelector({
