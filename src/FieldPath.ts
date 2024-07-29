@@ -181,13 +181,9 @@ function subschema(
       return subschema((schema as z.ZodLazy<z.ZodTypeAny>).schema, key)
     case 'ZodEffects': {
       const {
-        _def: {
-          effect: { type },
-          schema: innerSchema,
-        },
+        _def: { schema: innerSchema },
       } = schema as z.ZodEffects<z.ZodTypeAny, any>
-      if (type === 'refinement') return subschema(innerSchema, key)
-      break
+      return subschema(innerSchema, key)
     }
     case 'ZodOptional':
       return subschema((schema as z.ZodOptional<z.ZodTypeAny>).unwrap(), key)
@@ -207,7 +203,7 @@ function subschema(
       )
     case 'ZodPipeline':
       return subschema(
-        (schema as z.ZodPipeline<z.ZodTypeAny, z.ZodTypeAny>)._def.out,
+        (schema as z.ZodPipeline<z.ZodTypeAny, z.ZodTypeAny>)._def.in,
         key
       )
   }
