@@ -142,7 +142,7 @@ function subschema(
         .map((opt) => subschema(opt, key))
         .filter((opt): opt is z.ZodTypeAny => opt != null)
       return options.length > 1
-        ? z.discriminatedUnion(discUnion.discriminator, options as any)
+        ? z.union(options as any)
         : options.length === 1
         ? options[0]
         : undefined
