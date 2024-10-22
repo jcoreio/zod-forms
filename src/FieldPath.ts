@@ -118,7 +118,11 @@ function subschema(
         _def: { unknownKeys, catchall },
       } = schema as z.AnyZodObject
       if (key in shape) return shape[key]
-      if (unknownKeys === 'passthrough') return catchall
+      if (unknownKeys === 'passthrough') {
+        return catchall._def.typeName === z.ZodFirstPartyTypeKind.ZodNever
+          ? z.unknown()
+          : catchall
+      }
       break
     }
     case 'ZodUnion': {
