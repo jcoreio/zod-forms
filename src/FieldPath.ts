@@ -205,11 +205,12 @@ function subschema(
         (schema as z.ZodBranded<z.ZodTypeAny, any>)._def.type,
         key
       )
-    case 'ZodPipeline':
-      return subschema(
-        (schema as z.ZodPipeline<z.ZodTypeAny, z.ZodTypeAny>)._def.in,
-        key
-      )
+    case 'ZodPipeline': {
+      const { _def } = schema as z.ZodPipeline<z.ZodTypeAny, z.ZodTypeAny>
+      const _in = subschema(_def.in, key)
+      const out = subschema(_def.out, key)
+      return _in && out ? _in.pipe(out) : _in || out
+    }
   }
   return undefined
 }
