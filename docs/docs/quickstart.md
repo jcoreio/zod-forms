@@ -33,11 +33,11 @@ const schema = z.object({
 ## Create a form
 
 ```tsx
-import { createZodForm } from '@jcoreio/zod-form'
+import { createZodForm } from '@jcoreio/zod-forms'
 
 const {
   FormProvider,
-  // all of the following hooks can also be imported from '@jcoreio/zod-form',
+  // all of the following hooks can also be imported from '@jcoreio/zod-forms',
   // but the ones returned from `createZodForm` are already bound to the schema type
   useInitialize,
   useSubmit,
@@ -49,7 +49,7 @@ const {
 ## Create a field component
 
 ```tsx
-import { FieldPathForRawValue } from '@jcoreio/zod-form'
+import { FieldPathForRawValue } from '@jcoreio/zod-forms'
 
 function FormInput({
   field,
@@ -65,7 +65,7 @@ function FormInput({
   const { input, meta } = useHtmlField({ field, type })
 
   const inputRef = React.createRef<HTMLInputElement>()
-  const error = meta.touched || meta.submitFailed ? meta.error : undefined
+  const error = meta.touched ? meta.error : undefined
   React.useEffect(() => {
     inputRef.current?.setCustomValidity(error || '')
   }, [error])

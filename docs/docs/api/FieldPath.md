@@ -3,7 +3,7 @@
 Encapsulates a path to a field in a form and the schema at that path.
 
 ```ts
-import { FieldPath } from '@jcoreio/zod-form'
+import { FieldPath } from '@jcoreio/zod-forms'
 ```
 
 ```ts

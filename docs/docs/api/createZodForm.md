@@ -3,7 +3,7 @@
 Creates a form for a Zod schema
 
 ```ts
-import { createZodForm } from '@jcoreio/zod-form'
+import { createZodForm } from '@jcoreio/zod-forms'
 ```
 
 ```ts

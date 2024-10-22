@@ -60,7 +60,7 @@ If you want to render fields in one component that are typically grouped togethe
 you can use a single `FieldPath` prop to specify the form section, and get subpaths from it:
 
 ```tsx
-import { type FieldPathForRawValue } from '@jcoreio/zod-form'
+import { type FieldPathForRawValue } from '@jcoreio/zod-forms'
 
 function AddressFields({
   section,
