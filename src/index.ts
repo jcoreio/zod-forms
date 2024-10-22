@@ -31,3 +31,7 @@ export {
 } from './useHtmlField'
 export { useInitialize } from './useInitialize'
 export { useSubmit } from './useSubmit'
+export {
+  conditionalValidate,
+  ConditionalValidator,
+} from './ConditionalValidator'

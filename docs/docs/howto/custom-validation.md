@@ -1,4 +1,4 @@
-# Custom Validation
+# Custom/Conditional Validation
 
 In your form schema, use [`.refine`](https://zod.dev/?id=refine) and [`.superRefine`](https://zod.dev/?id=superrefine)
 for field validation.
@@ -27,51 +27,53 @@ const schema = z.object({
 
 ## Comparing Fields
 
-To validate one field against another, use [`.superRefine`](https://zod.dev/?id=superrefine):
+To validate one field against another, use [`conditionalValidate`](../api/conditionalValidate.md).
+It is similar to `.superRefine`, but ensures that the refinements are checked even if unrelated fields
+failed to parse.
 
 ```ts
-const schema = z
-  .object({
+import { conditionalValidate } from '@jcoreio/zod-forms'
+
+const schema = conditionalValidate(
+  z.object({
+    foo: z.string(),
     min: z.number().finite(),
     max: z.number().finite(),
   })
-  .superRefine(({ min, max }, ctx) => {
-    if (min > max) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: [...ctx.path, 'min'],
-        message: 'must be <= max',
-      })
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: [...ctx.path, 'max'],
-        message: 'must be >= min',
-      })
-    }
-  })
+).conditionalRefine(
+  // Pick the fields the refinement depends on here
+  (s) => s.pick({ min: true, max: true }),
+  // This refinement will only be checked if min and max are successfully parsed
+  ({ min, max }) => min <= max,
+  [
+    { path: ['min'], message: 'must be <= max' },
+    { path: ['max'], message: 'must be >= min' },
+  ]
+)
 ```
 
 ![error message example](../../static/img/min-max-validation.png)
 
 ## Conditional Validation
 
-You can use [`.superRefine`](https://zod.dev/?id=superrefine) to only validate one field when another is defined:
+To do conditional validation, use [`conditionalValidate`](../api/conditionalValidate.md).
+It is similar to `.superRefine`, but ensures that the refinements are checked even if unrelated fields
+failed to parse.
 
 ```ts
-const schema = z
-  .object({
+import { conditionalValidate } from '@jcoreio/zod-forms'
+
+const schema = conditionalValidate(
+  z.object({
     dataType: z.enum(['string', 'number']),
     displayPrecision: z.number().finite().optional(),
   })
-  .superRefine(({ dataType, displayPrecision }, ctx) => {
-    if (dataType === 'number' && displayPrecision == null) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: [...ctx.path, 'displayPrecision'],
-        message: 'Required when dataType is number',
-      })
-    }
-  })
+).conditionalRefine(
+  (s) => s.pick({ dataType: true, displayPrecision: true }),
+  ({ dataType, displayPrecision }) =>
+    dataType !== 'number' || displayPrecision != null,
+  { path: ['displayPrecision'], message: 'Required when dataType is number' }
+)
 ```
 
 ![error message example](../../static/img/conditional-validation.png)

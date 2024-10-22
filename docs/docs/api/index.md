@@ -10,3 +10,4 @@
 - [`useHtmlField`](useHtmlField.md) - React custom hook for connecting an `<input>` element to form state
 - [`useInitialize`](useInitialize.md) - React custom hook for setting initial values on a form
 - [`useSubmit`](useSubmit.md) - React custom hook for registering a submit handler function
+- [`conditionalValidate`](conditionalValidate.md) - Helper for doing conditional validation properly

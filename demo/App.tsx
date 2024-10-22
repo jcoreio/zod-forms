@@ -23,6 +23,8 @@ import {
   List,
   ListItem,
   IconButton,
+  FormLabel,
+  SxProps,
 } from '@mui/material'
 import { Add, Remove } from '@mui/icons-material'
 import { SchemaAt } from '../src/util/SchemaAt'
@@ -43,6 +45,7 @@ const schema = z
     array: z
       .array(z.object({ value: z.number(), displayText: z.string() }))
       .optional(),
+    numberEnum: z.union([z.literal(1), z.literal(2), z.literal(4)]).optional(),
   })
   .superRefine((obj, ctx) => {
     if (
@@ -167,6 +170,13 @@ function App2() {
           />
           <FormTextField field={form.get('bigint')} type="tel" label="BigInt" />
         </Box>
+        <Box sx={{ mt: 2 }}>
+          <FormSelectField field={form.get('numberEnum')} label="Number Enum">
+            <option value="1">One</option>
+            <option value="2">Two</option>
+            <option value="4">Four</option>
+          </FormSelectField>
+        </Box>
         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
           <Typography variant="h6">Array</Typography>
           <IconButton onClick={() => pushRaw(form.get('array'), {} as any)}>
@@ -203,6 +213,32 @@ const FormTextField = React.memo(function FormTextField({
   const error = meta.touched ? meta.error : undefined
   return (
     <TextField {...input} error={error != null} helperText={error} {...props} />
+  )
+})
+
+const FormSelectField = React.memo(function FormSelectField({
+  field,
+  sx,
+  label,
+  children,
+  ...props
+}: Omit<React.ComponentProps<'select'>, 'type'> & {
+  sx?: SxProps
+  label?: React.ReactNode
+  field: FieldPathForRawValue<string | number | bigint | null | undefined>
+}) {
+  const { input, meta } = useHtmlField({ field, type: 'text' })
+  const error = meta.touched ? meta.error : undefined
+  return (
+    <FormControl sx={sx} error={error != null}>
+      <FormLabel sx={{ display: 'flex', flexDirection: 'column' }}>
+        {label}
+        <select {...input} {...props}>
+          {children}
+        </select>
+      </FormLabel>
+      {error ? <FormHelperText>{error}</FormHelperText> : undefined}
+    </FormControl>
   )
 })
 
