@@ -1,4 +1,5 @@
 import z from 'zod'
+import { IgnoreEffect } from 'zod-invertible'
 import { DeepPartial } from './util/DeepPartial'
 
 type ConditionalCheck<T extends z.ZodTypeAny> = {
@@ -38,7 +39,9 @@ export class ConditionalValidator<
   Output = z.output<T>,
   Input = z.input<T>
 > extends z.ZodEffects<T, Output, Input> {
-  declare _def: ConditionalValidatorDef<T>
+  declare _def: ConditionalValidatorDef<T>;
+
+  [IgnoreEffect] = true
 
   constructor(schema: T, checks: ConditionalCheck<any>[]) {
     super({

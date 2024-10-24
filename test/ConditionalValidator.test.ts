@@ -2,6 +2,7 @@ import { describe, it } from 'mocha'
 import { expect } from 'chai'
 import z from 'zod'
 import { conditionalValidate } from '../src'
+import { invert } from 'zod-invertible'
 
 describe(`ConditionalValidator`, function () {
   it(`sync .conditionalRefine`, function () {
@@ -64,6 +65,12 @@ describe(`ConditionalValidator`, function () {
           message: 'Required',
         },
       ]),
+    })
+    const inverse = invert(schema)
+    expect(inverse.parse({ foo: '1', min: 1, max: 2 })).to.deep.equal({
+      foo: '1',
+      min: 1,
+      max: 2,
     })
   })
   it(`string message`, function () {
