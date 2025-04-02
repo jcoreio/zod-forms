@@ -31,13 +31,13 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@jcoreio/eslint-plugin-implicit-dependencies": "^1.1.1",
-    "@jcoreio/toolchain": "4.6.1",
-    "@jcoreio/toolchain-circle": "^4.6.1",
-    "@jcoreio/toolchain-esnext": "^4.6.1",
-    "@jcoreio/toolchain-mocha": "^4.6.1",
-    "@jcoreio/toolchain-react": "^4.6.1",
-    "@jcoreio/toolchain-semantic-release": "^4.6.1",
-    "@jcoreio/toolchain-typescript": "^4.6.1",
+    "@jcoreio/toolchain": "4.12.4",
+    "@jcoreio/toolchain-circle": "^4.12.4",
+    "@jcoreio/toolchain-esnext": "^4.12.4",
+    "@jcoreio/toolchain-mocha": "^4.12.4",
+    "@jcoreio/toolchain-react": "^4.12.4",
+    "@jcoreio/toolchain-semantic-release": "^4.12.4",
+    "@jcoreio/toolchain-typescript": "^4.12.4",
     "@mui/icons-material": "^5.16.1",
     "@mui/material": "^5.16.0",
     "@rsbuild/core": "1.0.0-alpha.7",
@@ -86,5 +86,8 @@
     "shallow-equal": "^3.1.0",
     "zod": "^3.23.8",
     "zod-invertible": "^1.1.0"
+  },
+  "@jcoreio/toolchain": {
+    "migratedVersion": "4.12.4"
   }
 }
