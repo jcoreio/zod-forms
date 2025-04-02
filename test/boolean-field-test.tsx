@@ -27,7 +27,7 @@ it(`boolean field test`, async function () {
   )
 
   const Form2 = () => {
-    useInitialize({ values: { field: false } })
+    useInitialize({ parsedValues: { field: false } })
     formContext = useFormContext()
 
     return (
@@ -60,12 +60,12 @@ it(`boolean field test`, async function () {
     dirty: false,
   })
 
-  await act(() => formContext?.setValue(root.get('field'), true))
+  await act(() => formContext?.setParsedValue(root.get('field'), true))
   expect(input.checked).to.equal(true)
   await act(() => fireEvent.click(input))
-  expect(formContext?.getValues()).to.deep.equal({ field: false })
+  expect(formContext?.getParsedValues()).to.deep.equal({ field: false })
   await act(() => fireEvent.click(input))
-  expect(formContext?.getValues()).to.deep.equal({ field: true })
+  expect(formContext?.getParsedValues()).to.deep.equal({ field: true })
   expect(formContext?.getStatus()).to.deep.equal({
     initialized: true,
     submitting: false,
@@ -78,7 +78,7 @@ it(`boolean field test`, async function () {
     pristine: false,
     dirty: true,
   })
-  await act(() => formContext?.setRawValue(root.get('field'), undefined as any))
+  await act(() => formContext?.setValue(root.get('field'), undefined as any))
   expect(formContext?.getStatus()).to.deep.equal({
     initialized: true,
     submitting: false,
@@ -103,15 +103,21 @@ it(`boolean field test`, async function () {
     undefined
   )
   await act(() => fireEvent.blur(input, { target: { value: '' } }))
-  await act(() => formContext?.setRawValue(root.get('field'), undefined as any))
+  await act(() => formContext?.setValue(root.get('field'), undefined as any))
   expect(component.queryByTestId('field-helperText')?.innerHTML).to.equal(
     'Required'
   )
   await act(() => fireEvent.click(input))
-  expect(formContext?.getValues()).to.deep.equal({ field: true })
+  expect(formContext?.getParsedValues()).to.deep.equal({ field: true })
 
   await act(() => fireEvent.submit(form))
   expect(onSubmit.args).to.deep.equal([
-    [{ field: true }, { initialValues: { field: false } }],
+    [
+      { field: true },
+      {
+        initialParsedValues: { field: false },
+        initialValues: { field: false },
+      },
+    ],
   ])
 })

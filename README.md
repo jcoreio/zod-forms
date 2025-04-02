@@ -75,7 +75,7 @@ const {
 ## Create a field component
 
 ```ts
-import { FieldPathForRawValue } from '@jcoreio/zod-form'
+import { FieldPathForValue } from '@jcoreio/zod-form'
 
 function FormInput({
   field,
@@ -85,7 +85,7 @@ function FormInput({
   type: HTMLInputTypeAttribute
   // This ensures that only fields that accept string, null or undefined
   // as input can be passed to <FormInput>
-  field: FieldPathForRawValue<string | null | undefined>
+  field: FieldPathForValue<string | null | undefined>
 }) {
   // This hook is designed to provide the smoothest integration with simple <input>s.
   const { input, meta } = useHtmlField({ field, type })

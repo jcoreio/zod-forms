@@ -8,9 +8,9 @@ export type SelectFormValues<T extends z.ZodTypeAny> = ReturnType<
 
 export function createSelectFormValues<T extends z.ZodTypeAny>() {
   return createStructuredSelector({
+    parsedValues: (state: FormState<T>) => state.parsedValues,
     values: (state: FormState<T>) => state.values,
-    rawValues: (state: FormState<T>) => state.rawValues,
+    initialParsedValues: (state: FormState<T>) => state.initialParsedValues,
     initialValues: (state: FormState<T>) => state.initialValues,
-    rawInitialValues: (state: FormState<T>) => state.rawInitialValues,
   })
 }

@@ -1,4 +1,5 @@
 import z from 'zod'
+import { DeepPartial } from './util/DeepPartial'
 
 export type FieldMeta = {
   touched: boolean
@@ -6,8 +7,11 @@ export type FieldMeta = {
 }
 
 export type SubmitHandler<T extends z.ZodTypeAny> = (
-  values: z.output<T>,
-  options: { initialValues: z.output<T> }
+  parsedValues: z.output<T>,
+  options: {
+    initialValues?: DeepPartial<z.input<T>>
+    initialParsedValues?: DeepPartial<z.output<T>>
+  }
 ) => void | Promise<void>
 
 export type SubmitSuccededHandler = () => void
@@ -18,12 +22,12 @@ export type FormState<T extends z.ZodTypeAny> = {
   mounted: boolean
   initialized: boolean
   fieldMeta: Record<string, FieldMeta>
-  rawValues?: unknown
-  values?: z.output<T>
-  submittedValues?: z.output<T>
-  rawSubmittedValues?: z.input<T>
-  rawInitialValues?: unknown
-  initialValues?: z.output<T>
+  values?: DeepPartial<z.input<T>>
+  parsedValues?: DeepPartial<z.output<T>>
+  submittedParsedValues?: z.output<T>
+  submittedValues?: z.input<T>
+  initialValues?: DeepPartial<z.input<T>>
+  initialParsedValues?: DeepPartial<z.output<T>>
   validationError?: any
   submitPromise?: Promise<void>
   onSubmit: Set<SubmitHandler<T>>

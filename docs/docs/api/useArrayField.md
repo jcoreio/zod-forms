@@ -26,23 +26,23 @@ An object containing the following properties. Causes a rerender when any of the
 - `error` - the validation error message, if any
 - `dirty` - whether the `value` is not equal to `initialValue`
 - `pristine` - opposite of `dirty`
-- `valid` - whether the `rawValue` is valid
+- `valid` - whether the `value` is valid
 - `invalid` - oppposite of `valid`
 - `touched` - whether the field has been blurred or the form submitted
 - `visited` - whether the field has been focused
 - `setMeta` - method to set the [`FieldMeta`](types.md#fieldmeta) for this field
-- `setRawValue` - method to set the raw value for this field
 - `setValue` - method to set the value for this field
+- `setParsedValue` - method to set the parsed value for this field
+- `insertParsed` - method to insert a parsed value into the array
 - `insert` - method to insert a value into the array
-- `insertRaw` - method to insert a raw value into the array
 - `move` - method to move a value from one index to another
 - `pop` - method to remove the last value from the array
+- `pushParsed` - method to add a parsed value to the end of the array
 - `push` - method to add a value to the end of the array
-- `pushRaw` - method to add a raw value to the end of the array
 - `remove` - method to remove a value at an index
 - `removeAll` - method to remove all values
+- `spliceParsed` - method to remove and/or insert parsed values, like `Array.splice`
 - `splice` - method to remove and/or insert values, like `Array.splice`
-- `spliceRaw` - method to remove and/or insert raw values, like `Array.splice`
 - `swap` - method to swap values at two indices
+- `unshiftParsed` - method to add a parsed value to the beginning of the array
 - `unshift` - method to add a value to the beginning of the array
-- `unshiftRaw` - method to add a raw value to the beginning of the

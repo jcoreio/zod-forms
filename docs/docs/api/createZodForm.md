@@ -14,7 +14,7 @@ createZodForm<T extends z.ZodTypeAny>(options: { schema: T }): ZodForm<T>
 
 If you want to use `.transform`s in `schema`, you must declare them via
 [`zod-invertible`](https://github.com/jcoreio/zod-invertible) so that it's possible
-to format final values into raw values; otherwise `createZodForm` will throw an error.
+to invert parsed values back into input values; otherwise `createZodForm` will throw an error.
 
 ## Returns [`ZodForm<T>`](types#zodform)
 

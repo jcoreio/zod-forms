@@ -37,8 +37,8 @@ const FeatureList: FeatureItem[] = [
     description: (
       <>
         Provides the behavior we want in JCore projects by default (normalizes
-        inputs on blur, and after submission, resets initial values to submitted
-        values)
+        inputs on blur, and after submission, resets initial parsedValues to
+        submitted parsedValues)
       </>
     ),
   },

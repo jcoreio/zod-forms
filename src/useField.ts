@@ -3,8 +3,8 @@ import { BasePath, FieldPath } from './FieldPath'
 import { FieldMeta } from './FormState'
 import { get } from './util/get'
 import React from 'react'
+import { setParsedValue } from './actions/setParsedValue'
 import { setValue } from './actions/setValue'
-import { setRawValue } from './actions/setRawValue'
 import { setMeta } from './actions/setMeta'
 import {
   useFormSelector as untypedUseFormSelector,
@@ -19,19 +19,20 @@ import { parsePathstring } from './util/parsePathstring'
 import { SchemaAt } from './util/SchemaAt'
 import { maybeParse } from './util/maybeParse'
 import { bindActionsToField } from './util/bindActionsToField'
+import { DeepPartial } from './util/DeepPartial'
 
 export type UseFieldProps<Field extends FieldPath> = FieldMeta &
   ReturnType<
     typeof bindActionsToField<{
+      setParsedValue: typeof setParsedValue
       setValue: typeof setValue
-      setRawValue: typeof setRawValue
       setMeta: typeof setMeta
     }>
   > & {
-    value: z.output<Field['schema']> | undefined
-    rawValue: unknown
-    initialValue: z.output<Field['schema']> | undefined
-    rawInitialValue: unknown
+    parsedValue: DeepPartial<z.output<Field['schema']>> | undefined
+    value: DeepPartial<z.input<Field['schema']>> | undefined
+    initialParsedValue: DeepPartial<z.output<Field['schema']>> | undefined
+    initialValue: DeepPartial<z.input<Field['schema']>> | undefined
     error?: string
     dirty: boolean
     pristine: boolean
@@ -55,8 +56,8 @@ function useFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
   type Schema = Field['schema']
 
   const {
+    setParsedValue,
     setValue,
-    setRawValue,
     setMeta,
     selectFormValues,
     selectFieldErrorMap,
@@ -71,29 +72,30 @@ function useFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
         createSelector(
           [
             createStructuredSelector({
-              value: ({ values }) =>
-                get(values, field.path) as z.output<Schema> | undefined,
-              rawValue: ({ rawValues }) =>
-                get(rawValues, field.path) as unknown,
+              parsedValue: ({ parsedValues }) =>
+                get(parsedValues, field.path) as z.output<Schema> | undefined,
+              value: ({ values }) => get(values, field.path) as unknown,
+              initialParsedValue: ({ initialParsedValues }) =>
+                get(initialParsedValues, field.path) as
+                  | z.output<Schema>
+                  | undefined,
               initialValue: ({ initialValues }) =>
-                get(initialValues, field.path) as z.output<Schema> | undefined,
-              rawInitialValue: ({ rawInitialValues }) =>
-                get(rawInitialValues, field.path) as unknown,
+                get(initialValues, field.path) as unknown,
             }),
           ],
           ({
-            rawValue,
-            value = maybeParse(field.schema, rawValue),
-            rawInitialValue,
-            initialValue = maybeParse(field.schema, rawInitialValue),
+            value,
+            parsedValue = maybeParse(field.schema, value),
+            initialValue,
+            initialParsedValue = maybeParse(field.schema, initialValue),
           }) => {
-            const dirty = !isEqual(value, initialValue)
+            const dirty = !isEqual(parsedValue, initialParsedValue)
             const pristine = !dirty
             return {
+              parsedValue,
               value,
-              rawValue,
+              initialParsedValue,
               initialValue,
-              rawInitialValue,
               dirty,
               pristine,
             }
@@ -103,7 +105,7 @@ function useFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
     [field.pathstring]
   )
 
-  const values = useFormSelector(valuesSelector, shallowEqual)
+  const parsedValues = useFormSelector(valuesSelector, shallowEqual)
 
   const error = useFormSelector(
     (state) => selectFieldErrorMap(state)[field.pathstring]
@@ -112,21 +114,21 @@ function useFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
   const submitFailed = useFormSelector((state) => state.submitFailed)
 
   const boundActions = React.useMemo(
-    () => bindActionsToField({ setValue, setRawValue, setMeta }, field),
+    () => bindActionsToField({ setParsedValue, setValue, setMeta }, field),
     [field.pathstring]
   )
 
   return React.useMemo(
     () => ({
       ...boundActions,
-      ...values,
+      ...parsedValues,
       visited: meta?.visited || false,
       touched: meta?.touched || submitFailed,
       error,
       valid: !error,
       invalid: Boolean(error),
     }),
-    [field.pathstring, values, meta, error, submitFailed]
+    [field.pathstring, parsedValues, meta, error, submitFailed]
   ) as any
 }
 

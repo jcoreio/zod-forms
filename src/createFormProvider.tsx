@@ -7,8 +7,8 @@ import { FormAction } from './FormAction'
 import { FormState } from './FormState'
 import { Provider } from 'react-redux'
 import { initialize } from './actions/initialize'
-import { setRawValue } from './actions/setRawValue'
 import { setValue } from './actions/setValue'
+import { setParsedValue } from './actions/setParsedValue'
 import { FormContext, FormContextProps } from './FormContext'
 import { FormStateContext } from './FormStateContext'
 import { createFormMiddleware } from './createFormMiddleware'
@@ -41,14 +41,17 @@ export const createFormProvider = <T extends z.ZodTypeAny>(
     const store = storeRef.current
     const { dispatch } = store
 
-    const getValues = React.useCallback(() => store.getState().values, [])
-    const getRawValues = React.useCallback(() => store.getState().rawValues, [])
-    const getInitialValues = React.useCallback(
-      () => store.getState().initialValues,
+    const getParsedValues = React.useCallback(
+      () => store.getState().parsedValues,
       []
     )
-    const getRawInitialValues = React.useCallback(
-      () => store.getState().rawInitialValues,
+    const getValues = React.useCallback(() => store.getState().values, [])
+    const getInitialParsedValues = React.useCallback(
+      () => store.getState().initialParsedValues,
+      []
+    )
+    const getInitialValues = React.useCallback(
+      () => store.getState().initialValues,
       []
     )
     const getStatus = React.useCallback(
@@ -65,10 +68,10 @@ export const createFormProvider = <T extends z.ZodTypeAny>(
     const formContext = React.useMemo(
       (): FormContextProps<T> => ({
         ...props,
+        getParsedValues,
         getValues,
-        getRawValues,
+        getInitialParsedValues,
         getInitialValues,
-        getRawInitialValues,
         getStatus,
         ...bindActionCreators(
           {
@@ -78,8 +81,8 @@ export const createFormProvider = <T extends z.ZodTypeAny>(
             submit,
             setSubmitStatus: setSubmitStatus<T>,
             setMeta: setMeta as any,
-            setRawValue: setRawValue as any,
             setValue: setValue as any,
+            setParsedValue: setParsedValue as any,
           },
           dispatch
         ),

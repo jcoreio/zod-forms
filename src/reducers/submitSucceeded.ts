@@ -11,7 +11,7 @@ export function submitSucceededReducer<T extends z.ZodTypeAny>(
     submitFailed: false,
     submitError: undefined,
     submitPromise: undefined,
+    initialParsedValues: state.submittedParsedValues,
     initialValues: state.submittedValues,
-    rawInitialValues: state.rawSubmittedValues,
   }
 }

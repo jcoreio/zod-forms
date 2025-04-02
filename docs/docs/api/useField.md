@@ -27,17 +27,17 @@ and should produce a TS error if the path is invalid or doesn't exist in the sch
 
 An object containing the following properties. Causes a rerender when any of these properties changes.
 
-- `value` - the parsed value of the field, or `undefined` if invalid
-- `rawValue` - the raw value of the field
-- `initialValue` - the parsed initial value of the field, or `undefined` if invalid/uninitialized
-- `rawInitialValue` - the raw initial value of the field
+- `parsedValue` - the parsed value of the field, or `undefined` if invalid
+- `value` - the value of the field
+- `initialParsedValue` - the parsed initial value of the field, or `undefined` if invalid/uninitialized
+- `initialValue` - the initial value of the field
 - `error` - the validation error message, if any
 - `dirty` - whether the `value` is not equal to `initialValue`
 - `pristine` - opposite of `dirty`
-- `valid` - whether the `rawValue` is valid
+- `valid` - whether the `value` is valid
 - `invalid` - oppposite of `valid`
 - `touched` - whether the field has been blurred or the form submitted
 - `visited` - whether the field has been focused
 - `setMeta` - method to set the [`FieldMeta`](types.md#fieldmeta) for this field
-- `setRawValue` - method to set the raw value for this field
 - `setValue` - method to set the value for this field
+- `setParsedValue` - method to set the parsed value for this field

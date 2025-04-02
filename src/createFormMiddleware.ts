@@ -22,19 +22,21 @@ export function createFormMiddleware<T extends z.ZodTypeAny>(): Middleware<
         onSubmit,
         onSubmitSucceeded,
         onSubmitFailed,
+        parsedValues,
         values,
-        rawValues,
         initialValues,
+        initialParsedValues,
       } = nextState
       const submitPromise = (async () => {
         if (nextState.validationError) throw nextState.validationError
-        for (const fn of onSubmit) await fn(values, { initialValues })
+        for (const fn of onSubmit)
+          await fn(parsedValues, { initialValues, initialParsedValues })
       })()
       store.dispatch(
         setSubmitStatus({
           submitting: true,
+          submittedParsedValues: parsedValues,
           submittedValues: values,
-          rawSubmittedValues: rawValues,
           submitError: undefined,
           submitSucceeded: false,
           submitFailed: false,

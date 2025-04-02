@@ -8,10 +8,10 @@ import { useFormValues } from '@jcoreio/zod-forms'
 
 ```ts
 export function useFormValues<T extends z.ZodTypeAny>(): {
-  values: z.output<T> | undefined
-  rawValues: unknown
-  initialValues: z.output<T> | undefined
-  initialRawValues: unknown
+  parsedValues: DeepPartial<z.output<T>> | undefined
+  values: DeepPartial<z.input<T>> | undefined
+  initialParsedValues: z.output<T> | undefined
+  initialValues: DeepPartial<z.input<T>> | undefined
 }
 ```
 
@@ -21,7 +21,7 @@ All types will be `unknown` unless you pass an explicit schema type for `T` or u
 
 An object containing the following properties. Causes a rerender when any field value changes.
 
-- `values` - the parsed field values, or `undefined` if any is invalid
-- `rawValues` - the raw field values
-- `initialValues` - the initial field values, or `undefined` if uninitialized or any is invalid
-- `rawInitialValues` - the raw initial field values
+- `validtedValues` - the parsed field values, or `undefined` if any is invalid
+- `values` - the field values
+- `initialParsedValues` - the initial parsed field values, or `undefined` if uninitialized or any is invalid
+- `initialValues` - the initial field values

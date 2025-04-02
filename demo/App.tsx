@@ -5,9 +5,10 @@ import {
   FieldPath,
   useHtmlField,
   useFormStatus,
-  FieldPathForRawValue,
+  FieldPathForValue,
   useFormContext,
   useArrayField,
+  conditionalValidate,
 } from '../src/index'
 import {
   Paper,
@@ -29,8 +30,8 @@ import {
 import { Add, Remove } from '@mui/icons-material'
 import { SchemaAt } from '../src/util/SchemaAt'
 
-const schema = z
-  .object({
+const schema = conditionalValidate(
+  z.object({
     trimString: z.string().trim(),
     urlString: z.string().trim().url().nullable(),
     min: z.number().finite(),
@@ -47,25 +48,15 @@ const schema = z
       .optional(),
     numberEnum: z.union([z.literal(1), z.literal(2), z.literal(4)]).optional(),
   })
-  .superRefine((obj, ctx) => {
-    if (
-      obj.requireMinLteMax &&
-      obj.min != null &&
-      obj.max != null &&
-      obj.min > obj.max
-    ) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: [...ctx.path, 'min'],
-        message: 'must be <= max',
-      })
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: [...ctx.path, 'max'],
-        message: 'must be >= min',
-      })
-    }
-  })
+).conditionalRefine(
+  (s) => s.pick({ min: true, max: true, requireMinLteMax: true }),
+  ({ min, max, requireMinLteMax }) =>
+    !requireMinLteMax || min == null || max == null || min < max,
+  [
+    { path: ['min'], message: 'must be <= max' },
+    { path: ['max'], message: 'must be >= min' },
+  ]
+)
 
 const form = createZodForm({
   schema,
@@ -112,7 +103,7 @@ function App2() {
   // const { submitting, pristine } = useFormStatus()
 
   const {
-    arrayActions: { pushRaw },
+    arrayActions: { push },
   } = useFormContext<typeof schema>()
 
   return (
@@ -179,7 +170,7 @@ function App2() {
         </Box>
         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'space-between' }}>
           <Typography variant="h6">Array</Typography>
-          <IconButton onClick={() => pushRaw(form.get('array'), {} as any)}>
+          <IconButton onClick={() => push(form.get('array'), {})}>
             <Add />
           </IconButton>
         </Box>
@@ -207,7 +198,7 @@ const FormTextField = React.memo(function FormTextField({
   ...props
 }: Omit<React.ComponentProps<typeof TextField>, 'type'> & {
   type: HTMLInputTypeAttribute
-  field: FieldPathForRawValue<string | number | bigint | null | undefined>
+  field: FieldPathForValue<string | number | bigint | null | undefined>
 }) {
   const { input, meta } = useHtmlField({ field, type })
   const error = meta.touched ? meta.error : undefined
@@ -225,7 +216,7 @@ const FormSelectField = React.memo(function FormSelectField({
 }: Omit<React.ComponentProps<'select'>, 'type'> & {
   sx?: SxProps
   label?: React.ReactNode
-  field: FieldPathForRawValue<string | number | bigint | null | undefined>
+  field: FieldPathForValue<string | number | bigint | null | undefined>
 }) {
   const { input, meta } = useHtmlField({ field, type: 'text' })
   const error = meta.touched ? meta.error : undefined
@@ -247,7 +238,7 @@ const FormSwitchField = React.memo(function FormSwitchField({
   label,
   ...props
 }: React.ComponentProps<typeof Switch> & {
-  field: FieldPathForRawValue<boolean | null | undefined>
+  field: FieldPathForValue<boolean | null | undefined>
   label?: React.ReactNode
 }) {
   const { input, meta } = useHtmlField({ field, type: 'checkbox' })

@@ -22,20 +22,20 @@ export function createSelectFormStatus() {
     [
       createSelector(
         [
-          (state: FormState<any>) => state.values,
-          (state: FormState<any>) => state.initialValues,
+          (state: FormState<any>) => state.parsedValues,
+          (state: FormState<any>) => state.initialParsedValues,
         ],
         isEqual
       ),
       createSelector(
         [
-          (state: FormState<any>) => state.rawValues,
-          (state: FormState<any>) => state.rawInitialValues,
+          (state: FormState<any>) => state.values,
+          (state: FormState<any>) => state.initialValues,
         ],
         isEqual
       ),
     ],
-    (pristine, rawPristine) => pristine && rawPristine
+    (parsedPristine, pristine) => parsedPristine && pristine
   )
 
   return createStructuredSelector({

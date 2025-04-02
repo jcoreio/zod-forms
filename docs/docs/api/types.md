@@ -9,22 +9,22 @@ export type FieldMeta = {
 }
 ```
 
-## `FieldPathForRawValue<RawValue>`
+## `FieldPathForValue<Value>`
 
-Type for a [`FieldPath`](FieldPath.md) where the raw value type must extend `RawValue`.
+Type for a [`FieldPath`](FieldPath.md) where the value type must extend `Value`.
 This is useful for typing a property in a custom component; for example,
 in a component that renders a checkbox, you could use
 
 ```ts
 type Props = {
-  field: FieldPathForRawValue<boolean | null | undefined>
+  field: FieldPathForValue<boolean | null | undefined>
 }
 ```
 
-## `FieldPathForValue<Value, RawValue = any>`
+## `FieldPathForParsedValue<ParsedValue, Value = any>`
 
-Type for a [`FieldPath`](FieldPath.md) where raw value type must extend `Value` and the
-raw value type must extend `RawValue`.
+Type for a [`FieldPath`](FieldPath.md) where value type must extend `Value` and the
+parsed value type must extend `ParsedValue`.
 
 ## `FormContextProps`
 
@@ -34,8 +34,8 @@ export type FormContextProps<T extends z.ZodTypeAny> = {
   inverseSchema: z.ZodType<z.input<T>, any, z.output<T>>
   root: FieldPath<T>
   initialize: (options: {
-    rawValues?: z.input<T>
-    values?: z.output<T>
+    values?: DeepPartial<z.input<T>>
+    parsedValues?: z.output<T>
     keepSubmitSucceeded?: boolean
   }) => void
   addHandlers: (handlers: {
@@ -52,11 +52,11 @@ export type FormContextProps<T extends z.ZodTypeAny> = {
     field: Field,
     meta: Partial<FieldMeta>
   ) => void
-  setRawValue: <Field extends FieldPath>(
-    field: Field,
-    rawValue: z.input<Field['schema']>
-  ) => void
   setValue: <Field extends FieldPath>(
+    field: Field,
+    value: DeepPartial<z.input<Field['schema']>>
+  ) => void
+  setParsedValue: <Field extends FieldPath>(
     field: Field,
     value: z.output<Field['schema']>,
     options?: {
@@ -69,8 +69,8 @@ export type FormContextProps<T extends z.ZodTypeAny> = {
     submitError?: Error
     submitSucceeded?: boolean
     submitFailed?: boolean
-    submittedValues?: z.output<T>
-    rawSubmittedValues?: z.input<T>
+    submittedParsedValues?: z.output<T>
+    submittedValues?: z.input<T>
   }) => void
   arrayActions: {
     insert: <Field extends ArrayFieldPath>(
@@ -78,10 +78,10 @@ export type FormContextProps<T extends z.ZodTypeAny> = {
       index: number,
       value: ValueFor<Field>
     ) => void
-    insertRaw: <Field extends ArrayFieldPath>(
+    insertParsed: <Field extends ArrayFieldPath>(
       field: Field,
       index: number,
-      rawValue: RawValueFor<Field>
+      parsedValue: ParsedValueFor<Field>
     ) => void
     move: (field: ArrayFieldPath, from: number, to: number) => void
     pop: (field: ArrayFieldPath) => void
@@ -89,14 +89,11 @@ export type FormContextProps<T extends z.ZodTypeAny> = {
       field: Field,
       value: ValueFor<Field>
     ) => void
-    pushRaw: <Field extends ArrayFieldPath>(
+    pushParsed: <Field extends ArrayFieldPath>(
       field: Field,
-      rawValue: RawValueFor<Field>
+      parsedValue: ParsedValueFor<Field>
     ) => void
-    remove: <Field extends ArrayFieldPath>(
-      field: Field,
-      rawValue: RawValueFor<Field>
-    ) => void
+    remove: <Field extends ArrayFieldPath>(field: Field, index: number) => void
     removeAll: (field: ArrayFieldPath) => void
     shift: (field: ArrayFieldPath) => void
     splice: <Field extends ArrayFieldPath>(
@@ -105,26 +102,26 @@ export type FormContextProps<T extends z.ZodTypeAny> = {
       deleteCount: number,
       ...values: ValueFor<Field>[]
     ) => void
-    spliceRaw: <Field extends ArrayFieldPath>(
+    spliceParsed: <Field extends ArrayFieldPath>(
       field: Field,
       index: number,
       deleteCount: number,
-      ...rawValues: RawValueFor<Field>[]
+      ...parsedValues: ParsedValueFor<Field>[]
     ) => void
     swap: (field: ArrayFieldPath, indexA: number, indexB: number) => void
     unshift: <Field extends ArrayFieldPath>(
       field: Field,
       value: ValueFor<Field>
     ) => void
-    unshiftRaw: <Field extends ArrayFieldPath>(
+    unshiftParsed: <Field extends ArrayFieldPath>(
       field: Field,
-      rawValue: RawValueFor<Field>
+      parsedValue: ParsedValueFor<Field>
     ) => void
   }
-  getValues: () => z.output<T> | undefined
-  getRawValues: () => unknown
-  getInitialValues: () => z.output<T> | undefined
-  getRawInitialValues: () => unknown
+  getValues: () => DeepPartial<z.input<T>> | undefined
+  getParsedValues: () => DeepPartial<z.output<T>> | undefined
+  getInitialValues: () => DeepPartial<z.input<T>> | undefined
+  getInitialParsedValues: () => DeepPartial<z.output<T>> | undefined
 }
 ```
 
@@ -169,8 +166,11 @@ export type SubmitFailedHandler = (error: Error) => void
 
 ```ts
 export type SubmitHandler<T extends z.ZodTypeAny> = (
-  values: z.output<T>,
-  options: { initialValues: z.output<T> }
+  parsedValues: z.output<T>,
+  options: {
+    initialValues?: DeepPartial<z.input<T>>
+    initialParsedValues?: DeepPartial<z.output<T>>
+  }
 ) => void | Promise<void>
 ```
 
@@ -184,7 +184,7 @@ export type SubmitSuccededHandler = () => void
 
 ```ts
 export interface TypedUseArrayField<T extends z.ZodTypeAny> {
-  <Field extends FieldPathForRawValue<any[] | null | undefined>>(
+  <Field extends FieldPathForValue<any[] | null | undefined>>(
     field: Field
   ): UseArrayFieldProps<Field>
   <Path extends PathInSchema<T>>(path: Path): UseArrayFieldProps<
@@ -234,9 +234,9 @@ export type UseArrayFieldProps<Field extends FieldPath> = NonNullable<
 > extends any[]
   ? FieldMeta & {
       setMeta: (meta: Partial<FieldMeta>) => void
-      setRawValue: (rawValue: z.input<Field['schema']>) => void
+      setParsedValue: (parsedValue: z.output<Field['schema']>) => void
       setValue: (
-        value: z.output<Field['schema']>,
+        value: DeepPartial<z.input<Field['schema']>>,
         options?: {
           normalize?: boolean
         }
@@ -256,17 +256,17 @@ export type UseArrayFieldProps<Field extends FieldPath> = NonNullable<
 ```ts
 export type UseFieldProps<Field extends FieldPath> = FieldMeta & {
   setMeta: (meta: Partial<FieldMeta>) => void
-  setRawValue: (rawValue: z.input<Field['schema']>) => void
+  setParsedValue: (parsedValue: z.output<Field['schema']>) => void
   setValue: (
-    value: z.output<Field['schema']>,
+    value: DeepPartial<z.input<Field['schema']>>,
     options?: {
       normalize?: boolean
     }
   ) => void
-  value: z.output<Field['schema']> | undefined
-  rawValue: unknown
-  initialValue: z.output<Field['schema']> | undefined
-  rawInitialValue: unknown
+  value: DeepPartial<z.input<Field['schema']>> | undefined
+  parsedValue: DeepPartial<z.output<Field['schema']>> | undefined
+  initialValue: DeepPartial<z.input<Field['schema']>> | undefined
+  initialParsedValue: DeepPartial<z.output<Field['schema']>> | undefined
   error?: string
   dirty: boolean
   pristine: boolean
@@ -325,18 +325,18 @@ export type ZodForm<T> = {
   FormProvider: React.ComponentType<{ children: JSX.Element }>
   useFormStatus: () => FormStatus
   useFormValues: () => {
-    values: z.output<T> | undefined
-    rawValues: unknown
-    initialValues: z.output<T> | undefined
-    initialRawValues: unknown
+    values: DeepPartial<z.input<T>> | undefined
+    parsedValues: DeepPartial<z.output<T>> | undefined
+    initialValues: DeepPartial<z.input<T>> | undefined
+    initialParsedValues: DeepPartial<z.output<T>> | undefined
   }
   useInitialize: (
     options: {
-      rawValues?: z.input<T>
-      values?: z.output<T>
+      values?: DeepPartial<z.input<T>>
+      parsedValues?: z.output<T>
       keepSubmitSucceeded?: boolean
     },
-    deps: DependencyList = [options.values, options.rawValues]
+    deps: DependencyList = [options.values, options.parsedValues]
   ) => void
   useSubmit: (handlers: {
     onSubmit?: SubmitHandler<T>

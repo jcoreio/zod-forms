@@ -1,5 +1,6 @@
 import z from 'zod'
 import { FieldPath } from '../FieldPath'
+import { DeepPartial } from '../util/DeepPartial'
 
 export type SetValueAction<Field extends FieldPath> = ReturnType<
   typeof setValue<Field>
@@ -7,15 +8,11 @@ export type SetValueAction<Field extends FieldPath> = ReturnType<
 
 export function setValue<Field extends FieldPath>(
   field: Field,
-  value: z.output<Field['schema']>,
-  options?: {
-    normalize?: boolean
-  }
+  value: DeepPartial<z.input<Field['schema']>>
 ) {
   return {
     type: 'setValue',
     field,
     value,
-    ...options,
   } as const
 }

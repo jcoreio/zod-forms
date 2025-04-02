@@ -1,13 +1,13 @@
 import React, { HTMLInputTypeAttribute } from 'react'
 import { TextField } from '@mui/material'
-import { FieldPathForRawValue, useHtmlField } from '../src'
+import { FieldPathForValue, useHtmlField } from '../src'
 
 export function FormTextField({
   field,
   type,
   ...props
 }: {
-  field: FieldPathForRawValue<number | bigint | string | null | undefined>
+  field: FieldPathForValue<number | bigint | string | null | undefined>
   type: HTMLInputTypeAttribute
 } & Omit<React.ComponentProps<typeof TextField>, 'type'>) {
   const { input, meta } = useHtmlField({ field, type })

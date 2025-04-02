@@ -75,22 +75,22 @@ function typeTests() {
 
   const form = createZodForm({ schema: testSchema })
 
-  form.useField(['foo', 0, 'bar']).setValue(2)
-  form.useField('foo[0].bar').setValue(2)
-  form.useField(['tup', 1, 'blah']).setValue('hello')
-  form.useField(['tup', 0]).setValue(5)
+  form.useField(['foo', 0, 'bar']).setParsedValue(2)
+  form.useField('foo[0].bar').setParsedValue(2)
+  form.useField(['tup', 1, 'blah']).setParsedValue('hello')
+  form.useField(['tup', 0]).setParsedValue(5)
   form
     .useHtmlField({ field: ['foo', 0, 'bar'] as const, type: 'text' })
-    .meta.setValue(2)
-  form.useField(form.get(['foo', 0, 'bar'])).setValue(2)
-  form.useField(form.get(['foo', 0]).get('bar')).setValue(2)
-  form.useField(form.get('foo').get('[0]').get('bar')).setValue(2)
-  form.useField(form.get('foo').get('[0]').get('bar')).setRawValue('5')
-  form.useField('foo[0].bar').setRawValue('5')
+    .meta.setParsedValue(2)
+  form.useField(form.get(['foo', 0, 'bar'])).setParsedValue(2)
+  form.useField(form.get(['foo', 0]).get('bar')).setParsedValue(2)
+  form.useField(form.get('foo').get('[0]').get('bar')).setParsedValue(2)
+  form.useField(form.get('foo').get('[0]').get('bar')).setValue('5')
+  form.useField('foo[0].bar').setValue('5')
   form
     .useHtmlField({ field: ['bool'] as const, type: 'checkbox' })
-    .meta.setValue(true)
+    .meta.setParsedValue(true)
   form
     .useHtmlField({ field: form.get('bool'), type: 'checkbox' })
-    .meta.setValue(true)
+    .meta.setParsedValue(true)
 }

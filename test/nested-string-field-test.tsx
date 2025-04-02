@@ -27,7 +27,7 @@ it(`string field test`, async function () {
   )
 
   const Form2 = () => {
-    useInitialize({ values: { foo: { bar: ['baz', 'init'] } } })
+    useInitialize({ parsedValues: { foo: { bar: ['baz', 'init'] } } })
     formContext = useFormContext()
 
     return (
@@ -60,13 +60,13 @@ it(`string field test`, async function () {
   })
 
   await act(() =>
-    formContext?.setValue(root.get(['foo', 'bar', 1]), 'newValue')
+    formContext?.setParsedValue(root.get(['foo', 'bar', 1]), 'newValue')
   )
   expect(input.value).to.equal('newValue')
   await act(() =>
     fireEvent.change(input, { target: { value: 'changedValue' } })
   )
-  expect(formContext?.getValues()).to.deep.equal({
+  expect(formContext?.getParsedValues()).to.deep.equal({
     foo: { bar: ['baz', 'changedValue'] },
   })
   expect(formContext?.getStatus()).to.deep.equal({
@@ -115,8 +115,10 @@ it(`string field test`, async function () {
   expect(component.queryByTestId('foo.bar[1]-helperText')?.innerHTML).to.equal(
     undefined
   )
-  expect(formContext?.getValues()).to.deep.equal({ foo: { bar: ['baz', 'x'] } })
-  expect(formContext?.getRawValues()).to.deep.equal({
+  expect(formContext?.getParsedValues()).to.deep.equal({
+    foo: { bar: ['baz', 'x'] },
+  })
+  expect(formContext?.getValues()).to.deep.equal({
     foo: { bar: ['baz', ' x '] },
   })
   expect(input.value).to.equal(' x ')
@@ -141,7 +143,10 @@ it(`string field test`, async function () {
   expect(onSubmit.args).to.deep.equal([
     [
       { foo: { bar: ['baz', 'x'] } },
-      { initialValues: { foo: { bar: ['baz', 'init'] } } },
+      {
+        initialParsedValues: { foo: { bar: ['baz', 'init'] } },
+        initialValues: { foo: { bar: ['baz', 'init'] } },
+      },
     ],
   ])
 })

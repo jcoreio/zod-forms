@@ -4,12 +4,10 @@ import { SchemaAt } from './util/SchemaAt'
 import { PathInSchema, PathstringInSchema } from './util/PathInSchema'
 import { parsePathstring } from './util/parsePathstring'
 
-export type FieldPathForValue<Value, RawValue = any> = FieldPath<
-  z.ZodType<Value, any, RawValue>
+export type FieldPathForParsedValue<ParsedValue, Value = any> = FieldPath<
+  z.ZodType<ParsedValue, any, Value>
 >
-export type FieldPathForRawValue<RawValue> = FieldPath<
-  z.ZodType<any, any, RawValue>
->
+export type FieldPathForValue<Value> = FieldPath<z.ZodType<any, any, Value>>
 
 export class FieldPath<T extends z.ZodTypeAny = z.ZodTypeAny> {
   readonly path: BasePath

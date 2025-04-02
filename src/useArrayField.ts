@@ -1,5 +1,5 @@
 import z from 'zod'
-import { BasePath, FieldPath, FieldPathForRawValue } from './FieldPath'
+import { BasePath, FieldPath, FieldPathForValue } from './FieldPath'
 import React from 'react'
 import { useFormContext } from './useFormContext'
 import { PathInSchema, PathstringInSchema } from './util/PathInSchema'
@@ -15,10 +15,11 @@ import {
   useFormSelector as untypedUseFormSelector,
 } from './useFormSelector'
 import { shallowEqual } from 'react-redux'
+import { setParsedValue } from './actions/setParsedValue'
 import { setValue } from './actions/setValue'
-import { setRawValue } from './actions/setRawValue'
 import { setMeta } from './actions/setMeta'
 import { FieldMeta } from './FormState'
+import { DeepPartial } from './util/DeepPartial'
 
 export type UseArrayFieldProps<Field extends FieldPath> = NonNullable<
   z.input<Field['schema']>
@@ -27,8 +28,8 @@ export type UseArrayFieldProps<Field extends FieldPath> = NonNullable<
       ReturnType<
         typeof bindActionsToField<
           typeof arrayActions & {
+            setParsedValue: typeof setParsedValue
             setValue: typeof setValue
-            setRawValue: typeof setRawValue
             setMeta: typeof setMeta
           }
         >
@@ -43,7 +44,7 @@ export type UseArrayFieldProps<Field extends FieldPath> = NonNullable<
   : { ERROR: 'not an array field' }
 
 export interface TypedUseArrayField<T extends z.ZodTypeAny> {
-  <Field extends FieldPathForRawValue<any[] | null | undefined>>(
+  <Field extends FieldPathForValue<any[] | null | undefined>>(
     field: Field
   ): UseArrayFieldProps<Field>
   <Path extends PathInSchema<T>>(path: Path): UseArrayFieldProps<
@@ -61,8 +62,8 @@ function useArrayFieldBase<Field extends FieldPath>(
 
   const {
     arrayActions,
+    setParsedValue,
     setValue,
-    setRawValue,
     setMeta,
     selectFormValues,
     selectFieldErrorMap,
@@ -77,21 +78,23 @@ function useArrayFieldBase<Field extends FieldPath>(
         createSelector(
           [
             createStructuredSelector({
+              parsedValue: ({ parsedValues }) =>
+                get(parsedValues, field.path) as
+                  | DeepPartial<z.output<T>>
+                  | undefined,
               value: ({ values }) =>
-                get(values, field.path) as z.output<T> | undefined,
-              rawValue: ({ rawValues }) =>
-                get(rawValues, field.path) as unknown,
-              initialValue: ({ initialValues }) =>
-                get(initialValues, field.path) as z.output<T> | undefined,
+                get(values, field.path) as DeepPartial<z.input<T>> | undefined,
+              initialParsedValue: ({ initialParsedValues }) =>
+                get(initialParsedValues, field.path) as z.output<T> | undefined,
             }),
           ],
-          ({ rawValue, value, initialValue }) => {
-            const dirty = !isEqual(value, initialValue)
+          ({ value, parsedValue, initialParsedValue }) => {
+            const dirty = !isEqual(parsedValue, initialParsedValue)
             const pristine = !dirty
             return {
               dirty,
               pristine,
-              length: Array.isArray(rawValue) ? rawValue.length : 0,
+              length: Array.isArray(value) ? value.length : 0,
             }
           }
         )
@@ -113,7 +116,7 @@ function useArrayFieldBase<Field extends FieldPath>(
   const boundActions = React.useMemo(
     () =>
       bindActionsToField(
-        { ...arrayActions, setValue, setRawValue, setMeta },
+        { ...arrayActions, setParsedValue, setValue, setMeta },
         field
       ),
     [field.pathstring]

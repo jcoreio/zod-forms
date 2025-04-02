@@ -27,7 +27,7 @@ it(`optional number field test`, async function () {
   )
 
   const Form2 = () => {
-    useInitialize({ values: { field: 3 } })
+    useInitialize({ parsedValues: { field: 3 } })
     formContext = useFormContext()
 
     return (
@@ -59,10 +59,10 @@ it(`optional number field test`, async function () {
     dirty: false,
   })
 
-  await act(() => formContext?.setValue(root.get('field'), 5))
+  await act(() => formContext?.setParsedValue(root.get('field'), 5))
   expect(input.value).to.equal('5')
   await act(() => fireEvent.change(input, { target: { value: '-3' } }))
-  expect(formContext?.getValues()).to.deep.equal({
+  expect(formContext?.getParsedValues()).to.deep.equal({
     field: -3,
   })
   expect(formContext?.getStatus()).to.deep.equal({
@@ -103,8 +103,8 @@ it(`optional number field test`, async function () {
   expect(component.queryByTestId('field-helperText')?.innerHTML).to.equal(
     'Invalid number'
   )
-  expect(formContext?.getValues()).to.deep.equal(undefined)
-  expect(formContext?.getRawValues()).to.deep.equal({ field: ' 3x ' })
+  expect(formContext?.getParsedValues()).to.deep.equal(undefined)
+  expect(formContext?.getValues()).to.deep.equal({ field: ' 3x ' })
   expect(input.value).to.equal(' 3x ')
   await act(() => fireEvent.blur(input, { target: { value: ' 3x ' } }))
   expect(input.value).to.equal(' 3x ')
@@ -142,7 +142,10 @@ it(`optional number field test`, async function () {
   expect(onSubmit.args).to.deep.equal([])
   await act(() => fireEvent.submit(form))
   expect(onSubmit.args).to.deep.equal([
-    [{ field: -9.5 }, { initialValues: { field: 3 } }],
+    [
+      { field: -9.5 },
+      { initialParsedValues: { field: 3 }, initialValues: { field: 3 } },
+    ],
   ])
 
   await act(() => fireEvent.blur(input, { target: { value: ' -95e-1 ' } }))
@@ -152,6 +155,9 @@ it(`optional number field test`, async function () {
   await act(() => fireEvent.change(input, { target: { value: ' ' } }))
   await act(() => fireEvent.submit(form))
   expect(onSubmit.args).to.deep.equal([
-    [{ field: undefined }, { initialValues: { field: -9.5 } }],
+    [
+      { field: undefined },
+      { initialParsedValues: { field: -9.5 }, initialValues: { field: -9.5 } },
+    ],
   ])
 })

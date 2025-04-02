@@ -9,11 +9,11 @@ import { useInitialize } from '@jcoreio/zod-forms'
 ```ts
 export function useInitialize<T extends z.ZodTypeAny>(
   options: {
-    rawValues?: z.input<T>
-    values?: z.output<T>
+    values?: DeepPartial<z.input<T>>
+    parsedValues?: z.output<T>
     keepSubmitSucceeded?: boolean
   },
-  deps: DependencyList = [options.values, options.rawValues]
+  deps: DependencyList = [options.values, options.parsedValues]
 ): void
 ```
 

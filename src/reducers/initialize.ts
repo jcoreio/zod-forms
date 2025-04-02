@@ -12,12 +12,14 @@ export const createInitializeReducer = <T extends z.ZodTypeAny>({
   function initializeReducer(state: FormState<T>, action: InitializeAction<T>) {
     const { keepSubmitSucceeded } = action
     try {
-      const rawValues =
-        action.rawValues ??
-        (action.values ? inverseSchema.parse(action.values) : undefined)
       const values =
         action.values ??
-        (action.rawValues ? schema.parse(action.rawValues) : undefined)
+        (action.parsedValues
+          ? inverseSchema.parse(action.parsedValues)
+          : undefined)
+      const parsedValues =
+        action.parsedValues ??
+        (action.values ? schema.parse(action.values) : undefined)
       return {
         ...state,
         validationError: undefined,
@@ -25,10 +27,10 @@ export const createInitializeReducer = <T extends z.ZodTypeAny>({
         submitting: false,
         submitFailed: false,
         submitSucceeded: keepSubmitSucceeded ? state.submitSucceeded : false,
-        rawValues,
         values,
-        rawInitialValues: rawValues,
+        parsedValues,
         initialValues: values,
+        initialParsedValues: parsedValues,
       }
     } catch (error) {
       return {
@@ -38,10 +40,10 @@ export const createInitializeReducer = <T extends z.ZodTypeAny>({
         submitting: false,
         submitFailed: false,
         submitSucceeded: keepSubmitSucceeded ? state.submitSucceeded : false,
-        rawValues: action.rawValues,
         values: action.values,
-        rawInitialValues: action.rawValues,
+        parsedValues: action.parsedValues,
         initialValues: action.values,
+        initialParsedValues: action.parsedValues,
       }
     }
   }

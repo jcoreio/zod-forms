@@ -15,8 +15,8 @@ const DateTimeField({
   fields: { date, time }
 }: {
   fields: {
-    date: FieldPathForValue<Date | null | undefined, string | null | undefined>,
-    time: FieldPathForValue<Date | null | undefined, string | null | undefined>,
+    date: FieldPathForParsedValue<Date | null | undefined, string | null | undefined>,
+    time: FieldPathForParsedValue<Date | null | undefined, string | null | undefined>,
   }
 }) {
   const dateProps = useField(fields.date)
@@ -60,12 +60,12 @@ If you want to render fields in one component that are typically grouped togethe
 you can use a single `FieldPath` prop to specify the form section, and get subpaths from it:
 
 ```tsx
-import { type FieldPathForRawValue } from '@jcoreio/zod-forms'
+import { type FieldPathForValue } from '@jcoreio/zod-forms'
 
 function AddressFields({
   section,
 }: {
-  section: FieldPathForRawValue<{
+  section: FieldPathForValue<{
     line1: string
     line2: string | null | undefined
     city: string

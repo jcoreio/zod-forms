@@ -27,7 +27,7 @@ it(`string field test`, async function () {
   )
 
   const Form2 = () => {
-    useInitialize({ values: { field: 'init' } })
+    useInitialize({ parsedValues: { field: 'init' } })
     formContext = useFormContext()
 
     return (
@@ -59,12 +59,12 @@ it(`string field test`, async function () {
     dirty: false,
   })
 
-  await act(() => formContext?.setValue(root.get('field'), 'newValue'))
+  await act(() => formContext?.setParsedValue(root.get('field'), 'newValue'))
   expect(input.value).to.equal('newValue')
   await act(() =>
     fireEvent.change(input, { target: { value: 'changedValue' } })
   )
-  expect(formContext?.getValues()).to.deep.equal({
+  expect(formContext?.getParsedValues()).to.deep.equal({
     field: 'changedValue',
   })
   expect(formContext?.getStatus()).to.deep.equal({
@@ -113,8 +113,8 @@ it(`string field test`, async function () {
   expect(component.queryByTestId('field-helperText')?.innerHTML).to.equal(
     undefined
   )
-  expect(formContext?.getValues()).to.deep.equal({ field: 'x' })
-  expect(formContext?.getRawValues()).to.deep.equal({ field: ' x ' })
+  expect(formContext?.getParsedValues()).to.deep.equal({ field: 'x' })
+  expect(formContext?.getValues()).to.deep.equal({ field: ' x ' })
   expect(input.value).to.equal(' x ')
   await act(() => fireEvent.blur(input, { target: { value: ' x ' } }))
   expect(input.value).to.equal('x')
@@ -135,6 +135,12 @@ it(`string field test`, async function () {
   expect(onSubmit.args).to.deep.equal([])
   await act(() => fireEvent.submit(form))
   expect(onSubmit.args).to.deep.equal([
-    [{ field: 'x' }, { initialValues: { field: 'init' } }],
+    [
+      { field: 'x' },
+      {
+        initialParsedValues: { field: 'init' },
+        initialValues: { field: 'init' },
+      },
+    ],
   ])
 })

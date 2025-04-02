@@ -67,25 +67,25 @@ function useHtmlFieldBase<Field extends FieldPath>(
   const { field, type, normalizeOnBlur = true } = options
   const props = useField(field)
   const {
+    parsedValue,
     value,
-    rawValue,
+    initialParsedValue,
     initialValue,
-    rawInitialValue,
+    setParsedValue,
     setValue,
-    setRawValue,
     setMeta,
     ...meta
   } = props
 
   const { schema } = field
 
-  // tempRawValue is used for storing blank text when we've coerced the
-  // raw value to null or undefined, or storing numeric text when we've
-  // coerced the raw value to a number or bigint.
-  // This way we can set a raw value that will parse better in the form
+  // tempValue is used for storing blank text when we've coerced the
+  // value to null or undefined, or storing numeric text when we've
+  // coerced the value to a number or bigint.
+  // This way we can set a value that will parse better in the form
   // state without interfering with the text the user is typing.
-  const [tempRawValue, setTempRawValue] = React.useState(
-    rawValue as string | null | undefined
+  const [tempValue, setTempValue] = React.useState(
+    value as string | null | undefined
   )
 
   const tryNumber = React.useMemo(() => acceptsNumber(schema), [schema])
@@ -93,18 +93,18 @@ function useHtmlFieldBase<Field extends FieldPath>(
 
   const onChange = React.useCallback(
     (e: React.ChangeEvent) => {
-      const rawValue = getRawValue(e)
-      const normalized = normalizeRawValue(rawValue, {
+      const value = getValue(e)
+      const normalized = normalizeValue(value, {
         schema,
         tryNumber,
         tryBigint,
       })
-      if (typeof rawValue === 'string' && typeof normalized !== 'string') {
-        setTempRawValue(rawValue)
+      if (typeof value === 'string' && typeof normalized !== 'string') {
+        setTempValue(value)
       }
-      setRawValue(normalized)
+      setValue(normalized)
     },
-    [getRawValue, setRawValue, schema]
+    [getValue, setValue, schema]
   )
 
   const onFocus = React.useCallback(() => {
@@ -113,23 +113,23 @@ function useHtmlFieldBase<Field extends FieldPath>(
 
   const onBlur = React.useCallback(
     (e: React.FocusEvent) => {
-      let rawValue = normalizeRawValue(getRawValue(e), {
+      let value = normalizeValue(getValue(e), {
         schema,
         tryNumber,
         tryBigint,
       })
       if (normalizeOnBlur) {
-        const parsed = field.schema.safeParse(rawValue)
+        const parsed = field.schema.safeParse(value)
         const formatted = parsed.success
           ? invert(field.schema).safeParse(parsed.data)
           : undefined
-        if (formatted?.success) rawValue = formatted.data
-        setRawValue(rawValue)
+        if (formatted?.success) value = formatted.data
+        setValue(value)
       }
-      setTempRawValue(undefined)
+      setTempValue(undefined)
       setMeta({ visited: true, touched: true })
     },
-    [getRawValue, setRawValue, schema]
+    [getValue, setValue, schema]
   )
 
   return React.useMemo(
@@ -138,32 +138,32 @@ function useHtmlFieldBase<Field extends FieldPath>(
         name: field.pathstring,
         type,
         value:
-          typeof rawValue === 'boolean'
-            ? String(rawValue)
-            : typeof rawValue === 'string'
-            ? rawValue || tempRawValue || ''
-            : tempRawValue || (rawValue == null ? '' : String(rawValue) || ''),
-        ...(type === 'checkbox' && { checked: Boolean(rawValue) }),
+          typeof value === 'boolean'
+            ? String(value)
+            : typeof value === 'string'
+            ? value || tempValue || ''
+            : tempValue || (value == null ? '' : String(value) || ''),
+        ...(type === 'checkbox' && { checked: Boolean(value) }),
         onChange,
         onFocus,
         onBlur,
       },
       meta: {
         ...meta,
+        parsedValue,
         value,
-        rawValue,
+        initialParsedValue,
         initialValue,
-        rawInitialValue,
+        setParsedValue,
         setValue,
-        setRawValue,
         setMeta,
       },
     }),
-    [props, tempRawValue, onChange]
+    [props, tempValue, onChange]
   ) as any
 }
 
-function getRawValue(e: ChangeEvent) {
+function getValue(e: ChangeEvent) {
   const { target } = e
   if (target instanceof HTMLInputElement) {
     return target.type === 'checkbox' ? target.checked : target.value
@@ -177,37 +177,37 @@ function normalizeBlank(schema: z.ZodTypeAny): any {
   return undefined
 }
 
-function safeBigInt(rawValue: string): bigint | undefined {
+function safeBigInt(value: string): bigint | undefined {
   try {
-    return BigInt(rawValue)
+    return BigInt(value)
   } catch (error) {
     return undefined
   }
 }
 
-function normalizeRawValue(
-  rawValue: string | boolean,
+function normalizeValue(
+  value: string | boolean,
   {
     schema,
     tryNumber,
     tryBigint,
   }: { schema: z.ZodTypeAny; tryNumber: boolean; tryBigint: boolean }
 ): string | boolean | number | bigint | null | undefined {
-  if (typeof rawValue === 'boolean') return rawValue
-  if (typeof rawValue === 'string' && !/\S/.test(rawValue)) {
+  if (typeof value === 'boolean') return value
+  if (typeof value === 'string' && !/\S/.test(value)) {
     return normalizeBlank(schema)
   }
-  if (typeof rawValue === 'string' && !schema.safeParse(rawValue).success) {
+  if (typeof value === 'string' && !schema.safeParse(value).success) {
     if (tryNumber) {
-      const num = Number(rawValue)
+      const num = Number(value)
       if (!isNaN(num)) return num
     }
     if (tryBigint) {
-      const bigint = safeBigInt(rawValue)
+      const bigint = safeBigInt(value)
       if (bigint != null) return bigint
     }
   }
-  return rawValue
+  return value
 }
 
 export function useHtmlField<Field extends FieldPath>(

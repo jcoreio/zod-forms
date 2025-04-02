@@ -10,7 +10,7 @@ export function useInitialize<
   >
 >(
   options: Omit<InitializeAction<T>, 'type'>,
-  deps: DependencyList = [options.values, options.rawValues]
+  deps: DependencyList = [options.parsedValues, options.values]
 ) {
   const { initialize } = useFormContext<T>()
   React.useEffect(() => {

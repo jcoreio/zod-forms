@@ -7,8 +7,8 @@ export {
 } from './FormState'
 export {
   FieldPath,
+  type FieldPathForParsedValue,
   type FieldPathForValue,
-  type FieldPathForRawValue,
 } from './FieldPath'
 export { useField, type UseFieldProps, type TypedUseField } from './useField'
 export {
