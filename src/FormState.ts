@@ -10,7 +10,7 @@ export type SubmitHandler<T extends z.ZodTypeAny> = (
   parsedValues: z.output<T>,
   options: {
     initialValues?: DeepPartial<z.input<T>>
-    initialParsedValues?: DeepPartial<z.output<T>>
+    initialParsedValues?: z.output<T>
   }
 ) => void | Promise<void>
 
@@ -23,11 +23,11 @@ export type FormState<T extends z.ZodTypeAny> = {
   initialized: boolean
   fieldMeta: Record<string, FieldMeta>
   values?: DeepPartial<z.input<T>>
-  parsedValues?: DeepPartial<z.output<T>>
+  parsedValues?: z.output<T>
   submittedParsedValues?: z.output<T>
   submittedValues?: z.input<T>
   initialValues?: DeepPartial<z.input<T>>
-  initialParsedValues?: DeepPartial<z.output<T>>
+  initialParsedValues?: z.output<T>
   validationError?: any
   submitPromise?: Promise<void>
   onSubmit: Set<SubmitHandler<T>>

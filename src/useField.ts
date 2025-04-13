@@ -29,10 +29,10 @@ export type UseFieldProps<Field extends FieldPath> = FieldMeta &
       setMeta: typeof setMeta
     }>
   > & {
-    parsedValue: DeepPartial<z.output<Field['schema']>> | undefined
-    value: DeepPartial<z.input<Field['schema']>> | undefined
-    initialParsedValue: DeepPartial<z.output<Field['schema']>> | undefined
-    initialValue: DeepPartial<z.input<Field['schema']>> | undefined
+    parsedValue?: z.output<Field['schema']>
+    value?: DeepPartial<z.input<Field['schema']>>
+    initialParsedValue?: z.output<Field['schema']>
+    initialValue?: DeepPartial<z.input<Field['schema']>>
     error?: string
     dirty: boolean
     pristine: boolean
@@ -89,7 +89,7 @@ function useFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
             initialValue,
             initialParsedValue = maybeParse(field.schema, initialValue),
           }) => {
-            const dirty = !isEqual(parsedValue, initialParsedValue)
+            const dirty = !isEqual(value, initialValue)
             const pristine = !dirty
             return {
               parsedValue,

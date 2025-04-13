@@ -8,7 +8,7 @@ import { useFormValues } from '@jcoreio/zod-forms'
 
 ```ts
 export function useFormValues<T extends z.ZodTypeAny>(): {
-  parsedValues: DeepPartial<z.output<T>> | undefined
+  parsedValues: z.output<T> | undefined
   values: DeepPartial<z.input<T>> | undefined
   initialParsedValues: z.output<T> | undefined
   initialValues: DeepPartial<z.input<T>> | undefined

@@ -78,18 +78,16 @@ function useArrayFieldBase<Field extends FieldPath>(
         createSelector(
           [
             createStructuredSelector({
-              parsedValue: ({ parsedValues }) =>
-                get(parsedValues, field.path) as
-                  | DeepPartial<z.output<T>>
-                  | undefined,
               value: ({ values }) =>
                 get(values, field.path) as DeepPartial<z.input<T>> | undefined,
-              initialParsedValue: ({ initialParsedValues }) =>
-                get(initialParsedValues, field.path) as z.output<T> | undefined,
+              initialValue: ({ initialValues }) =>
+                get(initialValues, field.path) as
+                  | DeepPartial<z.input<T>>
+                  | undefined,
             }),
           ],
-          ({ value, parsedValue, initialParsedValue }) => {
-            const dirty = !isEqual(parsedValue, initialParsedValue)
+          ({ value, initialValue }) => {
+            const dirty = !isEqual(value, initialValue)
             const pristine = !dirty
             return {
               dirty,

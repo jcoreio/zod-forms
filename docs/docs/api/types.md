@@ -119,9 +119,9 @@ export type FormContextProps<T extends z.ZodTypeAny> = {
     ) => void
   }
   getValues: () => DeepPartial<z.input<T>> | undefined
-  getParsedValues: () => DeepPartial<z.output<T>> | undefined
+  getParsedValues: () => z.output<T> | undefined
   getInitialValues: () => DeepPartial<z.input<T>> | undefined
-  getInitialParsedValues: () => DeepPartial<z.output<T>> | undefined
+  getInitialParsedValues: () => z.output<T> | undefined
 }
 ```
 
@@ -169,7 +169,7 @@ export type SubmitHandler<T extends z.ZodTypeAny> = (
   parsedValues: z.output<T>,
   options: {
     initialValues?: DeepPartial<z.input<T>>
-    initialParsedValues?: DeepPartial<z.output<T>>
+    initialParsedValues?: z.output<T>
   }
 ) => void | Promise<void>
 ```
@@ -264,9 +264,9 @@ export type UseFieldProps<Field extends FieldPath> = FieldMeta & {
     }
   ) => void
   value: DeepPartial<z.input<Field['schema']>> | undefined
-  parsedValue: DeepPartial<z.output<Field['schema']>> | undefined
+  parsedValue: z.output<Field['schema']> | undefined
   initialValue: DeepPartial<z.input<Field['schema']>> | undefined
-  initialParsedValue: DeepPartial<z.output<Field['schema']>> | undefined
+  initialParsedValue: z.output<Field['schema']> | undefined
   error?: string
   dirty: boolean
   pristine: boolean
@@ -326,9 +326,9 @@ export type ZodForm<T> = {
   useFormStatus: () => FormStatus
   useFormValues: () => {
     values: DeepPartial<z.input<T>> | undefined
-    parsedValues: DeepPartial<z.output<T>> | undefined
+    parsedValues: z.output<T> | undefined
     initialValues: DeepPartial<z.input<T>> | undefined
-    initialParsedValues: DeepPartial<z.output<T>> | undefined
+    initialParsedValues: z.output<T> | undefined
   }
   useInitialize: (
     options: {
