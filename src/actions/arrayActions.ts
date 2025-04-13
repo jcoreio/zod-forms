@@ -173,6 +173,23 @@ export type ArrayAction<Field extends ArrayFieldPath = ArrayFieldPath> =
   | ArrayUnshiftParsedAction<Field>
   | ArrayUnshiftAction<Field>
 
+export type arrayActions<Field extends ArrayFieldPath = ArrayFieldPath> = {
+  insertParsed: typeof arrayInsertParsed<Field>
+  insert: typeof arrayInsert<Field>
+  move: typeof arrayMove
+  pop: typeof arrayPop
+  pushParsed: typeof arrayPushParsed<Field>
+  push: typeof arrayPush<Field>
+  remove: typeof arrayRemove
+  removeAll: typeof arrayRemoveAll
+  shift: typeof arrayShift
+  spliceParsed: typeof arraySpliceParsed<Field>
+  splice: typeof arraySplice<Field>
+  swap: typeof arraySwap
+  unshiftParsed: typeof arrayUnshiftParsed<Field>
+  unshift: typeof arrayUnshift<Field>
+}
+
 export const arrayActions = {
   insertParsed: arrayInsertParsed,
   insert: arrayInsert,

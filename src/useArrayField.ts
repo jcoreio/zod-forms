@@ -6,7 +6,7 @@ import { PathInSchema, PathstringInSchema } from './util/PathInSchema'
 import { parsePathstring } from './util/parsePathstring'
 import { SchemaAt } from './util/SchemaAt'
 import { bindActionsToField } from './util/bindActionsToField'
-import { arrayActions } from './actions/arrayActions'
+import { arrayActions, ArrayFieldPath } from './actions/arrayActions'
 import { createSelector, createStructuredSelector } from 'reselect'
 import { get } from './util/get'
 import isEqual from 'fast-deep-equal'
@@ -21,28 +21,27 @@ import { setMeta } from './actions/setMeta'
 import { FieldMeta } from './FormState'
 import { DeepPartial } from './util/DeepPartial'
 
-export type UseArrayFieldProps<Field extends FieldPath> = NonNullable<
-  z.input<Field['schema']>
-> extends any[]
-  ? FieldMeta &
-      ReturnType<
-        typeof bindActionsToField<
-          Field,
-          typeof arrayActions & {
-            setParsedValue: typeof setParsedValue<Field>
-            setValue: typeof setValue<Field>
-            setMeta: typeof setMeta<Field>
-          }
-        >
-      > & {
-        elements: FieldPath<SchemaAt<Field['schema'], [number]>>[]
-        error?: string
-        dirty: boolean
-        pristine: boolean
-        valid: boolean
-        invalid: boolean
-      }
-  : { ERROR: 'not an array field' }
+export type UseArrayFieldProps<Field extends ArrayFieldPath = ArrayFieldPath> =
+  NonNullable<z.input<Field['schema']>> extends any[]
+    ? FieldMeta &
+        ReturnType<
+          typeof bindActionsToField<
+            Field,
+            arrayActions<Field> & {
+              setParsedValue: typeof setParsedValue<Field>
+              setValue: typeof setValue<Field>
+              setMeta: typeof setMeta<Field>
+            }
+          >
+        > & {
+          elements: FieldPath<SchemaAt<Field['schema'], [number]>>[]
+          error?: string
+          dirty: boolean
+          pristine: boolean
+          valid: boolean
+          invalid: boolean
+        }
+    : { ERROR: 'not an array field' }
 
 export interface TypedUseArrayField<T extends z.ZodTypeAny> {
   <Field extends FieldPathForValue<any[] | null | undefined>>(
@@ -56,7 +55,7 @@ export interface TypedUseArrayField<T extends z.ZodTypeAny> {
   ): UseArrayFieldProps<FieldPath<SchemaAt<T, parsePathstring<Pathstring>>>>
 }
 
-function useArrayFieldBase<Field extends FieldPath>(
+function useArrayFieldBase<Field extends ArrayFieldPath>(
   field: Field
 ): UseArrayFieldProps<Field> {
   type T = Field['schema']
@@ -121,7 +120,13 @@ function useArrayFieldBase<Field extends FieldPath>(
     [field.pathstring]
   )
   const elements = React.useMemo(
-    () => [...new Array(length).keys()].map((index) => field.subfield(index)),
+    () =>
+      [...new Array(length).keys()].map((index) =>
+        field.subfield(
+          // @ts-expect-error doesn't work on this type parameter
+          index
+        )
+      ),
     [length]
   )
 
