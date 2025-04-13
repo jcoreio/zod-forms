@@ -27,10 +27,11 @@ export type UseArrayFieldProps<Field extends FieldPath> = NonNullable<
   ? FieldMeta &
       ReturnType<
         typeof bindActionsToField<
+          Field,
           typeof arrayActions & {
-            setParsedValue: typeof setParsedValue
-            setValue: typeof setValue
-            setMeta: typeof setMeta
+            setParsedValue: typeof setParsedValue<Field>
+            setValue: typeof setValue<Field>
+            setMeta: typeof setMeta<Field>
           }
         >
       > & {

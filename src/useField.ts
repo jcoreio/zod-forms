@@ -23,11 +23,14 @@ import { DeepPartial } from './util/DeepPartial'
 
 export type UseFieldProps<Field extends FieldPath> = FieldMeta &
   ReturnType<
-    typeof bindActionsToField<{
-      setParsedValue: typeof setParsedValue
-      setValue: typeof setValue
-      setMeta: typeof setMeta
-    }>
+    typeof bindActionsToField<
+      Field,
+      {
+        setParsedValue: typeof setParsedValue<Field>
+        setValue: typeof setValue<Field>
+        setMeta: typeof setMeta<Field>
+      }
+    >
   > & {
     parsedValue?: z.output<Field['schema']>
     value?: DeepPartial<z.input<Field['schema']>>

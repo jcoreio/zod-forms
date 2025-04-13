@@ -8,7 +8,7 @@ export type SetValueAction<Field extends FieldPath> = ReturnType<
 
 export function setValue<Field extends FieldPath>(
   field: Field,
-  value: DeepPartial<z.input<Field['schema']>>
+  value: DeepPartial<z.input<Field['schema']>> | undefined
 ) {
   return {
     type: 'setValue',

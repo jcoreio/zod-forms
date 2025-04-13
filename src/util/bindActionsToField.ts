@@ -1,13 +1,16 @@
 import { FieldPath } from '../FieldPath'
 
 export function bindActionsToField<
-  Actions extends { [K in string]: (field: FieldPath, ...rest: any[]) => any }
+  Field extends FieldPath,
+  Actions extends {
+    [K in string]: (field: Field, ...rest: any[]) => any
+  }
 >(
   actions: Actions,
-  field: FieldPath
+  field: Field
 ): {
   [K in keyof Actions]: Actions[K] extends (
-    field: FieldPath,
+    field: Field,
     ...rest: infer Rest
   ) => infer Return
     ? (...rest: Rest) => Return

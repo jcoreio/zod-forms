@@ -9,6 +9,7 @@ import { acceptsBigint } from './util/acceptsBigint'
 import { PathInSchema, PathstringInSchema } from './util/PathInSchema'
 import { parsePathstring } from './util/parsePathstring'
 import { SchemaAt } from './util/SchemaAt'
+import { DeepPartial } from './util/DeepPartial'
 
 export type HtmlFieldInputProps = {
   name: string
@@ -185,29 +186,29 @@ function safeBigInt(value: string): bigint | undefined {
   }
 }
 
-function normalizeValue(
+function normalizeValue<T extends z.ZodTypeAny>(
   value: string | boolean,
   {
     schema,
     tryNumber,
     tryBigint,
-  }: { schema: z.ZodTypeAny; tryNumber: boolean; tryBigint: boolean }
-): string | boolean | number | bigint | null | undefined {
-  if (typeof value === 'boolean') return value
+  }: { schema: T; tryNumber: boolean; tryBigint: boolean }
+): DeepPartial<z.input<T>> | undefined {
+  if (typeof value === 'boolean') return value as any
   if (typeof value === 'string' && !/\S/.test(value)) {
     return normalizeBlank(schema)
   }
   if (typeof value === 'string' && !schema.safeParse(value).success) {
     if (tryNumber) {
       const num = Number(value)
-      if (!isNaN(num)) return num
+      if (!isNaN(num)) return num as any
     }
     if (tryBigint) {
       const bigint = safeBigInt(value)
-      if (bigint != null) return bigint
+      if (bigint != null) return bigint as any
     }
   }
-  return value
+  return value as any
 }
 
 export function useHtmlField<Field extends FieldPath>(
