@@ -21,27 +21,28 @@ import { setMeta } from './actions/setMeta'
 import { FieldMeta } from './FormState'
 import { DeepPartial } from './util/DeepPartial'
 
-export type UseArrayFieldProps<Field extends ArrayFieldPath = ArrayFieldPath> =
-  NonNullable<z.input<Field['schema']>> extends any[]
-    ? FieldMeta &
-        ReturnType<
-          typeof bindActionsToField<
-            Field,
-            arrayActions<Field> & {
-              setParsedValue: typeof setParsedValue<Field>
-              setValue: typeof setValue<Field>
-              setMeta: typeof setMeta<Field>
-            }
-          >
-        > & {
-          elements: FieldPath<SchemaAt<Field['schema'], [number]>>[]
-          error?: string
-          dirty: boolean
-          pristine: boolean
-          valid: boolean
-          invalid: boolean
-        }
-    : { ERROR: 'not an array field' }
+export type UseArrayFieldProps<Field extends FieldPath> = NonNullable<
+  z.input<Field['schema']>
+> extends any[]
+  ? FieldMeta &
+      ReturnType<
+        typeof bindActionsToField<
+          Field,
+          arrayActions<Field> & {
+            setParsedValue: typeof setParsedValue<Field>
+            setValue: typeof setValue<Field>
+            setMeta: typeof setMeta<Field>
+          }
+        >
+      > & {
+        elements: FieldPath<SchemaAt<Field['schema'], [number]>>[]
+        error?: string
+        dirty: boolean
+        pristine: boolean
+        valid: boolean
+        invalid: boolean
+      }
+  : { ERROR: 'not an array field' }
 
 export interface TypedUseArrayField<T extends z.ZodTypeAny> {
   <Field extends FieldPathForValue<any[] | null | undefined>>(
