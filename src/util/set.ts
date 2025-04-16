@@ -17,7 +17,10 @@ export function set(
     const oldValue = (from as any)[path[index]]
     const newValue = set(oldValue, path, value, index + 1)
     if (Object.is(oldValue, newValue)) return from
-    const result: any = Array.isArray(from) ? [...from] : { ...from }
+    const result: any =
+      Array.isArray(from) ?
+        [...from]
+      : Object.assign(Object.create(Object.getPrototypeOf(from)), from)
     result[path[index]] = newValue
     return result
   }

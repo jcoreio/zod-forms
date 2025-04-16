@@ -16,7 +16,7 @@ type ValueFor<Field extends ArrayFieldPath> = DeepPartial<
 >
 
 export type ArrayInsertParsedAction<
-  Field extends ArrayFieldPath = ArrayFieldPath
+  Field extends ArrayFieldPath = ArrayFieldPath,
 > = ReturnType<typeof arrayInsertParsed<Field>>
 
 export function arrayInsertParsed<Field extends ArrayFieldPath>(
@@ -51,7 +51,7 @@ export function arrayPop(field: ArrayFieldPath) {
 }
 
 export type ArrayPushParsedAction<
-  Field extends ArrayFieldPath = ArrayFieldPath
+  Field extends ArrayFieldPath = ArrayFieldPath,
 > = ReturnType<typeof arrayPushParsed<Field>>
 
 export function arrayPushParsed<Field extends ArrayFieldPath>(
@@ -90,7 +90,7 @@ export function arrayShift(field: ArrayFieldPath) {
 }
 
 export type ArraySpliceParsedAction<
-  Field extends ArrayFieldPath = ArrayFieldPath
+  Field extends ArrayFieldPath = ArrayFieldPath,
 > = ReturnType<typeof arraySpliceParsed<Field>>
 
 export function arraySpliceParsed<Field extends ArrayFieldPath>(
@@ -137,7 +137,7 @@ export function arraySwap(
 }
 
 export type ArrayUnshiftParsedAction<
-  Field extends ArrayFieldPath = ArrayFieldPath
+  Field extends ArrayFieldPath = ArrayFieldPath,
 > = ReturnType<typeof arrayUnshiftParsed<Field>>
 
 export function arrayUnshiftParsed<Field extends ArrayFieldPath>(

@@ -14,14 +14,14 @@ export type SubmitHandler<T extends z.ZodTypeAny> = (
   }
 ) => void | Promise<void>
 
-export type SubmitSuccededHandler = () => void
+export type SubmitSuccededHandler = () => void | Promise<void>
 
-export type SubmitFailedHandler = (error: Error) => void
+export type SubmitFailedHandler = (error: unknown) => void | Promise<void>
 
 export type FormState<T extends z.ZodTypeAny> = {
   mounted: boolean
   initialized: boolean
-  fieldMeta: Record<string, FieldMeta>
+  fieldMeta: { [K in string]?: FieldMeta }
   values?: DeepPartial<z.input<T>>
   parsedValues?: z.output<T>
   submittedParsedValues?: z.output<T>
@@ -36,5 +36,5 @@ export type FormState<T extends z.ZodTypeAny> = {
   submitting: boolean
   submitSucceeded: boolean
   submitFailed: boolean
-  submitError?: Error
+  submitError?: unknown
 }

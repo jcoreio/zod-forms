@@ -14,9 +14,9 @@ export const createInitializeReducer = <T extends z.ZodTypeAny>({
     try {
       const values =
         action.values ??
-        (action.parsedValues
-          ? inverseSchema.parse(action.parsedValues)
-          : undefined)
+        (action.parsedValues ?
+          inverseSchema.parse(action.parsedValues)
+        : undefined)
       const parsedValues =
         action.parsedValues ??
         (action.values ? schema.parse(action.values) : undefined)

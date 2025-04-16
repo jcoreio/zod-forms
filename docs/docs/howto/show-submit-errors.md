@@ -64,9 +64,9 @@ function SubmitStatusBanner() {
     return (
       <ErrorAlert>
         Submit failed:{' '}
-        {submitError instanceof Error
-          ? submitError.message
-          : String(submitError)}
+        {submitError instanceof Error ?
+          submitError.message
+        : String(submitError)}
       </ErrorAlert>
     )
   }

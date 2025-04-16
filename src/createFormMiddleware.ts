@@ -7,7 +7,7 @@ import { setSubmitStatus } from './actions/setSubmitStatus'
 import { submitSucceeded } from './actions/submitSucceeded'
 
 export function createFormMiddleware<T extends z.ZodTypeAny>(): Middleware<
-  // eslint-disable-next-line @typescript-eslint/ban-types
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   {},
   FormState<T>,
   Dispatch<FormAction<T>>
@@ -49,7 +49,7 @@ export function createFormMiddleware<T extends z.ZodTypeAny>(): Middleware<
           store.dispatch(submitSucceeded())
           for (const fn of onSubmitSucceeded) await fn()
         },
-        async (error) => {
+        async (error: unknown) => {
           if (store.getState().submitPromise !== submitPromise) return
           store.dispatch(
             setSubmitStatus({

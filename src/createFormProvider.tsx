@@ -1,5 +1,10 @@
 import React from 'react'
-import { Store, applyMiddleware, bindActionCreators, createStore } from 'redux'
+import {
+  Store,
+  applyMiddleware,
+  bindActionCreators,
+  legacy_createStore as createStore,
+} from 'redux'
 import z from 'zod'
 import { setMounted } from './actions/setMounted'
 import { createFormReducer } from './createFormReducer'
@@ -18,6 +23,7 @@ import { setMeta } from './actions/setMeta'
 import { addHandlers } from './actions/addHandlers'
 import { removeHandlers } from './actions/removeHandlers'
 import { arrayActions } from './actions/arrayActions'
+import PropTypes from 'prop-types'
 
 export const createFormProvider = <T extends z.ZodTypeAny>(
   props: Pick<
@@ -29,7 +35,7 @@ export const createFormProvider = <T extends z.ZodTypeAny>(
     | 'selectFieldErrorMap'
     | 'selectFormValues'
   >
-) =>
+) => {
   function FormProvider({ children }: { children: React.ReactElement }) {
     const storeRef = React.useRef<Store<FormState<T>, FormAction<T>>>()
     if (!storeRef.current) {
@@ -55,6 +61,7 @@ export const createFormProvider = <T extends z.ZodTypeAny>(
       []
     )
     const getStatus = React.useCallback(
+      // eslint-disable-next-line react/prop-types
       () => props.selectFormStatus(store.getState()),
       []
     )
@@ -102,3 +109,8 @@ export const createFormProvider = <T extends z.ZodTypeAny>(
       </FormContext.Provider>
     )
   }
+  FormProvider.propTypes = {
+    children: PropTypes.node,
+  }
+  return FormProvider
+}

@@ -1,44 +1,43 @@
 import { BasePath } from '../FieldPath'
 
-export type parsePathstring<Path extends string, IsTail = false> = [
-  Path
-] extends ['']
-  ? []
-  : [Path] extends [`[${infer Rest}`]
-  ? Rest extends `${infer N extends number}]${infer Tail}`
-    ? [N, ...parsePathstring<Tail, true>]
-    : ExtractInitialStringLiteral<Rest> extends infer StringLiteral extends string
-    ? [
+export type parsePathstring<Path extends string, IsTail = false> =
+  [Path] extends [''] ? []
+  : [Path] extends [`[${infer Rest}`] ?
+    Rest extends `${infer N extends number}]${infer Tail}` ?
+      [N, ...parsePathstring<Tail, true>]
+    : ExtractInitialStringLiteral<Rest> extends (
+      infer StringLiteral extends string
+    ) ?
+      [
         ProcessStringLiteral<StringLiteral>,
-        ...(Rest extends `${StringLiteral}]${infer Tail}`
-          ? parsePathstring<Tail, true>
-          : never)
+        ...(Rest extends `${StringLiteral}]${infer Tail}` ?
+          parsePathstring<Tail, true>
+        : never),
       ]
     : never
-  : [IsTail] extends [true]
-  ? [Path] extends [`.${infer Rest}`]
-    ? parsePathstring<Rest>
+  : [IsTail] extends [true] ?
+    [Path] extends [`.${infer Rest}`] ?
+      parsePathstring<Rest>
     : never
-  : [Path] extends [`${infer Head}[${infer Tail}`]
-  ? [Path] extends [`${infer Head2}.${infer Tail2}`]
-    ? Head2 extends `${Head}[${string}` // make sure we pick up to . or [, whichever comes first
-      ? [Head, ...parsePathstring<`[${Tail}`, true>]
+  : [Path] extends [`${infer Head}[${infer Tail}`] ?
+    [Path] extends [`${infer Head2}.${infer Tail2}`] ?
+      Head2 extends (
+        `${Head}[${string}` // make sure we pick up to . or [, whichever comes first
+      ) ?
+        [Head, ...parsePathstring<`[${Tail}`, true>]
       : [Head2, ...parsePathstring<`.${Tail2}`, true>]
     : [Head, ...parsePathstring<`[${Tail}`, true>]
-  : [Path] extends [`${infer Head}.${infer Tail}`]
-  ? [Head, ...parsePathstring<`.${Tail}`, true>]
+  : [Path] extends [`${infer Head}.${infer Tail}`] ?
+    [Head, ...parsePathstring<`.${Tail}`, true>]
   : [Path]
 
 /**
  * If T starts with a quoted string literal, returns that string literal.
  * Otherwise returns never
  */
-type ExtractInitialStringLiteral<T extends string> = [T] extends [
-  `"${infer Rest}`
-]
-  ? `"${RestOfStringLiteral<Rest, '"'>}`
-  : [T] extends [`'${infer Rest}`]
-  ? `'${RestOfStringLiteral<Rest, "'">}`
+type ExtractInitialStringLiteral<T extends string> =
+  [T] extends [`"${infer Rest}`] ? `"${RestOfStringLiteral<Rest, '"'>}`
+  : [T] extends [`'${infer Rest}`] ? `'${RestOfStringLiteral<Rest, "'">}`
   : never
 
 type RestOfStringLiteral<
@@ -49,13 +48,20 @@ type RestOfStringLiteral<
   /**
    * The opening quote type
    */
-  Q extends '"' | "'"
-> = [T] extends [`${infer A}${Q}${infer B}`] // find the next quote
-  ? A extends `${infer C}\\${infer D}` // the quote may be escaped, so find the first backslash
-    ? D extends '' // nothing after the backslash, so it escapes the quote Q
-      ? `${A}${Q}${RestOfStringLiteral<B, Q>}` // keep scanning until the closing quote
-      : D extends `${infer E extends keyof EscapeChars}${infer F}`
-      ? `${C}\\${E}${RestOfStringLiteral<`${F}${Q}${B}`, Q>}` // keep scanning until the closing quote
+  Q extends '"' | "'",
+> =
+  [T] extends (
+    [`${infer A}${Q}${infer B}`] // find the next quote
+  ) ?
+    A extends (
+      `${infer C}\\${infer D}` // the quote may be escaped, so find the first backslash
+    ) ?
+      D extends (
+        '' // nothing after the backslash, so it escapes the quote Q
+      ) ?
+        `${A}${Q}${RestOfStringLiteral<B, Q>}` // keep scanning until the closing quote
+      : D extends `${infer E extends keyof EscapeChars}${infer F}` ?
+        `${C}\\${E}${RestOfStringLiteral<`${F}${Q}${B}`, Q>}` // keep scanning until the closing quote
       : never
     : `${A}${Q}` // no backslash, Q is a closing quote and we're done!
   : never
@@ -73,16 +79,16 @@ const EscapeChars = {
   v: '\v',
 } as const
 
-type ProcessEscapes<T extends string> = T extends `${infer A}\\${infer B}`
-  ? B extends `${infer C extends keyof EscapeChars}${infer D}`
-    ? `${A}${EscapeChars[C]}${ProcessEscapes<D>}`
+type ProcessEscapes<T extends string> =
+  T extends `${infer A}\\${infer B}` ?
+    B extends `${infer C extends keyof EscapeChars}${infer D}` ?
+      `${A}${EscapeChars[C]}${ProcessEscapes<D>}`
     : never
   : T
 
-type ProcessStringLiteral<T extends string> = T extends `"${infer Content}"`
-  ? ProcessEscapes<Content>
-  : T extends `'${infer Content}'`
-  ? ProcessEscapes<Content>
+type ProcessStringLiteral<T extends string> =
+  T extends `"${infer Content}"` ? ProcessEscapes<Content>
+  : T extends `'${infer Content}'` ? ProcessEscapes<Content>
   : never
 
 const pathstringRx =

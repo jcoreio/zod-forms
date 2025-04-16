@@ -33,11 +33,11 @@ export function FormCheckboxField({
           }
         />
       </FormGroup>
-      {error ? (
+      {error ?
         <FormHelperText data-testid={`${field.pathstring}-helperText`}>
           {error}
         </FormHelperText>
-      ) : null}
+      : null}
     </FormControl>
   )
 }

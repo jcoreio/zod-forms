@@ -20,7 +20,10 @@ export function setMetaReducer<T extends z.ZodTypeAny>(
     ...state,
     fieldMeta: {
       ...state.fieldMeta,
-      [field.pathstring]: { ...oldMeta, ...meta },
+      [field.pathstring]: {
+        ...(oldMeta || { touched: false, visited: false }),
+        ...meta,
+      },
     },
   }
 }

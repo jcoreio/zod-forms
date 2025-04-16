@@ -20,8 +20,8 @@ export function arrayMoveReducer<T extends z.ZodTypeAny>(
 export function move<T>(array: T[], from: number, to: number): T[] {
   if (from < 0 || from >= array.length) throw new Error(`from out of range`)
   if (to < 0 || to >= array.length) throw new Error(`to out of range`)
-  return from < to
-    ? [
+  return from < to ?
+      [
         ...array.slice(0, from),
         ...array.slice(from + 1, to),
         array[from],

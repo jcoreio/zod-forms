@@ -50,8 +50,7 @@ const schema = conditionalValidate(
   })
 ).conditionalRefine(
   (s) => s.pick({ min: true, max: true, requireMinLteMax: true }),
-  ({ min, max, requireMinLteMax }) =>
-    !requireMinLteMax || min == null || max == null || min < max,
+  ({ min, max, requireMinLteMax }) => !requireMinLteMax || min < max,
   [
     { path: ['min'], message: 'must be <= max' },
     { path: ['max'], message: 'must be >= min' },
@@ -228,7 +227,9 @@ const FormSelectField = React.memo(function FormSelectField({
           {children}
         </select>
       </FormLabel>
-      {error ? <FormHelperText>{error}</FormHelperText> : undefined}
+      {error ?
+        <FormHelperText>{error}</FormHelperText>
+      : undefined}
     </FormControl>
   )
 })
@@ -251,7 +252,9 @@ const FormSwitchField = React.memo(function FormSwitchField({
           control={<Switch {...input} {...props} />}
         />
       </FormGroup>
-      {error ? <FormHelperText>{error}</FormHelperText> : null}
+      {error ?
+        <FormHelperText>{error}</FormHelperText>
+      : null}
     </FormControl>
   )
 })

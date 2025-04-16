@@ -55,45 +55,31 @@ export class FieldPath<T extends z.ZodTypeAny = z.ZodTypeAny> {
 
 export type BasePath = (string | number)[]
 
-export type SubpathKey<T extends z.ZodTypeAny> = 0 extends 1 & T
-  ? any
-  : 0 extends 1 & z.input<T>
-  ? any
-  : T extends z.ZodObject<infer Shape, infer UnknownKeys>
-  ? UnknownKeys extends 'passthrough'
-    ? string
+export type SubpathKey<T extends z.ZodTypeAny> =
+  0 extends 1 & T ? any
+  : 0 extends 1 & z.input<T> ? any
+  : T extends z.ZodObject<infer Shape, infer UnknownKeys> ?
+    UnknownKeys extends 'passthrough' ?
+      string
     : keyof Shape
-  : T extends z.ZodRecord<infer Key, any>
-  ? z.input<Key>
-  : T extends z.ZodMap<infer Key, any>
-  ? z.input<Key>
-  : T extends z.ZodArray<any>
-  ? number
-  : T extends z.ZodTuple<any, any>
-  ? number
-  : T extends z.ZodLazy<infer U>
-  ? SubpathKey<U>
-  : T extends z.ZodUnion<infer Options>
-  ? SubpathKey<Options[number]>
-  : T extends z.ZodDiscriminatedUnion<any, infer Options>
-  ? SubpathKey<Options[number]>
-  : T extends z.ZodOptional<infer U>
-  ? SubpathKey<U>
-  : T extends z.ZodNullable<infer U>
-  ? SubpathKey<U>
-  : T extends z.ZodDefault<infer U>
-  ? SubpathKey<U>
-  : T extends z.ZodCatch<infer U>
-  ? SubpathKey<U>
-  : T extends z.ZodEffects<infer U, any>
-  ? SubpathKey<U>
-  : T extends z.ZodBranded<infer U, any>
-  ? SubpathKey<U>
+  : T extends z.ZodRecord<infer Key, any> ? z.input<Key>
+  : T extends z.ZodMap<infer Key, any> ? z.input<Key>
+  : T extends z.ZodArray<any> ? number
+  : T extends z.ZodTuple<any, any> ? number
+  : T extends z.ZodLazy<infer U> ? SubpathKey<U>
+  : T extends z.ZodUnion<infer Options> ? SubpathKey<Options[number]>
+  : T extends z.ZodDiscriminatedUnion<any, infer Options> ?
+    SubpathKey<Options[number]>
+  : T extends z.ZodOptional<infer U> ? SubpathKey<U>
+  : T extends z.ZodNullable<infer U> ? SubpathKey<U>
+  : T extends z.ZodDefault<infer U> ? SubpathKey<U>
+  : T extends z.ZodCatch<infer U> ? SubpathKey<U>
+  : T extends z.ZodEffects<infer U, any> ? SubpathKey<U>
+  : T extends z.ZodBranded<infer U, any> ? SubpathKey<U>
   : never
 
-export type AllPaths<T extends z.ZodTypeAny> = SubpathKey<T> extends never
-  ? []
-  : [] | ValuesOf<SubpathKeyMap<T>>
+export type AllPaths<T extends z.ZodTypeAny> =
+  SubpathKey<T> extends never ? [] : [] | ValuesOf<SubpathKeyMap<T>>
 
 type ValuesOf<O> = O[keyof O]
 
@@ -117,8 +103,8 @@ function subschema(
       } = schema as z.AnyZodObject
       if (key in shape) return shape[key]
       if (unknownKeys === 'passthrough') {
-        return catchall._def.typeName === z.ZodFirstPartyTypeKind.ZodNever
-          ? z.unknown()
+        return catchall._def.typeName === z.ZodFirstPartyTypeKind.ZodNever ?
+            z.unknown()
           : catchall
       }
       break
@@ -129,11 +115,11 @@ function subschema(
       ).options
         .map((opt) => subschema(opt, key))
         .filter((opt): opt is z.ZodTypeAny => opt != null)
-      return options.length > 1
-        ? z.union(options as any)
-        : options.length === 1
-        ? options[0]
+      return (
+        options.length > 1 ? z.union(options as any)
+        : options.length === 1 ? options[0]
         : undefined
+      )
     }
     case 'ZodDiscriminatedUnion': {
       const discUnion = schema as z.ZodDiscriminatedUnion<
@@ -143,11 +129,11 @@ function subschema(
       const options = discUnion.options
         .map((opt) => subschema(opt, key))
         .filter((opt): opt is z.ZodTypeAny => opt != null)
-      return options.length > 1
-        ? z.union(options as any)
-        : options.length === 1
-        ? options[0]
+      return (
+        options.length > 1 ? z.union(options as any)
+        : options.length === 1 ? options[0]
         : undefined
+      )
       break
     }
     case 'ZodIntersection':
@@ -164,18 +150,12 @@ function subschema(
       break
     }
     case 'ZodRecord': {
-      const { keySchema, valueSchema } = schema as z.ZodRecord<
-        z.ZodTypeAny,
-        z.ZodTypeAny
-      >
+      const { keySchema, valueSchema } = schema as z.ZodRecord<z.ZodTypeAny>
       if (keySchema.safeParse(key).success) return valueSchema
       break
     }
     case 'ZodMap': {
-      const { keySchema, valueSchema } = schema as z.ZodMap<
-        z.ZodTypeAny,
-        z.ZodTypeAny
-      >
+      const { keySchema, valueSchema } = schema as z.ZodMap
       if (keySchema.safeParse(key).success) return valueSchema
       break
     }

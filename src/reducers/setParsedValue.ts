@@ -31,12 +31,13 @@ export const createSetParsedValueReducer = <T extends z.ZodTypeAny>({
         values: newValues,
         parsedValues: newParsedValues,
       }
-    } catch (error) {
+    } catch {
       const newParsed = invert(action.field.schema).safeParse(
         action.parsedValue
       )
-      const values = newParsed.success
-        ? (set(
+      const values =
+        newParsed.success ?
+          (set(
             state.values,
             action.field.path,
             newParsed.data
@@ -46,14 +47,14 @@ export const createSetParsedValueReducer = <T extends z.ZodTypeAny>({
       const result = {
         ...state,
         submitError: undefined,
-        validationError: !newParsed.success
-          ? newParsed.error
-          : newValidatedParsed.success
-          ? undefined
+        validationError:
+          !newParsed.success ? newParsed.error
+          : newValidatedParsed.success ? undefined
           : newValidatedParsed.error,
         values,
-        parsedValues: newValidatedParsed.success
-          ? newValidatedParsed.data
+        parsedValues:
+          newValidatedParsed.success ?
+            newValidatedParsed.data
           : state.parsedValues,
       }
       return result

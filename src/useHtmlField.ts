@@ -26,10 +26,11 @@ export type ValidUseHtmlFieldProps<Field extends FieldPath> = {
   meta: UseFieldProps<Field>
 }
 
-export type UseHtmlFieldProps<Field extends FieldPath> = z.input<
-  Field['schema']
-> extends string | number | bigint | boolean | null | undefined
-  ? {
+export type UseHtmlFieldProps<Field extends FieldPath> =
+  z.input<Field['schema']> extends (
+    string | number | bigint | boolean | null | undefined
+  ) ?
+    {
       input: HtmlFieldInputProps
       meta: UseFieldProps<Field>
     }
@@ -39,14 +40,12 @@ export type UseHtmlFieldProps<Field extends FieldPath> = z.input<
 
 export type UseHtmlFieldOptions<
   Field,
-  Schema extends z.ZodTypeAny = Field extends FieldPath<infer S>
-    ? S
-    : z.ZodTypeAny
+  Schema extends z.ZodTypeAny = Field extends FieldPath<infer S> ? S
+  : z.ZodTypeAny,
 > = {
   field: Field
-  type: z.input<Schema> extends boolean | null | undefined
-    ? 'checkbox'
-    : Exclude<HTMLInputTypeAttribute, 'checkbox'>
+  type: z.input<Schema> extends boolean | null | undefined ? 'checkbox'
+  : Exclude<HTMLInputTypeAttribute, 'checkbox'>
   normalizeOnBlur?: boolean
 }
 
@@ -121,8 +120,9 @@ function useHtmlFieldBase<Field extends FieldPath>(
       })
       if (normalizeOnBlur) {
         const parsed = field.schema.safeParse(value)
-        const formatted = parsed.success
-          ? invert(field.schema).safeParse(parsed.data)
+        const formatted =
+          parsed.success ?
+            invert(field.schema).safeParse(parsed.data)
           : undefined
         if (formatted?.success) value = formatted.data
         setValue(value)
@@ -139,11 +139,9 @@ function useHtmlFieldBase<Field extends FieldPath>(
         name: field.pathstring,
         type,
         value:
-          typeof value === 'boolean'
-            ? String(value)
-            : typeof value === 'string'
-            ? value || tempValue || ''
-            : tempValue || (value == null ? '' : String(value) || ''),
+          typeof value === 'boolean' ? String(value)
+          : typeof value === 'string' ? value || tempValue || ''
+          : tempValue || (value == null ? '' : String(value) || ''),
         ...(type === 'checkbox' && { checked: Boolean(value) }),
         onChange,
         onFocus,
@@ -181,7 +179,7 @@ function normalizeBlank(schema: z.ZodTypeAny): any {
 function safeBigInt(value: string): bigint | undefined {
   try {
     return BigInt(value)
-  } catch (error) {
+  } catch {
     return undefined
   }
 }
@@ -219,7 +217,7 @@ export function useHtmlField<
     z.ZodNever,
     'cast to TypedUseHtmlField<T> to pass a path array'
   >,
-  Path extends PathInSchema<T> = any
+  Path extends PathInSchema<T> = any,
 >(
   options: UseHtmlFieldOptions<Path, SchemaAt<T, Path>>
 ): UseHtmlFieldProps<FieldPath<SchemaAt<T, Path>>>
@@ -228,7 +226,7 @@ export function useHtmlField<
     z.ZodNever,
     'cast to TypedUseHtmlField<T> to pass a pathstring'
   >,
-  Path extends PathstringInSchema<T> = any
+  Path extends PathstringInSchema<T> = any,
 >(
   options: UseHtmlFieldOptions<Path, SchemaAt<T, parsePathstring<Path>>>
 ): UseHtmlFieldProps<FieldPath<SchemaAt<T, parsePathstring<Path>>>>

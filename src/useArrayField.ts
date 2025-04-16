@@ -21,10 +21,9 @@ import { setMeta } from './actions/setMeta'
 import { FieldMeta } from './FormState'
 import { DeepPartial } from './util/DeepPartial'
 
-export type UseArrayFieldProps<Field extends FieldPath> = NonNullable<
-  z.input<Field['schema']>
-> extends any[]
-  ? FieldMeta &
+export type UseArrayFieldProps<Field extends FieldPath> =
+  NonNullable<z.input<Field['schema']>> extends any[] ?
+    FieldMeta &
       ReturnType<
         typeof bindActionsToField<
           Field,
@@ -48,9 +47,9 @@ export interface TypedUseArrayField<T extends z.ZodTypeAny> {
   <Field extends FieldPathForValue<any[] | null | undefined>>(
     field: Field
   ): UseArrayFieldProps<Field>
-  <Path extends PathInSchema<T>>(path: Path): UseArrayFieldProps<
-    FieldPath<SchemaAt<T, Path>>
-  >
+  <Path extends PathInSchema<T>>(
+    path: Path
+  ): UseArrayFieldProps<FieldPath<SchemaAt<T, Path>>>
   <Pathstring extends PathstringInSchema<T>>(
     path: Pathstring
   ): UseArrayFieldProps<FieldPath<SchemaAt<T, parsePathstring<Pathstring>>>>
@@ -155,14 +154,14 @@ export function useArrayField<
     z.ZodNever,
     'cast to TypedUseArrayField<T> to pass a path array'
   >,
-  Path extends PathInSchema<T> = any
+  Path extends PathInSchema<T> = any,
 >(field: Path): UseArrayFieldProps<FieldPath<SchemaAt<T, Path>>>
 export function useArrayField<
   T extends z.ZodTypeAny = z.ZodBranded<
     z.ZodNever,
     'cast to TypedUseArrayField<T> to pass a pathstring'
   >,
-  Pathstring extends PathstringInSchema<T> = any
+  Pathstring extends PathstringInSchema<T> = any,
 >(
   field: Pathstring
 ): UseArrayFieldProps<FieldPath<SchemaAt<T, parsePathstring<Pathstring>>>>

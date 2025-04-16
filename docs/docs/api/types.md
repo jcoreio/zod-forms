@@ -187,9 +187,9 @@ export interface TypedUseArrayField<T extends z.ZodTypeAny> {
   <Field extends FieldPathForValue<any[] | null | undefined>>(
     field: Field
   ): UseArrayFieldProps<Field>
-  <Path extends PathInSchema<T>>(path: Path): UseArrayFieldProps<
-    FieldPath<SchemaAt<T, Path>>
-  >
+  <Path extends PathInSchema<T>>(
+    path: Path
+  ): UseArrayFieldProps<FieldPath<SchemaAt<T, Path>>>
   <Pathstring extends PathstringInSchema<T>>(
     path: Pathstring
   ): UseArrayFieldProps<FieldPath<SchemaAt<T, parsePathstring<Pathstring>>>>
@@ -201,12 +201,12 @@ export interface TypedUseArrayField<T extends z.ZodTypeAny> {
 ```ts
 export interface TypedUseField<T extends z.ZodTypeAny> {
   <Field extends FieldPath>(field: Field): UseFieldProps<Field>
-  <Path extends PathInSchema<T>>(path: Path): UseFieldProps<
-    FieldPath<SchemaAt<T, Path>>
-  >
-  <Pathstring extends PathstringInSchema<T>>(path: Pathstring): UseFieldProps<
-    FieldPath<SchemaAt<T, parsePathstring<Pathstring>>>
-  >
+  <Path extends PathInSchema<T>>(
+    path: Path
+  ): UseFieldProps<FieldPath<SchemaAt<T, Path>>>
+  <Pathstring extends PathstringInSchema<T>>(
+    path: Pathstring
+  ): UseFieldProps<FieldPath<SchemaAt<T, parsePathstring<Pathstring>>>>
 }
 ```
 
@@ -229,10 +229,9 @@ export interface TypedUseHtmlField<T extends z.ZodTypeAny> {
 ## `UseArrayFieldProps`
 
 ```ts
-export type UseArrayFieldProps<Field extends FieldPath> = NonNullable<
-  z.input<Field['schema']>
-> extends any[]
-  ? FieldMeta & {
+export type UseArrayFieldProps<Field extends FieldPath> =
+  NonNullable<z.input<Field['schema']>> extends any[] ?
+    FieldMeta & {
       setMeta: (meta: Partial<FieldMeta>) => void
       setParsedValue: (parsedValue: z.output<Field['schema']>) => void
       setValue: (
@@ -280,14 +279,12 @@ export type UseFieldProps<Field extends FieldPath> = FieldMeta & {
 ```ts
 export type UseHtmlFieldOptions<
   Field,
-  Schema extends z.ZodTypeAny = Field extends FieldPath<infer S>
-    ? S
-    : z.ZodTypeAny
+  Schema extends z.ZodTypeAny = Field extends FieldPath<infer S> ? S
+  : z.ZodTypeAny,
 > = {
   field: Field
-  type: z.input<Schema> extends boolean | null | undefined
-    ? 'checkbox'
-    : Exclude<HTMLInputTypeAttribute, 'checkbox'>
+  type: z.input<Schema> extends boolean | null | undefined ? 'checkbox'
+  : Exclude<HTMLInputTypeAttribute, 'checkbox'>
   normalizeOnBlur?: boolean
 }
 ```
@@ -295,10 +292,11 @@ export type UseHtmlFieldOptions<
 ## `UseHtmlFieldProps`
 
 ```ts
-export type UseHtmlFieldProps<Field extends FieldPath> = z.input<
-  Field['schema']
-> extends string | number | bigint | boolean | null | undefined
-  ? {
+export type UseHtmlFieldProps<Field extends FieldPath> =
+  z.input<Field['schema']> extends (
+    string | number | bigint | boolean | null | undefined
+  ) ?
+    {
       input: HtmlFieldInputProps
       meta: UseFieldProps<Field>
     }

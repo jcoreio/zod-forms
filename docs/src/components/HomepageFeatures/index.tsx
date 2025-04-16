@@ -1,11 +1,12 @@
 import clsx from 'clsx'
 import Heading from '@theme/Heading'
 import styles from './styles.module.css'
+import React from 'react'
 
 type FeatureItem = {
   title: string
   Svg?: React.ComponentType<React.ComponentProps<'svg'>>
-  description: JSX.Element
+  description: React.JSX.Element
 }
 
 const FeatureList: FeatureItem[] = [
@@ -58,7 +59,7 @@ function Feature({ title, Svg, description }: FeatureItem) {
   )
 }
 
-export default function HomepageFeatures(): JSX.Element {
+export default function HomepageFeatures(): React.JSX.Element {
   return (
     <section className={styles.features}>
       <div className="container">

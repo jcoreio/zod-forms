@@ -8,7 +8,7 @@ import { setValue } from '../../actions/setValue'
 
 export function updateRawArray<
   T extends z.ZodTypeAny,
-  Field extends FieldPathForValue<any[]>
+  Field extends FieldPathForValue<any[]>,
 >(
   reducer: Reducer<FormState<T>, FormAction<T>>,
   state: FormState<T>,
@@ -19,7 +19,7 @@ export function updateRawArray<
 ) {
   const oldValue = get(state.values, field.path)
   const newValue = updater(oldValue as any)
-  return newValue === oldValue
-    ? state
-    : reducer(state, setValue(field, newValue))
+  return newValue === oldValue ? state : (
+      reducer(state, setValue(field, newValue))
+    )
 }

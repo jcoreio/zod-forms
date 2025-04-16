@@ -45,17 +45,19 @@ export type UseFieldProps<Field extends FieldPath> = FieldMeta &
 
 export interface TypedUseField<T extends z.ZodTypeAny> {
   <Field extends FieldPath>(field: Field): UseFieldProps<Field>
-  <Path extends PathInSchema<T>>(path: Path): UseFieldProps<
-    FieldPath<SchemaAt<T, Path>>
-  >
-  <Pathstring extends PathstringInSchema<T>>(path: Pathstring): UseFieldProps<
-    FieldPath<SchemaAt<T, parsePathstring<Pathstring>>>
-  >
+  <Path extends PathInSchema<T>>(
+    path: Path
+  ): UseFieldProps<FieldPath<SchemaAt<T, Path>>>
+  <Pathstring extends PathstringInSchema<T>>(
+    path: Pathstring
+  ): UseFieldProps<FieldPath<SchemaAt<T, parsePathstring<Pathstring>>>>
 }
 
-function useFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
-  field: Field
-): UseFieldProps<Field> {
+function useFieldBase<
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
+  T extends z.ZodTypeAny,
+  Field extends FieldPath,
+>(field: Field): UseFieldProps<Field> {
   type Schema = Field['schema']
 
   const {
@@ -77,13 +79,13 @@ function useFieldBase<T extends z.ZodTypeAny, Field extends FieldPath>(
             createStructuredSelector({
               parsedValue: ({ parsedValues }) =>
                 get(parsedValues, field.path) as z.output<Schema> | undefined,
-              value: ({ values }) => get(values, field.path) as unknown,
+              value: ({ values }) => get(values, field.path),
               initialParsedValue: ({ initialParsedValues }) =>
                 get(initialParsedValues, field.path) as
                   | z.output<Schema>
                   | undefined,
               initialValue: ({ initialValues }) =>
-                get(initialValues, field.path) as unknown,
+                get(initialValues, field.path),
             }),
           ],
           ({
@@ -143,14 +145,14 @@ export function useField<
     z.ZodNever,
     'cast to TypedUseArray<T> to pass a path array'
   >,
-  Path extends PathInSchema<T> = any
+  Path extends PathInSchema<T> = any,
 >(field: Path): UseFieldProps<FieldPath<SchemaAt<T, Path>>>
 export function useField<
   T extends z.ZodTypeAny = z.ZodBranded<
     z.ZodNever,
     'cast to TypedUseArray<T> to pass a pathstring'
   >,
-  Pathstring extends PathstringInSchema<T> = any
+  Pathstring extends PathstringInSchema<T> = any,
 >(
   field: Pathstring
 ): UseFieldProps<FieldPath<SchemaAt<T, parsePathstring<Pathstring>>>>

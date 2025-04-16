@@ -29,15 +29,15 @@ function resolveSchema<T extends z.ZodTypeAny>(
   baseSchema: T,
   refineSchema: ConditionalRefineSchema<T>
 ) {
-  return typeof refineSchema === 'function'
-    ? refineSchema(baseSchema)
+  return typeof refineSchema === 'function' ?
+      refineSchema(baseSchema)
     : refineSchema
 }
 
 export class ConditionalValidator<
   T extends z.ZodTypeAny,
   Output = z.output<T>,
-  Input = z.input<T>
+  Input = z.input<T>,
 > extends z.ZodEffects<T, Output, Input> {
   declare _def: ConditionalValidatorDef<T>;
 
@@ -63,6 +63,7 @@ export class ConditionalValidator<
   }
   conditionalRefineAsync(
     schema: ConditionalRefineSchema<T>,
+    // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
     check: (value: z.output<T>) => unknown | Promise<unknown>,
     message: ConditionalRefineMessage<z.output<T>>
   ) {
@@ -110,12 +111,12 @@ function makePreprocess<T extends z.ZodTypeAny>(
         if (!parsed.success) return
         return check(parsed.data, ctx)
       }
-      return async
-        ? schema.safeParseAsync(input).then(handleParsed)
+      return async ?
+          schema.safeParseAsync(input).then(handleParsed)
         : handleParsed(schema.safeParse(input))
     })
-    return checks.some((c) => c.async)
-      ? Promise.all(results).then(() => input)
+    return checks.some((c) => c.async) ?
+        Promise.all(results).then(() => input)
       : input
   }, schema)
 }
@@ -128,11 +129,9 @@ function addIssues<Output>(
   message: ConditionalRefineMessage<Output>
 ) {
   const issues = asArray(
-    typeof message === 'function'
-      ? message(value)
-      : typeof message === 'string'
-      ? { message }
-      : message
+    typeof message === 'function' ? message(value)
+    : typeof message === 'string' ? { message }
+    : message
   )
   for (const issue of issues) {
     ctx.addIssue({ code: z.ZodIssueCode.custom, ...issue })
