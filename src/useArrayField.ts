@@ -20,6 +20,7 @@ import { setValue } from './actions/setValue'
 import { setMeta } from './actions/setMeta'
 import { FieldMeta } from './FormState'
 import { DeepPartial } from './util/DeepPartial'
+import { maybeParse } from './util/maybeParse'
 
 export type UseArrayFieldProps<Field extends FieldPath> =
   NonNullable<z.input<Field['schema']>> extends any[] ?
@@ -78,16 +79,25 @@ function useArrayFieldBase<Field extends ArrayFieldPath>(
         createSelector(
           [
             createStructuredSelector({
+              parsedValue: ({ parsedValues }) =>
+                get(parsedValues, field.path) as z.output<T> | undefined,
               value: ({ values }) =>
                 get(values, field.path) as DeepPartial<z.input<T>> | undefined,
+              initialParsedValue: ({ initialParsedValues }) =>
+                get(initialParsedValues, field.path) as z.output<T> | undefined,
               initialValue: ({ initialValues }) =>
                 get(initialValues, field.path) as
                   | DeepPartial<z.input<T>>
                   | undefined,
             }),
           ],
-          ({ value, initialValue }) => {
-            const dirty = !isEqual(value, initialValue)
+          ({
+            value,
+            parsedValue = maybeParse(field.schema, value),
+            initialValue,
+            initialParsedValue = maybeParse(field.schema, initialValue),
+          }) => {
+            const dirty = !isEqual(parsedValue, initialParsedValue)
             const pristine = !dirty
             return {
               dirty,

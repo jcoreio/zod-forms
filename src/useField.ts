@@ -20,6 +20,7 @@ import { SchemaAt } from './util/SchemaAt'
 import { maybeParse } from './util/maybeParse'
 import { bindActionsToField } from './util/bindActionsToField'
 import { DeepPartial } from './util/DeepPartial'
+import { invert } from 'zod-invertible'
 
 export type UseFieldProps<Field extends FieldPath> = FieldMeta &
   ReturnType<
@@ -53,11 +54,18 @@ export interface TypedUseField<T extends z.ZodTypeAny> {
   ): UseFieldProps<FieldPath<SchemaAt<T, parsePathstring<Pathstring>>>>
 }
 
+export type UseFieldOptions = {
+  normalizeOnMount?: boolean
+}
+
 function useFieldBase<
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   T extends z.ZodTypeAny,
   Field extends FieldPath,
->(field: Field): UseFieldProps<Field> {
+>(
+  field: Field,
+  { normalizeOnMount = true }: UseFieldOptions = {}
+): UseFieldProps<Field> {
   type Schema = Field['schema']
 
   const {
@@ -94,7 +102,7 @@ function useFieldBase<
             initialValue,
             initialParsedValue = maybeParse(field.schema, initialValue),
           }) => {
-            const dirty = !isEqual(value, initialValue)
+            const dirty = !isEqual(parsedValue, initialParsedValue)
             const pristine = !dirty
             return {
               parsedValue,
@@ -123,10 +131,31 @@ function useFieldBase<
     [field.pathstring]
   )
 
+  const mounted = React.useRef(false)
+
+  let normalizedValue = parsedValues.value
+  if (!mounted.current && normalizeOnMount) {
+    const parsed = field.schema.safeParse(parsedValues.value)
+    const formatted =
+      parsed.success ? invert(field.schema).safeParse(parsed.data) : undefined
+    if (formatted?.success && formatted.data !== parsedValues.value) {
+      normalizedValue = formatted.data
+    }
+  }
+  mounted.current = true
+  console.log({ ...parsedValues, normalizedValue, mounted: mounted.current })
+
+  React.useEffect(() => {
+    if (normalizeOnMount && !isEqual(normalizedValue, parsedValues.value)) {
+      boundActions.setValue(normalizedValue)
+    }
+  }, [])
+
   return React.useMemo(
     () => ({
       ...boundActions,
       ...parsedValues,
+      value: normalizedValue,
       visited: meta?.visited || false,
       touched: meta?.touched || submitFailed,
       error,
@@ -138,7 +167,8 @@ function useFieldBase<
 }
 
 export function useField<Field extends FieldPath>(
-  field: Field
+  field: Field,
+  options?: UseFieldOptions
 ): UseFieldProps<Field>
 export function useField<
   T extends z.ZodTypeAny = z.ZodBranded<
@@ -146,7 +176,10 @@ export function useField<
     'cast to TypedUseArray<T> to pass a path array'
   >,
   Path extends PathInSchema<T> = any,
->(field: Path): UseFieldProps<FieldPath<SchemaAt<T, Path>>>
+>(
+  field: Path,
+  options?: UseFieldOptions
+): UseFieldProps<FieldPath<SchemaAt<T, Path>>>
 export function useField<
   T extends z.ZodTypeAny = z.ZodBranded<
     z.ZodNever,
@@ -154,13 +187,17 @@ export function useField<
   >,
   Pathstring extends PathstringInSchema<T> = any,
 >(
-  field: Pathstring
+  field: Pathstring,
+
+  options?: UseFieldOptions
 ): UseFieldProps<FieldPath<SchemaAt<T, parsePathstring<Pathstring>>>>
 export function useField<T extends z.ZodTypeAny>(
-  field: FieldPath | BasePath | string
+  field: FieldPath | BasePath | string,
+  options?: UseFieldOptions
 ): UseFieldProps<any> | { ERROR: string } {
   const { root } = useFormContext<T>()
   return useFieldBase(
-    field instanceof FieldPath ? field : root.get(field as any)
+    field instanceof FieldPath ? field : root.get(field as any),
+    options
   )
 }

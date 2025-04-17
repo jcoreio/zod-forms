@@ -34,8 +34,10 @@ export function createSelectFormStatus() {
         ],
         isEqual
       ),
+      selectValidationError,
     ],
-    (parsedPristine, pristine) => parsedPristine && pristine
+    (parsedPristine, pristine, validationError) =>
+      validationError ? pristine : parsedPristine
   )
 
   return createStructuredSelector({

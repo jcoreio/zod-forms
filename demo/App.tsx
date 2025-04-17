@@ -34,6 +34,7 @@ const schema = conditionalValidate(
   z.object({
     trimString: z.string().trim(),
     urlString: z.string().trim().url().nullable(),
+    defaultString: z.string().default('default'),
     min: z.number().finite(),
     max: z.number().finite(),
     optionalNumber: z.number().optional(),
@@ -118,6 +119,11 @@ function App2() {
             field={form.get('urlString')}
             type="text"
             label="URL"
+          />
+          <FormTextField
+            field={form.get('defaultString')}
+            type="text"
+            label="String with default value"
           />
         </Box>
         <FormTextField field={form.get('min')} type="text" label="Min" />

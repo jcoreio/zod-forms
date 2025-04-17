@@ -10,6 +10,7 @@ import { PathInSchema, PathstringInSchema } from './util/PathInSchema'
 import { parsePathstring } from './util/parsePathstring'
 import { SchemaAt } from './util/SchemaAt'
 import { DeepPartial } from './util/DeepPartial'
+import isEqual from 'fast-deep-equal'
 
 export type HtmlFieldInputProps = {
   name: string
@@ -46,6 +47,7 @@ export type UseHtmlFieldOptions<
   field: Field
   type: z.input<Schema> extends boolean | null | undefined ? 'checkbox'
   : Exclude<HTMLInputTypeAttribute, 'checkbox'>
+  normalizeOnMount?: boolean
   normalizeOnBlur?: boolean
 }
 
@@ -64,8 +66,8 @@ export interface TypedUseHtmlField<T extends z.ZodTypeAny> {
 function useHtmlFieldBase<Field extends FieldPath>(
   options: UseHtmlFieldOptions<Field, Field['schema']>
 ): UseHtmlFieldProps<Field> {
-  const { field, type, normalizeOnBlur = true } = options
-  const props = useField(field)
+  const { field, type, normalizeOnMount, normalizeOnBlur = true } = options
+  const props = useField(field, { normalizeOnMount })
   const {
     parsedValue,
     value,
@@ -113,19 +115,18 @@ function useHtmlFieldBase<Field extends FieldPath>(
 
   const onBlur = React.useCallback(
     (e: React.FocusEvent) => {
-      let value = normalizeValue(getValue(e), {
-        schema,
-        tryNumber,
-        tryBigint,
-      })
       if (normalizeOnBlur) {
+        const value = normalizeValue(getValue(e), {
+          schema,
+          tryNumber,
+          tryBigint,
+        })
         const parsed = field.schema.safeParse(value)
         const formatted =
           parsed.success ?
             invert(field.schema).safeParse(parsed.data)
           : undefined
-        if (formatted?.success) value = formatted.data
-        setValue(value)
+        setValue(formatted?.success ? formatted.data : value)
       }
       setTempValue(undefined)
       setMeta({ visited: true, touched: true })
