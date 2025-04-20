@@ -4,6 +4,7 @@ import { DeepPartial } from './util/DeepPartial'
 export type FieldMeta = {
   touched: boolean
   visited: boolean
+  customMeta?: unknown
 }
 
 export type SubmitHandler<T extends z.ZodTypeAny> = (

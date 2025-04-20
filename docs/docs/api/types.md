@@ -6,6 +6,10 @@
 export type FieldMeta = {
   touched: boolean
   visited: boolean
+  /**
+   * You can store custom meta information in this field by calling `setMeta({ customMeta: ... })`
+   */
+  customMeta?: unknown
 }
 ```
 

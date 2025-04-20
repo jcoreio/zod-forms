@@ -21,6 +21,7 @@ import { maybeParse } from './util/maybeParse'
 import { bindActionsToField } from './util/bindActionsToField'
 import { DeepPartial } from './util/DeepPartial'
 import { invert } from 'zod-invertible'
+import { SelectFormValues } from './createSelectFormValues'
 
 export type UseFieldProps<Field extends FieldPath> = FieldMeta &
   ReturnType<
@@ -76,6 +77,8 @@ function useFieldBase<
     selectFieldErrorMap,
   } = useFormContext<T>()
 
+  type FormValues = ReturnType<SelectFormValues<T>>
+
   const useFormSelector = untypedUseFormSelector as TypedUseFormSelector<T>
 
   const valuesSelector = React.useMemo(
@@ -85,22 +88,39 @@ function useFieldBase<
         createSelector(
           [
             createStructuredSelector({
-              parsedValue: ({ parsedValues }) =>
-                get(parsedValues, field.path) as z.output<Schema> | undefined,
-              value: ({ values }) => get(values, field.path),
-              initialParsedValue: ({ initialParsedValues }) =>
-                get(initialParsedValues, field.path) as
-                  | z.output<Schema>
-                  | undefined,
-              initialValue: ({ initialValues }) =>
-                get(initialValues, field.path),
+              parsedValue: createSelector(
+                (state: FormValues) => state.parsedValues,
+                (parsedValues) =>
+                  get(parsedValues, field.path) as z.output<Schema> | undefined
+              ),
+              value: createSelector(
+                (state: FormValues) => state.values,
+                (values) =>
+                  get(values, field.path) as
+                    | DeepPartial<z.input<Schema>>
+                    | undefined
+              ),
+              initialParsedValue: createSelector(
+                (state: FormValues) => state.initialParsedValues,
+                (initialParsedValues) =>
+                  get(initialParsedValues, field.path) as
+                    | z.output<Schema>
+                    | undefined
+              ),
+              initialValue: createSelector(
+                (state: FormValues) => state.initialValues,
+                (initialValues) =>
+                  get(initialValues, field.path) as
+                    | DeepPartial<z.input<Schema>>
+                    | undefined
+              ),
             }),
           ],
           ({
             value,
-            parsedValue = maybeParse(field.schema, value),
+            parsedValue = maybeParse<Schema>(field.schema, value),
             initialValue,
-            initialParsedValue = maybeParse(field.schema, initialValue),
+            initialParsedValue = maybeParse<Schema>(field.schema, initialValue),
           }) => {
             const dirty = !isEqual(parsedValue, initialParsedValue)
             const pristine = !dirty
@@ -143,7 +163,6 @@ function useFieldBase<
     }
   }
   mounted.current = true
-  console.log({ ...parsedValues, normalizedValue, mounted: mounted.current })
 
   React.useEffect(() => {
     if (normalizeOnMount && !isEqual(normalizedValue, parsedValues.value)) {
@@ -158,6 +177,7 @@ function useFieldBase<
       value: normalizedValue,
       visited: meta?.visited || false,
       touched: meta?.touched || submitFailed,
+      customMeta: meta?.customMeta,
       error,
       valid: !error,
       invalid: Boolean(error),
