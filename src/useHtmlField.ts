@@ -61,6 +61,11 @@ export interface TypedUseHtmlField<T extends z.ZodTypeAny> {
   ): UseHtmlFieldProps<FieldPath<SchemaAt<T, parsePathstring<Path>>>>
 }
 
+const customMetaSchema = z.object({
+  value: z.unknown(),
+  stringValue: z.string(),
+})
+
 function useHtmlFieldBase<Field extends FieldPath>(
   options: UseHtmlFieldOptions<Field, Field['schema']>
 ): UseHtmlFieldProps<Field> {
@@ -77,16 +82,17 @@ function useHtmlFieldBase<Field extends FieldPath>(
     ...meta
   } = props
 
-  const { schema } = field
-
-  // tempValue is used for storing blank text when we've coerced the
-  // value to null or undefined, or storing numeric text when we've
-  // coerced the value to a number or bigint.
+  // meta.customMeta.stringValue is used for storing blank text when
+  // we've coerced the value to null or undefined, or storing numeric
+  // text when we've coerced the value to a number or bigint.
   // This way we can set a value that will parse better in the form
   // state without interfering with the text the user is typing.
-  const [tempValue, setTempValue] = React.useState(
-    value as string | null | undefined
-  )
+  const customMeta = React.useMemo(() => {
+    const parsedCustomMeta = customMetaSchema.safeParse(meta.customMeta)
+    return parsedCustomMeta.success ? parsedCustomMeta.data : undefined
+  }, [meta.customMeta])
+
+  const { schema } = field
 
   const tryNumber = React.useMemo(() => acceptsNumber(schema), [schema])
   const tryBigint = React.useMemo(() => acceptsBigint(schema), [schema])
@@ -100,7 +106,7 @@ function useHtmlFieldBase<Field extends FieldPath>(
         tryBigint,
       })
       if (typeof value === 'string' && typeof normalized !== 'string') {
-        setTempValue(value)
+        setMeta({ customMeta: { stringValue: value, value: normalized } })
       }
       setValue(normalized)
     },
@@ -127,8 +133,7 @@ function useHtmlFieldBase<Field extends FieldPath>(
         if (formatted?.success) value = formatted.data
         setValue(value)
       }
-      setTempValue(undefined)
-      setMeta({ visited: true, touched: true })
+      setMeta({ visited: true, touched: true, customMeta: undefined })
     },
     [getValue, setValue, schema]
   )
@@ -140,8 +145,11 @@ function useHtmlFieldBase<Field extends FieldPath>(
         type,
         value:
           typeof value === 'boolean' ? String(value)
-          : typeof value === 'string' ? value || tempValue || ''
-          : tempValue || (value == null ? '' : String(value) || ''),
+          : typeof value === 'string' ? value || customMeta?.stringValue || ''
+          : customMeta && Object.is(customMeta.value, value) ?
+            customMeta.stringValue
+          : value == null ? ''
+          : String(value) || '',
         ...(type === 'checkbox' && { checked: Boolean(value) }),
         onChange,
         onFocus,
@@ -158,7 +166,7 @@ function useHtmlFieldBase<Field extends FieldPath>(
         setMeta,
       },
     }),
-    [props, tempValue, onChange]
+    [props, customMeta, onChange]
   ) as any
 }
 

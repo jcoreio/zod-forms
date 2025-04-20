@@ -135,6 +135,7 @@ function useArrayFieldBase<Field extends ArrayFieldPath>(
       ...boundActions,
       visited: meta?.visited || false,
       touched: meta?.touched || submitFailed,
+      customMeta: meta?.customMeta,
       error,
       elements,
       dirty,

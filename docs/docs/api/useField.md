@@ -38,6 +38,7 @@ An object containing the following properties. Causes a rerender when any of the
 - `invalid` - oppposite of `valid`
 - `touched` - whether the field has been blurred or the form submitted
 - `visited` - whether the field has been focused
+- `customMeta` - custom meta information you've stored for this field
 - `setMeta` - method to set the [`FieldMeta`](types.md#fieldmeta) for this field
 - `setValue` - method to set the value for this field
 - `setParsedValue` - method to set the parsed value for this field
