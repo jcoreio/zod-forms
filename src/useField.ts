@@ -122,6 +122,7 @@ function useFieldBase<
             initialValue,
             initialParsedValue = maybeParse<Schema>(field.schema, initialValue),
           }) => {
+            // console.error(new Error('selector'), { value, parsedValue })
             const dirty = !isEqual(parsedValue, initialParsedValue)
             const pristine = !dirty
             return {
@@ -145,16 +146,20 @@ function useFieldBase<
   )
   const meta = useFormSelector((state) => state.fieldMeta[field.pathstring])
   const submitFailed = useFormSelector((state) => state.submitFailed)
+  const initialized = useFormSelector((state) => state.initialized)
 
   const boundActions = React.useMemo(
     () => bindActionsToField({ setParsedValue, setValue, setMeta }, field),
     [field.pathstring]
   )
 
-  const mounted = React.useRef(false)
+  const info = React.useRef({ mounted: false, initialized })
 
   let normalizedValue = parsedValues.value
-  if (!mounted.current && normalizeOnMount) {
+  if (
+    normalizeOnMount &&
+    (!info.current.mounted || (!info.current.initialized && initialized))
+  ) {
     const parsed = field.schema.safeParse(parsedValues.value)
     const formatted =
       parsed.success ? invert(field.schema).safeParse(parsed.data) : undefined
@@ -162,7 +167,8 @@ function useFieldBase<
       normalizedValue = formatted.data
     }
   }
-  mounted.current = true
+  info.current.mounted = true
+  info.current.initialized = initialized
 
   React.useEffect(() => {
     if (normalizeOnMount && !isEqual(normalizedValue, parsedValues.value)) {
