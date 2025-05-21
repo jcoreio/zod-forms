@@ -62,10 +62,14 @@
     "react": "^18.0.0",
     "react-dom": "^18.3.1",
     "sinon": "^20.0.0",
-    "typescript": "^5.1.0"
+    "typescript": "^5.1.0",
+    "zod": "^3.23.8",
+    "zod-invertible": "^1.1.0"
   },
   "peerDependencies": {
-    "react": "^18.0.0"
+    "react": "^18.0.0",
+    "zod": "^3.23.8",
+    "zod-invertible": "^1.1.0"
   },
   "version": "0.0.0-development",
   "sideEffects": false,
@@ -87,9 +91,7 @@
     "react-redux": "^9.1.2",
     "redux": "^5.0.1",
     "reselect": "^5.1.1",
-    "shallow-equal": "^3.1.0",
-    "zod": "^3.23.8",
-    "zod-invertible": "^1.1.0"
+    "shallow-equal": "^3.1.0"
   },
   "@jcoreio/toolchain": {
     "migratedVersion": "5.3.6"

@@ -29,12 +29,6 @@ importers:
       shallow-equal:
         specifier: ^3.1.0
         version: 3.1.0
-      zod:
-        specifier: ^3.23.8
-        version: 3.24.2
-      zod-invertible:
-        specifier: ^1.1.0
-        version: 1.2.0
     devDependencies:
       '@emotion/react':
         specifier: ^11.11.4
@@ -141,6 +135,12 @@ importers:
       typescript:
         specifier: ^5.1.0
         version: 5.8.3
+      zod:
+        specifier: ^3.23.8
+        version: 3.24.2
+      zod-invertible:
+        specifier: ^1.1.0
+        version: 1.2.0
 
 packages:
 
