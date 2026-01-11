@@ -6,6 +6,7 @@ module.exports = defineConfig([
   {
     rules: {
       'no-console': 2,
+      '@typescript-eslint/no-redundant-type-constituents': 0,
     },
   },
   {
