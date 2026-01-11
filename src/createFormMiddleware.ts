@@ -28,6 +28,7 @@ export function createFormMiddleware<T extends z.ZodTypeAny>(): Middleware<
         initialParsedValues,
       } = nextState
       const submitPromise = (async () => {
+        // eslint-disable-next-line @typescript-eslint/only-throw-error
         if (nextState.validationError) throw nextState.validationError
         for (const fn of onSubmit)
           await fn(parsedValues, { initialValues, initialParsedValues })
