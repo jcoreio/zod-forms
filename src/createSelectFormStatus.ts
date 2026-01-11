@@ -1,6 +1,7 @@
 import { createSelector, createStructuredSelector } from 'reselect'
 import { FormState } from './FormState'
 import isEqual from 'fast-deep-equal'
+import z from 'zod'
 
 export type SelectFormStatus = ReturnType<typeof createSelectFormStatus>
 export type FormStatus = ReturnType<SelectFormStatus>
@@ -11,7 +12,9 @@ export function createSelectFormStatus() {
   function selectValidationError({ validationError }: FormState<any>) {
     if (
       validationError === lastValidationError ||
-      isEqual(validationError?.issues, lastValidationError?.issues)
+      (validationError instanceof z.ZodError &&
+        lastValidationError instanceof z.ZodError &&
+        isEqual(validationError.issues, lastValidationError.issues))
     ) {
       return lastValidationError
     }

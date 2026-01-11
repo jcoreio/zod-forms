@@ -14,6 +14,8 @@ export function useInitialize<
 ) {
   const { initialize } = useFormContext<T>()
   React.useEffect(() => {
-    initialize(options)
+    if (options.values != null || options.parsedValues != null) {
+      initialize(options)
+    }
   }, deps)
 }

@@ -29,7 +29,7 @@ export type FormState<T extends z.ZodTypeAny> = {
   submittedValues?: z.input<T>
   initialValues?: DeepPartial<z.input<T>>
   initialParsedValues?: z.output<T>
-  validationError?: any
+  validationError?: unknown
   submitPromise?: Promise<void>
   onSubmit: Set<SubmitHandler<T>>
   onSubmitSucceeded: Set<SubmitSuccededHandler>

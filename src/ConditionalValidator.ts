@@ -63,7 +63,6 @@ export class ConditionalValidator<
   }
   conditionalRefineAsync(
     schema: ConditionalRefineSchema<T>,
-    // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
     check: (value: z.output<T>) => unknown | Promise<unknown>,
     message: ConditionalRefineMessage<z.output<T>>
   ) {
