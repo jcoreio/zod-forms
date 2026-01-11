@@ -138,7 +138,8 @@ export type FormStatus = {
   submitSucceeded: boolean
   submitFailed: boolean
   submitError: boolean
-  valididationError: Error | undefined
+  submitError: unknown
+  valididationError: unknown
   valid: boolean
   invalid: boolean
   pristine: boolean
