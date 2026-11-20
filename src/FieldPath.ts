@@ -101,7 +101,7 @@ function subschema(
         shape,
         _def: { unknownKeys, catchall },
       } = schema as z.AnyZodObject
-      if (key in shape) return shape[key]
+      if (Object.prototype.hasOwnProperty.call(shape, key)) return shape[key]
       if (unknownKeys === 'passthrough') {
         return catchall._def.typeName === z.ZodFirstPartyTypeKind.ZodNever ?
             z.unknown()

@@ -4,7 +4,7 @@ export function get(
 ): unknown {
   return path.reduce(
     (from: any, next) =>
-      from instanceof Object && next in from ? from[next] : undefined,
+      from instanceof Object && Object.prototype.hasOwnProperty.call(from, next) ? from[next] : undefined,
     from
   )
 }
