@@ -1,4 +1,3 @@
-/* eslint-env node, es2018 */
 module.exports = {
   // scripts: {
   //   pretest: 'docker compose up -d',

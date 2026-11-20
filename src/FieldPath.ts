@@ -44,7 +44,7 @@ export class FieldPath<T extends z.ZodTypeAny = z.ZodTypeAny> {
     const schema = subschema(this.schema, key)
     if (!schema) throw new Error(`invalid subschema key: ${key}`)
     const subfield = new FieldPath({
-      path: [...this.path, key] as any,
+      path: [...this.path, key],
       schema: schema as any,
     })
     if (this.subfields == null) this.subfields = new Map()
